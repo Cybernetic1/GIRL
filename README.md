@@ -1,2 +1,2 @@
 # GILR
-Genetic Inductive learning of Logic Rules
+Genetic Inductive Learning of Logic Rules
