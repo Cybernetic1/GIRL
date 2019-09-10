@@ -92,12 +92,16 @@ op_map = {
 	}
 
 def export_tree_as_graph(node, fname):
-	f = open(fname, 'w')
+	if fname == "stdout":
+		f = sys.stdout
+	else:
+		f = open(fname, 'w')
 	f.write("digraph {\n")
 	# f.write("fontname=\"times-bold\";")
 	print_tree_as_graph(f, node)
 	f.write("}\n")
-	f.close()
+	if fname != "stdout":
+		f.close()
 
 def print_tree_as_graph(f, node, index = 0):
 	if not isinstance(node, list):
@@ -432,6 +436,8 @@ def Evolve():
 	print()
 	pop2 = sorted(population, key = lambda x : x['fitness'], reverse = False)
 	best = pop2[0]
+	export_tree_as_graph(best.get("target"), "logic-rule.dot")
+	print("Example rule written to file: logic-rule.dot")
 	# plot_population(screen, pop2)
 	input("Press any key to continue....")
 
