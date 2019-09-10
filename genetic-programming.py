@@ -15,7 +15,7 @@
 #		2. Run the rules for N iterations, record scores
 #		3. Repeat
 
-# **** Rete-related
+# **** Rete-related ideas:
 #		* If Rete is used, we may want to learn the Rete network directly
 #		* How to genetically encode a Rete net?
 #		* Perhaps differentiable Rete is a better approach?
@@ -47,7 +47,7 @@
 
 # STRUCTURE OF A RULE
 # ===================
-#    [ [] [] ] => []
+#    [ [] ... [] ] => []
 # =  pair( list of lists , list )
 
 import random
@@ -80,15 +80,16 @@ cache = []		# for storing previously-learned best formulas
 datasize = 4623
 
 op_map = {
-	operator.add : ' + ',
-	operator.sub : ' - ',
-	operator.mul : ' * ',
-	operator.truediv : ' ÷ ',
+	operator.add : '+',
+	operator.sub : '-',
+	operator.mul : '*',
+	operator.truediv : '÷',
 
-	operator.and_ : ' ∧ ',
-	operator.or_ : ' ∨ ',
-	operator.gt : ' > ',
-	operator.lt : ' < ',
+	operator.and_ : '⋀',
+	operator.or_ : '⋁',
+	operator.gt : '>',
+	operator.lt : '<',
+	operator.not_: '~'
 	}
 
 def export_tree_as_graph(node, fname):
@@ -148,6 +149,7 @@ def read_tree(str):			# assume str is in prefix notation with ()'s
 	return None
 
 def eval_tree(node, time):
+	""" Old code """
 	if not isinstance(node, list):
 		if isinstance(node, float):
 			return node
@@ -166,20 +168,22 @@ def generate_random_formula(max, funcs, terms, depth = 0):
 	if (depth >= max - 1) or (depth > 1 and random.uniform(0.0,1.0) < 0.1):
 		t = terms[random.randint(0, len(terms) - 1)]
 		if t == 'R':
-			return random.uniform(-5.0, +5.0)
+			return random.randint(0, 3)
 		else:
 			return t
 	depth += 1
+	op = funcs[random.randint(0, len(funcs) - 1)]
 	arg1 = generate_random_formula(max, funcs, terms, depth)
+	if op == operator.not_:
+		return [op, arg1]
 	arg2 = generate_random_formula(max, funcs, terms, depth)
-	return [funcs[random.randint(0, len(funcs) - 1)], arg1, arg2]
+	return [op, arg1, arg2]
 
-# Needs to generate a random condition in 3 stages:
-# 1) ∧ and ∨
-# 2) > and <
-# 3) formula
+# Needs to generate a random condition in 2 stages:
+# 1) ⋀ and ⋁ and ~
+# 2) literals
 def generate_random_condition(max, funcs, terms, depth = 0):
-	if (depth == max - 1) or (depth > 1 and random.uniform(0.0,1.0) < 0.1):
+	if (depth >= max - 1) or (depth > 1 and random.uniform(0.0,1.0) < 0.1):
 		return generate_random_inequality(max - depth, funcs, terms)
 	depth += 1
 	arg1 = generate_random_condition(max, funcs, terms, depth)
@@ -202,8 +206,8 @@ def count_nodes(node):
 	return a1 + a2 + 1
 
 # ***** Calculate fitness
-# This is old code from Stock Market (to be modified)
 def fitness(formula, cond = None, num_trials = 200):
+	""" This is old code from Stock Market (to be modified) """
 	return 0.0
 	sum_err = 0.0
 	for i in range(0, num_trials):
@@ -401,14 +405,14 @@ def mutation_cond(parent, maxDepth, funcs, terms):
 # problem configuration
 
 terms = [
+		'O', 'X',		# Moves for the 2 players
 		'T', 'F',		# Logical true and false
 		'R']			# 'R' invokes random number generator
 
-arith_ops = [
-	operator.add,
-	operator.sub,
-	operator.mul,
-	operator.truediv
+logic_ops = [
+	operator.and_,
+	operator.or_,
+	operator.not_
 	]
 
 def Evolve():
@@ -426,7 +430,7 @@ def Evolve():
 		print(i, ' ', end=' ')
 		sys.stdout.flush()
 		# print "\tGenerating formula..."
-		target = generate_random_formula(maxDepth, arith_ops, terms)
+		target = generate_random_formula(maxDepth, logic_ops, terms)
 		# print "\tGenerating condition..."
 		# cond = generate_random_condition(maxDepth, arith_ops, terms)
 		population.append({
@@ -436,6 +440,7 @@ def Evolve():
 	print()
 	pop2 = sorted(population, key = lambda x : x['fitness'], reverse = False)
 	best = pop2[0]
+	# print(print_tree(best.get("target")))
 	export_tree_as_graph(best.get("target"), "logic-rule.dot")
 	print("Example rule written to file: logic-rule.dot")
 	# plot_population(screen, pop2)
