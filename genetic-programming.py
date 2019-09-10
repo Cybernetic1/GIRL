@@ -47,8 +47,8 @@
 
 # STRUCTURE OF A RULE
 # ===================
-#    [ [] ... [] ] => []
-# =  pair( list of lists , list )
+#    formula => literal
+# =  pair( tree as list , literal as list )
 
 import random
 import operator
@@ -77,19 +77,21 @@ p_repro = 0.08
 
 cache = []		# for storing previously-learned best formulas
 
-datasize = 4623
+var_index = 0	# keeping track of logic variables
 
 op_map = {
+	operator.and_ : '⋀',
+	operator.or_ : '⋁',
+	operator.not_: '~',
+	'=>': '=>',
+
+	# These may not be used in the program:
 	operator.add : '+',
 	operator.sub : '-',
 	operator.mul : '*',
 	operator.truediv : '÷',
-
-	operator.and_ : '⋀',
-	operator.or_ : '⋁',
 	operator.gt : '>',
 	operator.lt : '<',
-	operator.not_: '~'
 	}
 
 def export_tree_as_graph(node, fname):
@@ -128,15 +130,19 @@ def print_tree_as_graph(f, node, index = 0):
 	count2 = print_tree_as_graph(f, node[2], index + count1 + 1)
 	return count1 + count2 + 1
 
-def print_tree(node, tabs = ""):
+def print_tree(node):
 	if not isinstance(node, list):
-		if isinstance(node, float):
-			return str(round(node, 2))
+		if isinstance(node, int):
+			return str(node)		# consts
 		else:
-			return node
-	return tabs + op_map[node[0]] + "\n" + \
-		tabs + print_tree(node[1], tabs + "    ") + "\n" + \
-		tabs + print_tree(node[2], tabs + "    ")
+			return node				# vars
+	if len(node) == 3:
+		return '(' + op_map[node[0]] + ' ' + \
+			print_tree(node[1]) + ' ' + \
+			print_tree(node[2]) + ')'
+	else:
+		return '(' + op_map[node[0]] + ' ' + \
+			print_tree(node[1]) + ')'
 
 def read_tree(str):			# assume str is in prefix notation with ()'s
 	if str[0] == '(':
@@ -164,37 +170,50 @@ def eval_tree(node, time):
 		return float('nan')
 	return node[0](*[arg1, arg2])
 
-def generate_random_formula(max, funcs, terms, depth = 0):
-	if (depth >= max - 1) or (depth > 1 and random.uniform(0.0,1.0) < 0.1):
-		t = terms[random.randint(0, len(terms) - 1)]
-		if t == 'R':
-			return random.randint(0, 3)
-		else:
-			return t
-	depth += 1
-	op = funcs[random.randint(0, len(funcs) - 1)]
-	arg1 = generate_random_formula(max, funcs, terms, depth)
-	if op == operator.not_:
-		return [op, arg1]
-	arg2 = generate_random_formula(max, funcs, terms, depth)
-	return [op, arg1, arg2]
+def generate_random_formula(maxDepth):
+	pre_condition  = generate_random_condition(maxDepth)
+	post_condition = generate_random_atom()
+	return ['=>', pre_condition, post_condition]
 
-# Needs to generate a random condition in 2 stages:
+# Generate a random (pre-)condition in 2 stages:
 # 1) ⋀ and ⋁ and ~
 # 2) literals
-def generate_random_condition(max, funcs, terms, depth = 0):
-	if (depth >= max - 1) or (depth > 1 and random.uniform(0.0,1.0) < 0.1):
-		return generate_random_inequality(max - depth, funcs, terms)
+def generate_random_condition(maxDepth, depth = 0):
+	if (depth >= maxDepth - 1) or (depth > 1 and random.uniform(0.0, 1.0) < 0.1):
+		return generate_random_atom()
 	depth += 1
-	arg1 = generate_random_condition(max, funcs, terms, depth)
-	arg2 = generate_random_condition(max, funcs, terms, depth)
-	op = operator.and_ if (random.uniform(0.0, 1.0) > 0.5) else operator.or_
+	choice = random.uniform(0.0, 1.0)
+	arg1 = generate_random_condition(maxDepth, depth)
+	if choice < 0.3333:
+		return [operator.not_, arg1]
+	arg2 = generate_random_condition(maxDepth, depth)
+	op = operator.and_ if (choice < 0.6666) else operator.or_
 	return [op, arg1, arg2]
 
-def generate_random_inequality(max, funcs, terms):
-	# determine max = ?
-	arg1 = generate_random_formula(max, funcs, terms)
-	arg2 = generate_random_formula(max, funcs, terms)
+def generate_random_atom():
+	""" An atomic logic formula such as X(a,b) """
+	predicate = 'X' if (random.uniform(0.0, 1.0) > 0.5) else 'O'
+	arg1 = generate_random_var_or_const()
+	arg2 = generate_random_var_or_const()
+	return [predicate, arg1, arg2]
+
+def generate_random_var_or_const():
+	""" Result could be old var, new var, or const """
+	global var_index
+	choice = random.uniform(0.0, 1.0)
+	if choice < 0.5:					# const
+		return random.randint(0, 3)
+	elif choice < 0.8:					# old var
+		return '?' + str(random.randint(0, var_index))
+	else:								# new var
+		var_index += 1
+		return '?' + str(var_index)
+
+def generate_random_inequality(maxDepth, funcs, terms):
+	""" Old code, not used yet """
+	# determine maxDepth = ?
+	arg1 = generate_random_formula(maxDepth, funcs, terms)
+	arg2 = generate_random_formula(maxDepth, funcs, terms)
 	op = operator.gt if (random.uniform(0.0, 1.0) > 0.5) else operator.lt
 	return [op, arg1, arg2]
 
@@ -409,12 +428,6 @@ terms = [
 		'T', 'F',		# Logical true and false
 		'R']			# 'R' invokes random number generator
 
-logic_ops = [
-	operator.and_,
-	operator.or_,
-	operator.not_
-	]
-
 def Evolve():
 	global maxGens, popSize, maxDepth, bouts, p_repro, crossRate, mutationRate
 	population = []
@@ -430,17 +443,14 @@ def Evolve():
 		print(i, ' ', end=' ')
 		sys.stdout.flush()
 		# print "\tGenerating formula..."
-		target = generate_random_formula(maxDepth, logic_ops, terms)
-		# print "\tGenerating condition..."
-		# cond = generate_random_condition(maxDepth, arith_ops, terms)
+		target = generate_random_formula(maxDepth)
 		population.append({
 			'target' : target, \
-			# 'cond' : cond, \
 			'fitness' : fitness(target)})
 	print()
 	pop2 = sorted(population, key = lambda x : x['fitness'], reverse = False)
 	best = pop2[0]
-	# print(print_tree(best.get("target")))
+	print(print_tree(best.get("target")))
 	export_tree_as_graph(best.get("target"), "logic-rule.dot")
 	print("Example rule written to file: logic-rule.dot")
 	# plot_population(screen, pop2)
