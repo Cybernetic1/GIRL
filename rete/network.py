@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import cStringIO
+import io
 
 from rete.bind_node import BindNode
 from rete.filter_node import FilterNode
@@ -50,7 +50,7 @@ class Network:
 					child.left_activation(jr.owner, None)
 
 	def dump(self):
-		self.buf = cStringIO.StringIO()
+		self.buf = io.StringIO()
 		self.buf.write('digraph {\n')
 		self.dump_beta(self.beta_root)
 		self.dump_alpha(self.alpha_root)
@@ -292,7 +292,7 @@ class Network:
 			if isinstance(cond, Has):
 				# **** Added by YKY:  check if cond is a custom operator
 				op = getattr(cond, 'F1')
-				print "op = ", op
+				print("op = ", op)
 				if op not in ['>', '<', '=', '!=']:
 					op = None
 					current_node = self.build_or_share_beta_memory(current_node)

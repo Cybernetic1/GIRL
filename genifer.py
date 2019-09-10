@@ -30,7 +30,7 @@ def add_wmes():
 	for wme in wmes:
 		net.add_wme(wme)
 
-print(u"\n\u001b[32m——`—,—{\u001b[31;1m@\u001b[0m\n".encode("utf-8"))   # Genifer logo ——`—,—{@
+print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`—,—{@
 
 rete_net = init_network()
 

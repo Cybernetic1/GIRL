@@ -1,6 +1,6 @@
 from rete.common import BetaNode, Has
 
-import cStringIO
+import io
 
 class JoinNode(BetaNode):
 

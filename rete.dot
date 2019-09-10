@@ -1,36 +1,36 @@
 digraph {
 	subgraph cluster_1 {
 	label = beta
-	"BetaNode 140294501952528" [label="BetaNode"];
-	"BetaMemory 140294479360080" [label="BetaMem"];
-	"BetaNode 140294501952528" -> "BetaMemory 140294479360080";
-	"JoinNode 140294479360144" [label="BetaMem"];
-	"BetaMemory 140294479360080" -> "JoinNode 140294479360144";
-	"JoinNode 140294479360144" [shape=box, color=red, label="JoinNode"];
-	"JoinNode 140294479360144" -> "amem:<rete.alpha.AlphaMemory instance at 0x7f98da9ace60>"
-	"JoinNode 140294479360144" -> "has:(O $x $x)"
-	"BetaMemory 140294479360208" [label="BetaMem"];
-	"JoinNode 140294479360144" -> "BetaMemory 140294479360208";
-	"JoinNode 140294479360272" [label="BetaMem"];
-	"BetaMemory 140294479360208" -> "JoinNode 140294479360272";
-	"JoinNode 140294479360272" [shape=box, color=red, label="JoinNode"];
-	"JoinNode 140294479360272" -> "amem:<rete.alpha.AlphaMemory instance at 0x7f98da9acef0>"
-	"JoinNode 140294479360272" -> "has:(□ $y $z)"
-	"PNode 140294479306704" [label="BetaMem"];
-	"JoinNode 140294479360272" -> "PNode 140294479306704";
+	"BetaNode 140382141729032" [label="BetaNode"];
+	"BetaMemory 140382141473680" [label="BetaMem"];
+	"BetaNode 140382141729032" -> "BetaMemory 140382141473680";
+	"JoinNode 140382141473960" [label="BetaMem"];
+	"BetaMemory 140382141473680" -> "JoinNode 140382141473960";
+	"JoinNode 140382141473960" [shape=box, color=red, label="JoinNode"];
+	"JoinNode 140382141473960" -> "amem:<rete.alpha.AlphaMemory object at 0x7fad43ace470>"
+	"JoinNode 140382141473960" -> "has:(O $x $x)"
+	"BetaMemory 140382141474016" [label="BetaMem"];
+	"JoinNode 140382141473960" -> "BetaMemory 140382141474016";
+	"JoinNode 140382141474184" [label="BetaMem"];
+	"BetaMemory 140382141474016" -> "JoinNode 140382141474184";
+	"JoinNode 140382141474184" [shape=box, color=red, label="JoinNode"];
+	"JoinNode 140382141474184" -> "amem:<rete.alpha.AlphaMemory object at 0x7fad43ace550>"
+	"JoinNode 140382141474184" -> "has:(□ $y $z)"
+	"PNode 140382141473624" [label="BetaMem"];
+	"JoinNode 140382141474184" -> "PNode 140382141473624";
 	}
 	subgraph cluster_0 {
 	label = alpha
 	"no-test" -> "F1==O";
 	"F1==O" -> "F2==F3";
-	"F2==F3" -> "amem:<rete.alpha.AlphaMemory instance at 0x7f98da9ace60>";
-	"amem:<rete.alpha.AlphaMemory instance at 0x7f98da9ace60>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
+	"F2==F3" -> "amem:<rete.alpha.AlphaMemory object at 0x7fad43ace470>";
+	"amem:<rete.alpha.AlphaMemory object at 0x7fad43ace470>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
 	"no-test" -> "F1==□";
-	"F1==□" -> "amem:<rete.alpha.AlphaMemory instance at 0x7f98da9acef0>";
-	"amem:<rete.alpha.AlphaMemory instance at 0x7f98da9acef0>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
-	"no-test" -> "amem:<rete.alpha.AlphaMemory instance at 0x7f98da999488>";
-	"amem:<rete.alpha.AlphaMemory instance at 0x7f98da999488>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
+	"F1==□" -> "amem:<rete.alpha.AlphaMemory object at 0x7fad43ace550>";
+	"amem:<rete.alpha.AlphaMemory object at 0x7fad43ace550>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
+	"no-test" -> "amem:<rete.alpha.AlphaMemory object at 0x7fad43b0c828>";
+	"amem:<rete.alpha.AlphaMemory object at 0x7fad43b0c828>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
 	}
-	"F2==F3" -> "JoinNode 140294479360144";
-	"F1==□" -> "JoinNode 140294479360272";
+	"F2==F3" -> "JoinNode 140382141473960";
+	"F1==□" -> "JoinNode 140382141474184";
 }
