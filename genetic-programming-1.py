@@ -10,7 +10,7 @@ op_map = {
 	operator.add : ' + ',
 	operator.sub : ' - ',
 	operator.mul : ' * ',
-	operator.div : ' ÷ ',
+	operator.truediv : ' ÷ ',
 	}
 
 def print_program(node):
@@ -29,20 +29,20 @@ def eval_program(node, dict):
 			return dict[node]
 		return node
 	arg1, arg2 = eval_program(node[1], dict), eval_program(node[2], dict)
-	if node[0] == operator.div and arg2 == 0.0:
+	if node[0] == operator.truediv and arg2 == 0.0:
 		return 0.0
-	return apply(node[0], [arg1, arg2])
+	return node[0](arg1, arg2)
 
-def generate_random_program(max, funcs, terms, depth = 0):
-	if (depth == max - 1) or (depth > 1 and random.uniform(0.0,1.0) < 0.1):
+def generate_random_program(max_depth, funcs, terms, depth = 0):
+	if (depth >= max_depth - 1) or (depth > 1 and random.uniform(0.0,1.0) < 0.1):
 		t = terms[random.randint(0, len(terms) - 1)]
 		if t == 'R':
 			return rand_in_bounds(-5.0, +5.0)
 		else:
 			return t
 	depth += 1
-	arg1 = generate_random_program(max, funcs, terms, depth)
-	arg2 = generate_random_program(max, funcs, terms, depth)
+	arg1 = generate_random_program(max_depth, funcs, terms, depth)
+	arg2 = generate_random_program(max_depth, funcs, terms, depth)
 	return [funcs[random.randint(0, len(funcs) - 1)], arg1, arg2]
 
 def count_nodes(node):
@@ -167,8 +167,8 @@ def search(max_gens, pop_size, max_depth, bouts, p_repro, p_cross, p_mut, functs
 		population = sorted(population, key = lambda x : x['fitness'])
 		if population[0]['fitness'] <= best['fitness']:
 			best = population[0]
-		print "gen: ", gen,
-		print "fitness = ", best['fitness']
+		print("gen: ", gen, end='\t')
+		print("fitness = ", best['fitness'])
 		if best['fitness'] == 0:
 			break
 	return best
@@ -176,7 +176,7 @@ def search(max_gens, pop_size, max_depth, bouts, p_repro, p_cross, p_mut, functs
 def main():
 	# problem configuration
 	terms = ['X', 'R']
-	functs = [operator.add, operator.sub, operator.mul, operator.div]
+	functs = [operator.add, operator.sub, operator.mul, operator.truediv]
 	# algorithm configuration
 	max_gens = 50
 	max_depth = 7
@@ -187,11 +187,11 @@ def main():
 	p_mut = 0.02
 	# execute the algorithm
 	best = search(max_gens, pop_size, max_depth, bouts, p_repro, p_cross, p_mut, functs, terms)
-	print "Done!"
-	print "best fitness = ", round(best['fitness'],4)
+	print("Done!")
+	print("best fitness = ", round(best['fitness'],4))
 	# print best['prog']
-	print "formula = ",
-	print print_program(best['prog'])
+	print("formula = ", end='')
+	print(print_program(best['prog']))
 
 print("Genetic programming test")
 main()

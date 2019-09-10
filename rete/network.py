@@ -292,16 +292,17 @@ class Network:
 			if isinstance(cond, Has):
 				# **** Added by YKY:  check if cond is a custom operator
 				op = getattr(cond, 'F1')
-				print("op = ", op)
+				# print("op = ", op)
 				if op not in ['>', '<', '=', '!=']:
-					op = None
+					# op = None
 					current_node = self.build_or_share_beta_memory(current_node)
 					tests = self.get_join_tests_from_condition(cond, conds_higher_up)
 					am = self.build_or_share_alpha_memory(cond)
 					current_node = self.build_or_share_join_node(current_node, am, tests, cond)
 				else:
 					# All earlier conds in which F2.var and F3.var occur must be tested
-					
+					# 1. collect all earlier conds in which F2 or F3 occurs
+					# 2. set all links of the form "F2 op F3"
 					continue
 			elif isinstance(cond, Neg):
 				tests = self.get_join_tests_from_condition(cond, conds_higher_up)

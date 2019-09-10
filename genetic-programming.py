@@ -401,9 +401,6 @@ def mutation_cond(parent, maxDepth, funcs, terms):
 
 terms = [
 		'O1', 'H1', 'L1', 'C1',
-		# 'O2', 'H2', 'L2', 'C2',
-		# 'O3', 'H3', 'L3', 'C3',
-		# 'O4', 'H4', 'L4', 'C4',
 		'Ot',				# today's open price
 		'E20',				# 20-day moving average (exponential)
 		'E100',				# 100-day moving average (exponential)
