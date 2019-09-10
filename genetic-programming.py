@@ -9,15 +9,17 @@
 #		Over many runs, each candidate rule would accumulate some scores
 
 # * Rule engine (minimalistic):
-#		It may be based on Genifer 3
-#		Or Genifer 6 (Rete)
-
+#		It may be based on Genifer 3 (simple rule engine)
+#		This version is based on Genifer 6 (Rete)
+#		1. First, evolve a set of rules, import into Rete
+#		2. Run the rules for N iterations, record scores
+#		3. Repeat
 
 # **** Rete-related
-# * If Rete is used, we may want to learn the Rete network directly
-# * How to genetically encode a Rete net?
-# * Perhaps differentiable Rete is a better approach?
-# * It may be efficient enough to compile to Rete on each GA iteration 
+#		* If Rete is used, we may want to learn the Rete network directly
+#		* How to genetically encode a Rete net?
+#		* Perhaps differentiable Rete is a better approach?
+#		* It may be efficient enough to compile to Rete on each GA iteration 
 
 # STANDARD EVOLUTIONARY ALGORITHM
 # ===============================
@@ -157,7 +159,7 @@ def eval_tree(node, time):
 	return node[0](*[arg1, arg2])
 
 def generate_random_formula(max, funcs, terms, depth = 0):
-	if (depth == max - 1) or (depth > 1 and random.uniform(0.0,1.0) < 0.1):
+	if (depth >= max - 1) or (depth > 1 and random.uniform(0.0,1.0) < 0.1):
 		t = terms[random.randint(0, len(terms) - 1)]
 		if t == 'R':
 			return random.uniform(-5.0, +5.0)
@@ -195,15 +197,10 @@ def count_nodes(node):
 	a2 = count_nodes(node[2])
 	return a1 + a2 + 1
 
-# ***** Calculate profit.
-# On each day, a limit order (either long or short) will be placed at price T.
-# If T > opening price O(t) on that day, T will be a long order, otherwise short.
-# For a long order, if the high price H(t) > T, the order will be triggered.
-# The profit is then O(t) - T.
-# If the order is not triggered, the profit / loss would depend on the closing
-# price C(t).  The profit (or loss) would be C(t) - E(t) = C(t) - O(t).
-
+# ***** Calculate fitness
+# This is old code from Stock Market (to be modified)
 def fitness(formula, cond = None, num_trials = 200):
+	return 0.0
 	sum_err = 0.0
 	for i in range(0, num_trials):
 		time = random.randint(100, datasize - 10)
@@ -347,7 +344,7 @@ def is_arith(node):
 		(op == operator.add) or \
 		(op == operator.sub) or \
 		(op == operator.mul) or \
-		(op == operator.div)
+		(op == operator.truediv)
 
 # randomly cross some inequalities? (choose 2 points in inequalities)
 def crossover_cond2(parent1, parent2, maxDepth, terms):
@@ -400,11 +397,7 @@ def mutation_cond(parent, maxDepth, funcs, terms):
 # problem configuration
 
 terms = [
-		'O1', 'H1', 'L1', 'C1',
-		'Ot',				# today's open price
-		'E20',				# 20-day moving average (exponential)
-		'E100',				# 100-day moving average (exponential)
-		'Avg',				# 100-day average daily range
+		'T', 'F',		# Logical true and false
 		'R']			# 'R' invokes random number generator
 
 arith_ops = [
@@ -439,7 +432,7 @@ def Evolve():
 	print()
 	pop2 = sorted(population, key = lambda x : x['fitness'], reverse = False)
 	best = pop2[0]
-	plot_population(screen, pop2)
+	# plot_population(screen, pop2)
 	input("Press any key to continue....")
 
 	for gen in range(0, maxGens):
@@ -473,7 +466,7 @@ def Evolve():
 		best['fitness'] = fitness(best['target'], None, 500)
 		# population = children
 		population = sorted(children, key = lambda x : x['fitness'], reverse = False)
-		plot_population(screen, population)
+		# plot_population(screen, population)
 		quitting = False
 		pausing = False
 		for event in pygame.event.get():
@@ -500,3 +493,5 @@ def Evolve():
 		# if best['fitness'] == 0:
 		#	break
 	return best
+
+Evolve()
