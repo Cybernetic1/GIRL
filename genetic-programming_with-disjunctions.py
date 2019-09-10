@@ -1,9 +1,10 @@
 # -*- coding: utf8 -*-
 
-# **** NOTE:  In this new version we use rules that are compatible with Rete,
-# that consists only of conjunctions, negations, and negated conjunctions (NC).
-# NCs can be nested to any level.  So the general form of a rule is: a conjunction,
-# followed by some negated atoms, followed by a possibly nested NC.
+# **** NOTE ****
+# This (unfinished) version generates general logic formulas using the full set
+# of operators: ⋀ ⋁ ~ but it may be incompatible with Rete which allows only
+# conjunctions, negations, and negated conjunctions.  In the newer version we
+# use rules that are compatible with Rete.
 
 # TO-DO:
 
@@ -102,21 +103,20 @@ op_map = {
 	operator.lt : '<',
 	}
 
-def export_rule_as_graph(node, fname):
+def export_tree_as_graph(node, fname):
 	if fname == "stdout":
 		f = sys.stdout
 	else:
 		f = open(fname + '.dot', 'w')
 	f.write("digraph {\n")
 	# f.write("fontname=\"times-bold\";")
-	print_rule_as_graph(f, node)
+	print_tree_as_graph(f, node)
 	f.write("}\n")
 	if fname != "stdout":
 		f.close()
 		os.system("dot -Tpng %s.dot -o%s.png" % (fname, fname))
 
-def print_rule_as_graph(f, node, index = 0):
-	""" This function has to be rewritten... """
+def print_tree_as_graph(f, node, index = 0):
 	op = node[0]
 	if node[0] in op_map:
 		op = op_map[node[0]]
@@ -141,36 +141,23 @@ def print_rule_as_graph(f, node, index = 0):
 		f.write("node" + str(index) + "[label=\"" + label + color)
 		return 1
 
-def print_rule(rule):
-	""" Format of a rule:
-		[ => pre-condition post-condition ]
-		Format of a pre-condition:
-		[ literals ... [nc ... [nc ...] ] ]
-	"""
-	# print("rule = ", rule)
-	s = ""
-	for literal in rule[1]:
-		s += print_literal(literal) + ' ⋀ '
-	s += print_nc(rule[2])
-	return s + " => " + print_literal(rule[3])
-
-def print_nc(nc):
-	s = 'NC['
-	for literal_or_NC in nc[1:]:
-		if literal_or_NC[0] == 'NC':
-			return s + print_nc(literal_or_NC) + ']'
+def print_tree(node):
+	if not isinstance(node, list):
+		if isinstance(node, int):
+			return str(node)		# consts
 		else:
-			s += print_literal(literal_or_NC) + ' '
-	return s + ']'
-
-def print_literal(literal):
-	if literal[0] == '~':
-		return '~' + literal[1] + '(' + \
-			str(literal[2]) + ',' + str(literal[3]) + ')'
+			return node				# vars
+	if node[0] in op_map:
+		op = op_map[node[0]]
 	else:
-		# print("litertal[0] = ", literal[0])
-		return literal[0] + '(' + \
-			str(literal[1]) + ',' + str(literal[2]) + ')'
+		op = node[0]
+	if len(node) == 3:
+		return '(' + op + ' ' + \
+			print_tree(node[1]) + ' ' + \
+			print_tree(node[2]) + ')'
+	else:
+		return '(' + op + ' ' + \
+			print_tree(node[1]) + ')'
 
 def read_tree(str):			# assume str is in prefix notation with ()'s
 	if str[0] == '(':
@@ -201,32 +188,22 @@ def eval_tree(node, time):
 def generate_random_formula(maxDepth):
 	pre_condition  = generate_random_condition(maxDepth)
 	post_condition = generate_random_atom()
-	return ['=>', *pre_condition, post_condition]
+	return ['=>', pre_condition, post_condition]
 
 # Generate a random (pre-)condition in 2 stages:
-# 1) a number of atoms (possibly negated)
-# 2) an NC (= negated conjunction, possibly nested)
+# 1) ⋀ and ⋁ and ~
+# 2) literals
 def generate_random_condition(maxDepth, depth = 0):
-	return [ \
-		generate_random_conjunction(),
-		generate_random_NC() ]
-
-def generate_random_NC():
-	nc = ['NC']
-	while random.uniform(0.0, 1.0) < 0.7:
-		nc.append(generate_random_atom())
-	if random.uniform(0.0, 1.0) < 0.3:
-		nc.append(generate_random_NC())
-	return nc
-
-def generate_random_conjunction():
-	conjunction = []
-	while random.uniform(0.0, 1.0) < 0.7:
-		if random.uniform(0.0, 1.0) < 0.3:
-			conjunction.append(['~'] + generate_random_atom())
-		else:
-			conjunction.append(generate_random_atom())
-	return conjunction
+	if (depth >= maxDepth - 1) or (depth > 1 and random.uniform(0.0, 1.0) < 0.1):
+		return generate_random_atom()
+	depth += 1
+	choice = random.uniform(0.0, 1.0)
+	arg1 = generate_random_condition(maxDepth, depth)
+	if choice < 0.1:
+		return [operator.not_, arg1]
+	arg2 = generate_random_condition(maxDepth, depth)
+	op = operator.and_ if (choice < 0.55) else operator.or_
+	return [op, arg1, arg2]
 
 def generate_random_atom():
 	""" An atomic logic formula such as X(a,b) """
@@ -510,9 +487,9 @@ def Evolve():
 	pop2 = sorted(population, key = lambda x : x['fitness'], reverse = False)
 	best = pop2[0]
 	rule = best.get('target')
-	print("\nExample logic rule:\n", print_rule(rule))
-	# export_tree_as_graph(rule, "logic-rule")
-	# print("Example rule written to file: logic-rule.png")
+	print("\nExample logic rule:\n", print_tree(rule))
+	export_tree_as_graph(rule, "logic-rule")
+	print("Example rule written to file: logic-rule.png")
 	# plot_population(screen, pop2)
 
 	print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`—,—{@
