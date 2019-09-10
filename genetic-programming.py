@@ -57,6 +57,9 @@ import math
 import os
 import pygame	# for pause key in Evolve()
 
+from rete.common import Has, Rule, WME
+from rete.network import Network
+
 # ============ Global variables ==============
 
 # Logic parameters:
@@ -440,6 +443,12 @@ terms = [
 		'T', 'F',		# Logical true and false
 		'R']			# 'R' invokes random number generator
 
+def add_tree_to_Rete(rete_net, rule):
+	c1 = Has('O', '$x', '$x')
+	c2 = Has('□', '$y', '$z')
+	c3 = Has('>', '$y', '$z')
+	rete_net.add_production(Rule(c1, c2, c3))
+
 def Evolve():
 	global maxGens, popSize, maxDepth, bouts, p_repro, crossRate, mutationRate
 	population = []
@@ -462,10 +471,18 @@ def Evolve():
 	print()
 	pop2 = sorted(population, key = lambda x : x['fitness'], reverse = False)
 	best = pop2[0]
-	print(print_tree(best.get("target")))
-	export_tree_as_graph(best.get("target"), "logic-rule")
+	rule = best.get('target')
+	print("\nExample logic rule:\n", print_tree(rule))
+	export_tree_as_graph(rule, "logic-rule")
 	print("Example rule written to file: logic-rule.png")
 	# plot_population(screen, pop2)
+
+	print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`—,—{@
+
+	# Feed logic formulas into Rete
+	rete_net = Network()
+	add_tree_to_Rete(rete_net, rule)
+
 	input("**** This program works till here....")
 
 	for gen in range(0, maxGens):

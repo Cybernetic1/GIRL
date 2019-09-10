@@ -14,8 +14,7 @@ def init_network():
 	net.add_production(Rule(c1, c2, c3))
 	return net
 
-def add_wmes():
-	net = init_network()
+def add_wmes(net):
 	wmes = [
 		WME('X', '0', '2'),
 		WME('X', '1', '1'),
@@ -40,4 +39,4 @@ f.close()
 os.system("dot -Tpng rete.dot -orete.png")
 print("Rete graph saved as rete.png\n")
 
-add_wmes()
+add_wmes(rete_net)
