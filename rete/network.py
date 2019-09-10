@@ -303,7 +303,9 @@ class Network:
 					# All earlier conds in which F2.var and F3.var occur must be tested
 					# 1. collect all earlier conds in which F2 or F3 occurs
 					# 2. set all links of the form "F2 op F3"
-					continue
+					F2s = []
+					F3s = []
+					
 			elif isinstance(cond, Neg):
 				tests = self.get_join_tests_from_condition(cond, conds_higher_up)
 				am = self.build_or_share_alpha_memory(cond)
