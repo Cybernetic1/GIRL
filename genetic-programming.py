@@ -54,6 +54,7 @@ import random
 import operator
 import sys
 import math
+import os
 import pygame	# for pause key in Evolve()
 
 # ============ Global variables ==============
@@ -83,7 +84,6 @@ op_map = {
 	operator.and_ : '⋀',
 	operator.or_ : '⋁',
 	operator.not_: '~',
-	'=>': '=>',
 
 	# These may not be used in the program:
 	operator.add : '+',
@@ -98,37 +98,45 @@ def export_tree_as_graph(node, fname):
 	if fname == "stdout":
 		f = sys.stdout
 	else:
-		f = open(fname, 'w')
+		f = open(fname + '.dot', 'w')
 	f.write("digraph {\n")
 	# f.write("fontname=\"times-bold\";")
 	print_tree_as_graph(f, node)
 	f.write("}\n")
 	if fname != "stdout":
 		f.close()
+		os.system("dot -Tpng %s.dot -o%s.png" % (fname, fname))
 
 def print_tree_as_graph(f, node, index = 0):
 	if not isinstance(node, list):
-		if isinstance(node, float):
-			f.write("node" + str(index) + "[label=\"" + str(round(node, 2)) + "\",style=\"filled\",fillcolor=\"yellow\"];\n")
-		elif node == "E20" or node == "E100" or node == "Avg":
-			f.write("node" + str(index) + "[label=\"" + str(node) + "\",style=\"filled\",fillcolor=\"#FFCCCC\"];\n")
+		if isinstance(node, int):
+			f.write("node" + str(index) + "[label=\"" + str(node) + "\",style=\"filled\",fillcolor=\"yellow\"];\n")
 		else:
 			f.write("node" + str(index) + "[label=\"" + str(node) + "\"];\n")
-		return 1
+		return 1			# This means # of tree nodes increment by 1
 	op = node[0]
+	if node[0] in op_map:
+		op = op_map[node[0]]
 	color = "\"];\n"
-	if op == operator.and_ or op == operator.or_:
+	if op == '⋀' or op == '⋁' or op == '=>':
 		color = "\",color=\"red\"];\n"
-	elif op == operator.gt or op == operator.lt:
+		f.write("node" + str(index) + "[label=\"" + op + color)
+		f.write("node" + str(index) + " -> node" + str(index + 1) + ";\n")
+		count1 = print_tree_as_graph(f, node[1], index + 1)
+		f.write("node" + str(index) + " -> node" + str(index + count1 + 1) + ";\n")
+		count2 = print_tree_as_graph(f, node[2], index + count1 + 1)
+		return count1 + count2 + 1
+	elif op == '~':
 		color = "\",color=\"green\"];\n"
-	else:
-		color = "\",color=\"red\"];\n"
-	f.write("node" + str(index) + "[label=\"" + op_map[node[0]] + color)
-	f.write("node" + str(index) + " -> node" + str(index + 1) + ";\n")
-	count1 = print_tree_as_graph(f, node[1], index + 1)
-	f.write("node" + str(index) + " -> node" + str(index + count1 + 1) + ";\n")
-	count2 = print_tree_as_graph(f, node[2], index + count1 + 1)
-	return count1 + count2 + 1
+		f.write("node" + str(index) + "[label=\"" + op + color)
+		f.write("node" + str(index) + " -> node" + str(index + 1) + ";\n")
+		count1 = print_tree_as_graph(f, node[1], index + 1)
+		return count1 + 1
+	else:									# Atoms
+		color = "\",style=\"filled\",fillcolor=\"yellow\"];\n"
+		label = op + '(' + str(node[1]) + ',' + str(node[2]) + ')'
+		f.write("node" + str(index) + "[label=\"" + label + color)
+		return 1
 
 def print_tree(node):
 	if not isinstance(node, list):
@@ -136,12 +144,16 @@ def print_tree(node):
 			return str(node)		# consts
 		else:
 			return node				# vars
+	if node[0] in op_map:
+		op = op_map[node[0]]
+	else:
+		op = node[0]
 	if len(node) == 3:
-		return '(' + op_map[node[0]] + ' ' + \
+		return '(' + op + ' ' + \
 			print_tree(node[1]) + ' ' + \
 			print_tree(node[2]) + ')'
 	else:
-		return '(' + op_map[node[0]] + ' ' + \
+		return '(' + op + ' ' + \
 			print_tree(node[1]) + ')'
 
 def read_tree(str):			# assume str is in prefix notation with ()'s
@@ -184,10 +196,10 @@ def generate_random_condition(maxDepth, depth = 0):
 	depth += 1
 	choice = random.uniform(0.0, 1.0)
 	arg1 = generate_random_condition(maxDepth, depth)
-	if choice < 0.3333:
+	if choice < 0.1:
 		return [operator.not_, arg1]
 	arg2 = generate_random_condition(maxDepth, depth)
-	op = operator.and_ if (choice < 0.6666) else operator.or_
+	op = operator.and_ if (choice < 0.55) else operator.or_
 	return [op, arg1, arg2]
 
 def generate_random_atom():
@@ -201,8 +213,8 @@ def generate_random_var_or_const():
 	""" Result could be old var, new var, or const """
 	global var_index
 	choice = random.uniform(0.0, 1.0)
-	if choice < 0.5:					# const
-		return random.randint(0, 3)
+	if choice < 0.5:					# constant ∈ {0, 1, 2}
+		return random.randint(0, 2)
 	elif choice < 0.8:					# old var
 		return '?' + str(random.randint(0, var_index))
 	else:								# new var
@@ -451,10 +463,10 @@ def Evolve():
 	pop2 = sorted(population, key = lambda x : x['fitness'], reverse = False)
 	best = pop2[0]
 	print(print_tree(best.get("target")))
-	export_tree_as_graph(best.get("target"), "logic-rule.dot")
-	print("Example rule written to file: logic-rule.dot")
+	export_tree_as_graph(best.get("target"), "logic-rule")
+	print("Example rule written to file: logic-rule.png")
 	# plot_population(screen, pop2)
-	input("Press any key to continue....")
+	input("**** This program works till here....")
 
 	for gen in range(0, maxGens):
 		children = []
