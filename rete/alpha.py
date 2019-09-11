@@ -29,7 +29,7 @@ class ConstantTestNode:
 		if self.field_to_test != 'no-test':
 			v = getattr(wme, self.field_to_test)
 			v2 = self.thing_the_field_must_equal
-			if v2[0] == 'F':
+			if v2 and v2[0] == 'F':
 				v2 = getattr(wme, v2)
 			# print "%s =? %s" % (v, v2)
 			if v != v2:

@@ -115,7 +115,7 @@ class Bind:
 
 class WME:
 
-	def __init__(self, F1, F2, F3):
+	def __init__(self, F1=None, F2=None, F3=None):
 		self.F1 = F1
 		self.F2 = F2
 		self.F3 = F3
@@ -224,6 +224,5 @@ class Token:
 				for child in token.node.ncc_node.children:
 					child.left_activation(token.owner, None)
 
-
 def is_var(v):
-	return v.startswith('$')
+	return v.startswith('$') if v else False

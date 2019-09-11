@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python2.7grep
 # -*- coding: utf-8 -*-
 import sys
 import os
@@ -9,11 +9,11 @@ from rete.network import Network
 def init_network():
 	net = Network()
 
-	c1 = Has('male', '$a', '_')
+	c1 = Has('male', '$a')
 	c2 = Has('love', '$a', '$b')
-	c3 = Has('female', '$b', '_')
-	# net.add_production(Rule(Ncc(c1, Ncc(c2, c3))))
-	net.add_production(Rule(c1, Ncc(c2, c3)))
+	c3 = Has('female', '$b')
+	net.add_production(Rule(Ncc(c1, Ncc(c2, c3))))
+	# net.add_production(Rule(c1, Ncc(c2, c3)))
 	# net.add_production(Rule(c2, c3))
 
 	# c01 = Has('O', '$x', '$x')
@@ -24,14 +24,14 @@ def init_network():
 
 def add_wmes(net):
 	wmes = [
-		WME('female', 'Mary', '_'),
-		#WME('female', 'Ann', '_'),
-		WME('love', 'John', 'Mary'),
+		WME('female', 'Mary'),
+		WME('female', 'Ann'),
+		WME('love', 'John', 'Pete'),
 		#WME('love', 'John', 'Ann'),
-		WME('love', 'Pete', 'Mary'),
+		WME('love', 'Pete', 'Ann'),
 		#WME('love', 'Pete', 'Ann'),
-		WME('male', 'John', '_'),
-		WME('male', 'Pete', '_'),
+		WME('male', 'John'),
+		WME('male', 'Pete'),
 		# WME('X', '0', '2'),
 		# WME('X', '1', '1'),
 		# WME('X', '2', '1'),
