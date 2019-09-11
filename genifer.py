@@ -3,28 +3,42 @@
 import sys
 import os
 
-from rete.common import Has, Rule, WME
+from rete.common import Has, Rule, WME, Neg, Ncc, Token
 from rete.network import Network
 
 def init_network():
 	net = Network()
-	c1 = Has('O', '$x', '$x')
-	c2 = Has('□', '$y', '$z')
-	c3 = Has('>', '$y', '$z')
-	net.add_production(Rule(c1, c2, c3))
+
+	c1 = Has('male', '$a', '_')
+	c2 = Has('love', '$a', '$b')
+	c3 = Has('female', '$b', '_')
+	# net.add_production(Rule(Ncc(c1, Ncc(c2, c3))))
+	net.add_production(Rule(Ncc(c2, c3)))
+	# net.add_production(Rule(c2, c3))
+
+	# c01 = Has('O', '$x', '$x')
+	# c02 = Has('□', '$y', '$z')
+	# c03 = Has('>', '$y', '$z')
+	# net.add_production(Rule(c01, c02, c03))
 	return net
 
 def add_wmes(net):
 	wmes = [
-		WME('X', '0', '2'),
-		WME('X', '1', '1'),
-		WME('X', '2', '1'),
-		WME('O', '0', '0'),
-		WME('O', '1', '0'),
-		WME('O', '1', '2'),
-		WME('O', '2', '2'),
-		WME('□', '0', '1'),
-		WME('□', '2', '0'),
+		WME('male', 'John', '_'),
+		WME('male', 'Pete', '_'),
+		WME('female', 'Mary', '_'),
+		WME('female', 'Ann', '_'),
+		WME('love', 'John', 'Mary'),
+		WME('love', 'Pete', 'John'),
+		# WME('X', '0', '2'),
+		# WME('X', '1', '1'),
+		# WME('X', '2', '1'),
+		# WME('O', '0', '0'),
+		# WME('O', '1', '0'),
+		# WME('O', '1', '2'),
+		# WME('O', '2', '2'),
+		# WME('□', '0', '1'),
+		# WME('□', '2', '0'),
 	]
 	for wme in wmes:
 		net.add_wme(wme)

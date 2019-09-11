@@ -92,8 +92,15 @@ class Network:
 			self.buf.write("	subgraph cluster_1 {\n")
 			self.buf.write("	label = beta\n")
 			self.buf.write('	"%s" [label="BetaNode"];\n' % node.dump())
+		if isinstance(node, BetaMemory):
+			self.buf.write('	"%s" [label="BetaMem"];\n' % node.dump())
+		if isinstance(node, PNode):
+			self.buf.write('	"%s" [label="PNode"];\n' % node.dump())
 		if isinstance(node, NccPartnerNode):
+			self.buf.write('	"%s" [label="NccPartnerNode"];\n' % node.dump())
 			self.buf.write('	"%s" -> "%s";\n' % (node.dump(), node.ncc_node.dump()))
+		if isinstance(node, NccNode):
+			self.buf.write('	"%s" [label="NccNode"];\n' % node.dump())
 		if isinstance(node, JoinNode):
 			# dump details of node
 			self.buf.write('	"%s" [shape=box, color=red, label="JoinNode"];\n' % node.dump())
@@ -103,7 +110,6 @@ class Network:
 			for t in node.tests:
 				self.buf.write('	"%s" -> "%s"\n' % (node.dump(), t.dump()))
 		for child in node.children:
-			self.buf.write('	"%s" [label="BetaMem"];\n' % child.dump())
 			self.buf.write('	"%s" -> "%s";\n' % (node.dump(), child.dump()))
 			self.dump_beta(child)
 		if node == self.beta_root:
@@ -146,7 +152,7 @@ class Network:
 				field_of_v2 = cond.contain(v)
 				if not field_of_v2:
 					continue
-				t = TestAtJoinNode(field_of_v, idx, field_of_v2, op)
+				t = TestAtJoinNode(field_of_v, idx, field_of_v2)
 				result.append(t)
 		return result
 

@@ -1,6 +1,5 @@
 from rete.common import Token, BetaNode
 
-
 class NccNode(BetaNode):
 
 	def __init__(self, children=None, parent=None, items=None, partner=None):
@@ -11,6 +10,9 @@ class NccNode(BetaNode):
 		super(NccNode, self).__init__(children=children, parent=parent)
 		self.items = items if items else []
 		self.partner = partner
+
+	def dump(self):
+		return repr(self)
 
 	def left_activation(self, t, w, binding=None):
 		"""
@@ -28,7 +30,6 @@ class NccNode(BetaNode):
 			for child in self.children:
 				child.left_activation(new_token, None)
 
-
 class NccPartnerNode(BetaNode):
 
 	def __init__(self, children=None, parent=None, ncc_node=None,
@@ -41,6 +42,9 @@ class NccPartnerNode(BetaNode):
 		self.ncc_node = ncc_node
 		self.number_of_conditions = number_of_conditions
 		self.new_result_buffer = new_result_buffer if new_result_buffer else []
+
+	def dump(self):
+		return repr(self)
 
 	def left_activation(self, t, w, binding=None):
 		"""

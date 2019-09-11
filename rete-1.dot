@@ -1,0 +1,51 @@
+digraph {
+	subgraph cluster_1 {
+	label = beta
+	"BetaNode 139960276346024" [label="BetaNode"];
+	"BetaNode 139960276346024" -> "BetaMemory 139960276346584";
+	"BetaMemory 139960276346584" [label="BetaMem"];
+	"BetaMemory 139960276346584" -> "JoinNode 139960276346920";
+	"JoinNode 139960276346920" [shape=box, color=red, label="JoinNode"];
+	"JoinNode 139960276346920" -> "amem:<rete.alpha.AlphaMemory object at 0x7f4b0a8de7f0>"
+	"JoinNode 139960276346920" -> "has:(O 0 ?0)"
+	"JoinNode 139960276346920" -> "BetaMemory 139960276346976";
+	"BetaMemory 139960276346976" [label="BetaMem"];
+	"BetaMemory 139960276346976" -> "JoinNode 139960276347200";
+	"JoinNode 139960276347200" [shape=box, color=red, label="JoinNode"];
+	"JoinNode 139960276347200" -> "amem:<rete.alpha.AlphaMemory object at 0x7f4b0a8de908>"
+	"JoinNode 139960276347200" -> "has:(O 1 2)"
+	"JoinNode 139960276347200" -> "BetaMemory 139960276347312";
+	"BetaMemory 139960276347312" [label="BetaMem"];
+	"BetaMemory 139960276347312" -> "JoinNode 139960276347480";
+	"JoinNode 139960276347480" [shape=box, color=red, label="JoinNode"];
+	"JoinNode 139960276347480" -> "amem:<rete.alpha.AlphaMemory object at 0x7f4b0a8dea20>"
+	"JoinNode 139960276347480" -> "has:(O 1 1)"
+	"JoinNode 139960276347480" -> "<rete.ncc_node.NccPartnerNode object at 0x7f4b0a8dea90>";
+	"<rete.ncc_node.NccPartnerNode object at 0x7f4b0a8dea90>" [label="NccPartnerNode"];
+	"<rete.ncc_node.NccPartnerNode object at 0x7f4b0a8dea90>" -> "<rete.ncc_node.NccNode object at 0x7f4b0a8de978>";
+	"JoinNode 139960276347200" -> "<rete.ncc_node.NccNode object at 0x7f4b0a8de978>";
+	"<rete.ncc_node.NccNode object at 0x7f4b0a8de978>" [label="NccNode"];
+	"<rete.ncc_node.NccNode object at 0x7f4b0a8de978>" -> "PNode 139960276346080";
+	"PNode 139960276346080" [label="PNode"];
+	}
+	subgraph cluster_0 {
+	label = alpha
+	"no-test" -> "F1==O";
+	"F1==O" -> "F2==0";
+	"F2==0" -> "F3==?0";
+	"F3==?0" -> "amem:<rete.alpha.AlphaMemory object at 0x7f4b0a8de7f0>";
+	"amem:<rete.alpha.AlphaMemory object at 0x7f4b0a8de7f0>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
+	"F1==O" -> "F2==1";
+	"F2==1" -> "F3==2";
+	"F3==2" -> "amem:<rete.alpha.AlphaMemory object at 0x7f4b0a8de908>";
+	"amem:<rete.alpha.AlphaMemory object at 0x7f4b0a8de908>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
+	"F2==1" -> "F3==1";
+	"F3==1" -> "amem:<rete.alpha.AlphaMemory object at 0x7f4b0a8dea20>";
+	"amem:<rete.alpha.AlphaMemory object at 0x7f4b0a8dea20>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
+	"no-test" -> "amem:<rete.alpha.AlphaMemory object at 0x7f4b0a8de438>";
+	"amem:<rete.alpha.AlphaMemory object at 0x7f4b0a8de438>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
+	}
+	"F3==?0" -> "JoinNode 139960276346920";
+	"F3==2" -> "JoinNode 139960276347200";
+	"F3==1" -> "JoinNode 139960276347480";
+}

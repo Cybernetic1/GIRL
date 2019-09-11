@@ -1,11 +1,12 @@
 # -*- coding: utf8 -*-
 
+# TO-DO:
+# * nested-NC's seem not implemented yet
+
 # **** NOTE:  In this new version we use rules that are compatible with Rete,
 # that consists only of conjunctions, negations, and negated conjunctions (NC).
 # NCs can be nested to any level.  So the general form of a rule is: a conjunction,
 # followed by some negated atoms, followed by a possibly nested NC.
-
-# TO-DO:
 
 # * Objective function:
 #		The KB would be run many times
@@ -52,8 +53,12 @@
 
 # STRUCTURE OF A RULE
 # ===================
-#    formula => literal
-# =  pair( tree as list , literal as list )
+#   pre-condition => post-condition
+#	pre-condition = list of positive/negative literals, followed by a
+#					possibly nested NC part
+#	NC = NC[ list of literals... [another NC...] ]
+#	post-condition = just one positive literal = one atom
+#	literal = atomic proposition optionally preceded by a negation sign
 
 import random
 import operator
@@ -62,8 +67,9 @@ import math
 import os
 import pygame	# for pause key in Evolve()
 
-from rete.common import Has, Rule, WME
+from rete.common import Has, Rule, WME, Neg, Ncc, Token
 from rete.network import Network
+from rete.network import PNode
 
 # ============ Global variables ==============
 
@@ -88,20 +94,6 @@ cache = []		# for storing previously-learned best formulas
 
 var_index = 0	# keeping track of logic variables
 
-op_map = {
-	operator.and_ : '⋀',
-	operator.or_ : '⋁',
-	operator.not_: '~',
-
-	# These may not be used in the program:
-	operator.add : '+',
-	operator.sub : '-',
-	operator.mul : '*',
-	operator.truediv : '÷',
-	operator.gt : '>',
-	operator.lt : '<',
-	}
-
 def export_rule_as_graph(node, fname):
 	if fname == "stdout":
 		f = sys.stdout
@@ -116,10 +108,10 @@ def export_rule_as_graph(node, fname):
 		os.system("dot -Tpng %s.dot -o%s.png" % (fname, fname))
 
 def print_rule_as_graph(f, node, index = 0):
-	""" This function has to be rewritten... """
+	""" This function has to be rewritten """
 	op = node[0]
-	if node[0] in op_map:
-		op = op_map[node[0]]
+	# if node[0] in op_map:
+		# op = op_map[node[0]]
 	color = "\"];\n"
 	if op == '⋀' or op == '⋁' or op == '=>':
 		color = "\",color=\"red\"];\n"
@@ -459,33 +451,35 @@ def mutation_cond(parent, maxDepth, funcs, terms):
 	child = prune(child, maxDepth, terms)
 	return child
 
-# problem configuration
-
-terms = [
-		'O', 'X',		# Moves for the 2 players
-		'T', 'F',		# Logical true and false
-		'R']			# 'R' invokes random number generator
-
 # Add a logic formula to Rete
-def add_tree_to_Rete(rete_net, rule):
-	""" This code is still unfinished """
-	op = rule[0]
-	if rule[0] in op_map:
-		op = op_map[rule[0]]
-	if op == 'X' or op == 'O':
-		return Has(op, str(rule[1]), str(rule[2]))
-	elif op == '⋀':
-		return Rule( \
-			add_tree_to_Rete(rule[1]), \
-			add_tree_to_Rete(rule[2]))
-	else:
-		return Rule( \
-			add_tree_to_Rete(rule[1]))
+def add_rule_to_Rete(rete_net, rule):
+	""" Format of a rule:
+		[ => pre-condition post-condition ]
+		Format of a pre-condition:
+		[ literals ... [nc ... [nc ...] ] ]
+	"""
+	conjunction = []
+	for literal in rule[1]:
+		conjunction.append(get_Rete_literal(literal))
+	conjunction.append(get_Rete_nc(rule[2]))
+	p0 = rete_net.add_production(Rule(*conjunction))
+	# Conclusion = get_Rete_literal(rule[3])
+	return
 
-	c1 = Has('O', '$x', '$x')
-	c2 = Has('□', '$y', '$z')
-	c3 = Has('>', '$y', '$z')
-	rete_net.add_production(Rule(c1, c2, c3))
+def get_Rete_nc(nc):
+	conjunction = []
+	for literal_or_NC in nc[1:]:
+		if literal_or_NC[0] == 'NC':
+			return conjunction.append(get_Rete_nc(literal_or_NC))
+		else:
+			conjunction.append(get_Rete_literal(literal_or_NC))
+	return Ncc(*conjunction)
+
+def get_Rete_literal(literal):
+	if literal[0] == '~':
+		return Neg(literal[1], str(literal[2]), str(literal[3]))
+	else:
+		return Has(literal[0], str(literal[1]), str(literal[2]))
 
 def Evolve():
 	global maxGens, popSize, maxDepth, bouts, p_repro, crossRate, mutationRate
@@ -499,7 +493,7 @@ def Evolve():
 		})
 	print("Adding from cache:", len(cache))
 	for i in range(0, popSize - len(cache)):
-		print(i, '..', end='')
+		print(i, '..', end='\r')
 		sys.stdout.flush()
 		# print "\tGenerating formula..."
 		target = generate_random_formula(maxDepth)
@@ -519,7 +513,14 @@ def Evolve():
 
 	# Feed logic formulas into Rete
 	rete_net = Network()
-	add_tree_to_Rete(rete_net, rule)
+	add_rule_to_Rete(rete_net, rule)
+
+	fname = 'rete-0'
+	f = open(fname + '.dot', 'w+')
+	f.write(rete_net.dump())
+	f.close()
+	os.system("dot -Tpng %s.dot -o%s.png" % (fname, fname))
+	print("Rete graph saved as %s.png\n" % fname)
 
 	input("**** This program works till here....")
 
@@ -536,12 +537,12 @@ def Evolve():
 			elif operation < p_repro + crossRate:
 				p2 = tournament_selection(population, bouts)
 				c2 = {}
-				c1['target'],c2['target'] = crossover(p1['target'], p2['target'], maxDepth, terms)
+				c1['target'],c2['target'] = crossover(p1['target'], p2['target'], maxDepth)
 				# c1['cond'],  c2['cond']   = crossover_cond(p1['cond'],   p2['cond'],   maxDepth, terms)
 				# print "***** crossed condition = ", print_tree(c1['cond'])
 				children.append(c2)
 			elif operation < p_repro + crossRate + mutationRate:
-				c1['target'] = mutation(p1['target'], maxDepth, arith_ops, terms)
+				c1['target'] = mutation(p1['target'], maxDepth, arith_ops)
 				# c1['cond']   = mutation_cond(p1['cond'],   maxDepth, arith_ops, terms)
 				# print "***** mutated condition = ", print_tree(c1['cond'])
 			if len(children) < popSize:
