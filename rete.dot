@@ -1,40 +1,52 @@
 digraph {
 	subgraph cluster_1 {
 	label = beta
-	"BetaNode 140452181298704" [label="BetaNode"];
-	"BetaNode 140452181298704" -> "BetaMemory 140452181413224";
-	"BetaMemory 140452181413224" [label="BetaMem"];
-	"BetaMemory 140452181413224" -> "JoinNode 140452181413448";
-	"JoinNode 140452181413448" [shape=box, color=red, label="JoinNode"];
-	"JoinNode 140452181413448" -> "amem:<rete.alpha.AlphaMemory object at 0x7fbd92618e10>"
-	"JoinNode 140452181413448" -> "has:(love $a $b)"
-	"JoinNode 140452181413448" -> "BetaMemory 140452181413504";
-	"BetaMemory 140452181413504" [label="BetaMem"];
-	"BetaMemory 140452181413504" -> "JoinNode 140452181413784";
-	"JoinNode 140452181413784" [shape=box, color=red, label="JoinNode"];
-	"JoinNode 140452181413784" -> "amem:<rete.alpha.AlphaMemory object at 0x7fbd92618f60>"
-	"JoinNode 140452181413784" -> "has:(female $b _)"
-	"JoinNode 140452181413784" -> "F2 None? 0:F3"
-	"JoinNode 140452181413784" -> "<rete.ncc_node.NccPartnerNode object at 0x7fbd92618fd0>";
-	"<rete.ncc_node.NccPartnerNode object at 0x7fbd92618fd0>" [label="NccPartnerNode"];
-	"<rete.ncc_node.NccPartnerNode object at 0x7fbd92618fd0>" -> "<rete.ncc_node.NccNode object at 0x7fbd92618d30>";
-	"BetaNode 140452181298704" -> "<rete.ncc_node.NccNode object at 0x7fbd92618d30>";
-	"<rete.ncc_node.NccNode object at 0x7fbd92618d30>" [label="NccNode"];
-	"<rete.ncc_node.NccNode object at 0x7fbd92618d30>" -> "PNode 140452181413112";
-	"PNode 140452181413112" [label="PNode"];
+	"BetaNode 140427264776568" [label="BetaNode"];
+	"BetaNode 140427264776568" -> "BetaMemory 140427264907304";
+	"BetaMemory 140427264907304" [label="BetaMem"];
+	"BetaMemory 140427264907304" -> "JoinNode 140427264907584";
+	"JoinNode 140427264907584" [shape=box, color=red, label="JoinNode"];
+	"JoinNode 140427264907584" -> "amem:<rete.alpha.AlphaMemory object at 0x7fb7c53dd908>"
+	"JoinNode 140427264907584" -> "has:(male $a _)"
+	"JoinNode 140427264907584" -> "BetaMemory 140427264907696";
+	"BetaMemory 140427264907696" [label="BetaMem"];
+	"BetaMemory 140427264907696" -> "JoinNode 140427264907920";
+	"JoinNode 140427264907920" [shape=box, color=red, label="JoinNode"];
+	"JoinNode 140427264907920" -> "amem:<rete.alpha.AlphaMemory object at 0x7fb7c53dda20>"
+	"JoinNode 140427264907920" -> "has:(love $a $b)"
+	"JoinNode 140427264907920" -> "F2 None? 0:F2"
+	"JoinNode 140427264907920" -> "BetaMemory 140427264907976";
+	"BetaMemory 140427264907976" [label="BetaMem"];
+	"BetaMemory 140427264907976" -> "JoinNode 140427264908256";
+	"JoinNode 140427264908256" [shape=box, color=red, label="JoinNode"];
+	"JoinNode 140427264908256" -> "amem:<rete.alpha.AlphaMemory object at 0x7fb7c53ddba8>"
+	"JoinNode 140427264908256" -> "has:(female $b _)"
+	"JoinNode 140427264908256" -> "F2 None? 1:F3"
+	"JoinNode 140427264908256" -> "<rete.ncc_node.NccPartnerNode object at 0x7fb7c53ddc18>";
+	"<rete.ncc_node.NccPartnerNode object at 0x7fb7c53ddc18>" [label="NccPartnerNode"];
+	"<rete.ncc_node.NccPartnerNode object at 0x7fb7c53ddc18>" -> "<rete.ncc_node.NccNode object at 0x7fb7c53dd978>";
+	"JoinNode 140427264907584" -> "<rete.ncc_node.NccNode object at 0x7fb7c53dd978>";
+	"<rete.ncc_node.NccNode object at 0x7fb7c53dd978>" [label="NccNode"];
+	"<rete.ncc_node.NccNode object at 0x7fb7c53dd978>" -> "PNode 140427264907248";
+	"PNode 140427264907248" [label="PNode"];
 	}
 	subgraph cluster_0 {
 	label = alpha
+	"no-test" -> "F1==male";
+	"F1==male" -> "F3==_";
+	"F3==_" -> "amem:<rete.alpha.AlphaMemory object at 0x7fb7c53dd908>";
+	"amem:<rete.alpha.AlphaMemory object at 0x7fb7c53dd908>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
 	"no-test" -> "F1==love";
-	"F1==love" -> "amem:<rete.alpha.AlphaMemory object at 0x7fbd92618e10>";
-	"amem:<rete.alpha.AlphaMemory object at 0x7fbd92618e10>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
+	"F1==love" -> "amem:<rete.alpha.AlphaMemory object at 0x7fb7c53dda20>";
+	"amem:<rete.alpha.AlphaMemory object at 0x7fb7c53dda20>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
 	"no-test" -> "F1==female";
 	"F1==female" -> "F3==_";
-	"F3==_" -> "amem:<rete.alpha.AlphaMemory object at 0x7fbd92618f60>";
-	"amem:<rete.alpha.AlphaMemory object at 0x7fbd92618f60>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
-	"no-test" -> "amem:<rete.alpha.AlphaMemory object at 0x7fbd925fcbe0>";
-	"amem:<rete.alpha.AlphaMemory object at 0x7fbd925fcbe0>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
+	"F3==_" -> "amem:<rete.alpha.AlphaMemory object at 0x7fb7c53ddba8>";
+	"amem:<rete.alpha.AlphaMemory object at 0x7fb7c53ddba8>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
+	"no-test" -> "amem:<rete.alpha.AlphaMemory object at 0x7fb7c53bd6d8>";
+	"amem:<rete.alpha.AlphaMemory object at 0x7fb7c53bd6d8>" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];
 	}
-	"F1==love" -> "JoinNode 140452181413448";
-	"F3==_" -> "JoinNode 140452181413784";
+	"F3==_" -> "JoinNode 140427264907584";
+	"F1==love" -> "JoinNode 140427264907920";
+	"F3==_" -> "JoinNode 140427264908256";
 }

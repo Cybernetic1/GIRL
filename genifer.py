@@ -13,7 +13,7 @@ def init_network():
 	c2 = Has('love', '$a', '$b')
 	c3 = Has('female', '$b', '_')
 	# net.add_production(Rule(Ncc(c1, Ncc(c2, c3))))
-	net.add_production(Rule(Ncc(c2, c3)))
+	net.add_production(Rule(c1, Ncc(c2, c3)))
 	# net.add_production(Rule(c2, c3))
 
 	# c01 = Has('O', '$x', '$x')
@@ -24,12 +24,14 @@ def init_network():
 
 def add_wmes(net):
 	wmes = [
+		WME('female', 'Mary', '_'),
+		#WME('female', 'Ann', '_'),
+		WME('love', 'John', 'Mary'),
+		#WME('love', 'John', 'Ann'),
+		WME('love', 'Pete', 'Mary'),
+		#WME('love', 'Pete', 'Ann'),
 		WME('male', 'John', '_'),
 		WME('male', 'Pete', '_'),
-		WME('female', 'Mary', '_'),
-		WME('female', 'Ann', '_'),
-		WME('love', 'John', 'Mary'),
-		WME('love', 'Pete', 'John'),
 		# WME('X', '0', '2'),
 		# WME('X', '1', '1'),
 		# WME('X', '2', '1'),
