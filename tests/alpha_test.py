@@ -17,32 +17,32 @@ def test_root():
 def test_level1():
     # (Var('x'), 'on', Var('y'))
     root = ConstantTestNode('no-test')
-    path = [('attribute', 'on')]
+    path = [('F2', 'on')]
     ConstantTestNode.build_or_share_alpha_memory(root, path)
-    assert root.children[0].field_to_test == 'attribute'
-    assert root.children[0].field_must_equal == 'on'
+    assert root.children[0].field_to_test == 'F2'
+    assert root.children[0].thing_the_field_must_equal == 'on'
     assert len(path) == 0
 
 
 def test_level2():
     # (Var('x'), 'on', 'table')
     root = ConstantTestNode('no-test')
-    path = [('attribute', 'on'), ('value', 'table')]
+    path = [('F2', 'on'), ('F3', 'table')]
     ConstantTestNode.build_or_share_alpha_memory(root, path)
-    assert root.children[0].field_to_test == 'attribute'
-    assert root.children[0].children[0].field_to_test == 'value'
+    assert root.children[0].field_to_test == 'F2'
+    assert root.children[0].children[0].field_to_test == 'F3'
 
-    path = [('attribute', 'color'), ('value', 'red')]
+    path = [('F2', 'color'), ('F3', 'red')]
     ConstantTestNode.build_or_share_alpha_memory(root, path)
-    path = [('attribute', 'color'), ('value', 'blue')]
+    path = [('F2', 'color'), ('F3', 'blue')]
     ConstantTestNode.build_or_share_alpha_memory(root, path)
     assert len(root.children[1].children) == 2
 
 
 def test_add_wme():
     root = ConstantTestNode('no-test')
-    am1 = ConstantTestNode.build_or_share_alpha_memory(root, [('attribute', 'on')])
-    am2 = ConstantTestNode.build_or_share_alpha_memory(root, [('attribute', 'on'), ('value', 'table')])
+    am1 = ConstantTestNode.build_or_share_alpha_memory(root, [('F2', 'on')])
+    am2 = ConstantTestNode.build_or_share_alpha_memory(root, [('F2', 'on'), ('F3', 'table')])
 
     root.activation(WME('x', 'on', 'table'))
     assert len(am1.items) == 1

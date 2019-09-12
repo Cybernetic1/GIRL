@@ -7,12 +7,12 @@ def test_xml():
     <data version="0.0.2">
         <production>
             <lhs>
-                <has identifier="$x" attribute="on" value="$y" />
+                <has F1="$x" F2="on" F3="$y" />
                 <bind to="$test">1+1</bind>
                 <filter>$y != "table"</filter>
                 <ncc>
-                    <has identifier="$z" attribute="color" value="red" />
-                    <has identifier="$z" attribute="on" value="$w" />
+                    <has F1="$z" F2="color" F3="red" />
+                    <has F1="$z" F2="on" F3="$w" />
                 </ncc>
             </lhs>
             <rhs></rhs>

@@ -4,7 +4,6 @@ from rete.common import Rule, Has, Neg, WME, Token, Ncc
 from rete.network import Network
 from rete.pnode import PNode
 
-
 def test_network_case0():
     net = Network()
     c0 = Has('x', 'id', '1')
@@ -120,6 +119,7 @@ def test_negative_condition():
         WME('B3', 'left-of', 'B4'),
         WME('B3', 'on', 'table'),
         WME('B3', 'color', 'red'),
+        # WME('B4', 'color', 'blue'),
     ]
     for wme in wmes:
         net.add_wme(wme)
@@ -128,6 +128,7 @@ def test_negative_condition():
         WME('B3', 'left-of', 'B4'),
         None
     ]
+    print("we're here...")
 
 
 def test_multi_productions():

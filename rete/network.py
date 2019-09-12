@@ -125,11 +125,11 @@ class Network:
 			v = getattr(condition, f)
 			if not is_var(v):
 				path.append((f, v))
-			else:
-				for f2 in FIELDS:
-					v2 = getattr(condition, f2)
-					if f < f2 and v == v2:
-						path.append((f, f2))
+			# else:
+				# for f2 in FIELDS:
+					# v2 = getattr(condition, f2)
+					# if f < f2 and v == v2:
+						# path.append((f, f2))
 		am = ConstantTestNode.build_or_share_alpha_memory(self.alpha_root, path)
 		for w in self.alpha_root.amem.items:
 			if condition.test(w):
@@ -296,7 +296,11 @@ class Network:
 		current_node = parent
 		conds_higher_up = earlier_conds
 		for cond in rule:
-			if isinstance(cond, Has):
+			if isinstance(cond, Neg):
+				tests = self.get_join_tests_from_condition(cond, conds_higher_up)
+				am = self.build_or_share_alpha_memory(cond)
+				current_node = self.build_or_share_negative_node(current_node, am, tests)
+			elif isinstance(cond, Has):
 				# **** Added by YKY:  check if cond is a custom operator
 				op = getattr(cond, 'F1')
 				# print("op = ", op)
@@ -312,11 +316,7 @@ class Network:
 					# 2. set all links of the form "F2 op F3"
 					F2s = []
 					F3s = []
-					
-			elif isinstance(cond, Neg):
-				tests = self.get_join_tests_from_condition(cond, conds_higher_up)
-				am = self.build_or_share_alpha_memory(cond)
-				current_node = self.build_or_share_negative_node(current_node, am, tests)
+					print("**** not implemented ****")
 			elif isinstance(cond, Ncc):
 				current_node = self.build_or_share_ncc_nodes(current_node, cond, conds_higher_up)
 			elif isinstance(cond, Filter):
