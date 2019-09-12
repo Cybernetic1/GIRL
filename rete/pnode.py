@@ -12,6 +12,7 @@ class PNode(BetaNode):
 		super(PNode, self).__init__(children=children, parent=parent)
 		self.items = items if items else []
 		self.children = children if children else []
+		self.postcondition = None
 		for k, v in kwargs.items():
 			setattr(self, k, v)
 

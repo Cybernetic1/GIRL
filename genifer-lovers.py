@@ -1,12 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-# Now it is confirmed that NC's cannot be nested, or contain Neg conditions.
-
-import sys
 import os
 
-from rete.common import Has, Rule, WME, Neg, Ncc, Token
+from rete.common import Has, Rule, WME, Neg, Ncc
 from rete.network import Network
 
 net = Network()
@@ -14,12 +11,13 @@ net = Network()
 c1 = Has('male', '$a')
 c2 = Has('love', '$a', '$b')
 c3 = Has('female', '$b')
+
 # net.add_production(Rule(Ncc(c1, Ncc(c2, c3))))
 # net.add_production(Rule(Ncc(c2, Ncc(c3))))
-p0 = net.add_production(Rule(c3, Ncc(c2, c1)))
 # net.add_production(Rule(c1, Ncc(c2)))
 # net.add_production(Rule(c1, Ncc(c2, c3)))
 # net.add_production(Rule(c2, c3))
+p0 = net.add_production(Rule(c3, Ncc(c2, c1)))
 
 wmes = [
 	WME('female', 'Mary'),

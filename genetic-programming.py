@@ -3,8 +3,10 @@
 # TO-DO:
 #	* Mysterious bug about "tokens"
 #	* Pass post-conditions to Rete side
+#	* Check if it is valid move, if yes, add as WME, record the move
+#	* If win / lose, assign reward to traced steps
+#	* Play many games
 #	* Invention of new predicates
-#	* Run Rete with initial conditions, record inference trace, score rules
 
 # Done:
 # * Now it is confirmed that NC's cannot be nested, or contain Neg conditions.
@@ -72,7 +74,7 @@ import math
 import os
 import pygame	# for pause key in Evolve()
 
-from rete.common import Has, Rule, WME, Neg, Ncc, Token
+from rete.common import Has, Rule, WME, Neg, Ncc, is_var
 from rete.network import Network
 from rete.network import PNode
 
@@ -151,7 +153,7 @@ def print_rule(rule):
 	for literal in rule[1]:
 		s += print_literal(literal) + ' ⋀ '
 	s += print_nc(rule[2])
-	return s + " => " + print_literal(rule[3])
+	return s + " \x1b[31;1m=> " + print_literal(rule[3]) + "\x1b[0m"
 
 def print_nc(nc):
 	s = '\x1b[32m[ '
@@ -251,9 +253,9 @@ def generate_random_var_or_const(create = True):
 	choice = random.uniform(0.0, 1.0)
 	if create and choice > 0.8:				# new var
 		var_index += 1
-		return '?' + str(var_index)
+		return '$' + str(var_index)
 	elif choice > 0.5 and var_index >= 0:	# old var
-		return '?' + str(random.randint(0, var_index))
+		return '$' + str(random.randint(0, var_index))
 	else:									# constant ∈ {0, 1, 2}
 		return random.randint(0, 2)
 
@@ -478,6 +480,7 @@ def add_rule_to_Rete(rete_net, rule):
 	"""
 	# print("rule[1] = ", rule[1])
 	# print("rule[2] = ", rule[2])
+	# print("rule[3] = ", rule[3])
 	conjunction = []
 	for literal in rule[1]:
 		conjunction.append(get_Rete_literal(literal))
@@ -485,7 +488,7 @@ def add_rule_to_Rete(rete_net, rule):
 	for literal in rule[2]:
 		conjunction2.append(get_Rete_literal(literal))
 	p = rete_net.add_production(Rule(*conjunction, Ncc(*conjunction2)))
-	# Conclusion = get_Rete_literal(rule[3])
+	p.postcondition = get_Rete_literal(rule[3])
 	return p
 
 def get_Rete_nc(nc):
@@ -572,10 +575,22 @@ def Evolve():
 
 	for p in p_nodes:
 		if len(p.items) > 0:
-			print("# of results = ", len(p.items))
-			print("\x1b[31;1mResults:\x1b[0m")
-			for i in p.items:
-				print(i)
+			print(len(p.items), end=' ')
+			print("\x1b[31;1mresults:\x1b[0m")
+			for item in p.items:
+				f2 = getattr(p.postcondition, 'F2')
+				f3 = getattr(p.postcondition, 'F3')
+				if is_var(f2):
+					p.postcondition.F2 = item.get_binding(f2)
+				if is_var(f3):
+					p.postcondition.F3 = item.get_binding(f3)
+				print("postcond = ", p.postcondition)
+				# print(item)
+
+	# Actions could be intermediate predicates
+	# Check if it is valid move, if yes, add as WME, record the move
+	# If win / lose, assign reward to traced steps
+	# Play many games
 
 	input("**** This program works till here....")
 	exit(0)
