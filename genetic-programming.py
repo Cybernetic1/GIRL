@@ -1,7 +1,10 @@
 # -*- coding: utf8 -*-
 
 # TO-DO:
-# * nested-NC's seem not implemented yet
+# *
+
+# Done:
+# * Now it is confirmed that NC's cannot be nested, or contain Neg conditions.
 
 # **** NOTE:  In this new version we use rules that are compatible with Rete,
 # that consists only of conjunctions, negations, and negated conjunctions (NC).
@@ -54,10 +57,9 @@
 # STRUCTURE OF A RULE
 # ===================
 #   pre-condition => post-condition
-#	pre-condition = list of positive/negative literals, followed by a
-#					possibly nested NC part
-#	NC = NC[ list of literals... [another NC...] ]
-#	post-condition = just one positive literal = one atom
+#	pre-condition = list of positive/negative atoms, followed by an NC part
+#	NC = NC[ list of atoms... ]
+#	post-condition = just one positive atom
 #	literal = atomic proposition optionally preceded by a negation sign
 
 import random
@@ -137,7 +139,9 @@ def print_rule(rule):
 	""" Format of a rule:
 		[ => pre-condition post-condition ]
 		Format of a pre-condition:
-		[ literals ... [nc ... [nc ...] ] ]
+		[ literals ... [NC ... [NC ...] ] ]
+	(In the current version of Rete, NC's cannot be nested, but we keep
+	the function anyway)
 	"""
 	# print("rule = ", rule)
 	s = ""
@@ -204,11 +208,13 @@ def generate_random_condition(maxDepth, depth = 0):
 		generate_random_NC() ]
 
 def generate_random_NC():
+	""" In the current version of Rete, NC's cannot be nested,
+	nor can they contain Neg (negative) conditions. """
 	nc = ['NC']
 	while random.uniform(0.0, 1.0) < 0.7:
 		nc.append(generate_random_atom())
-	if random.uniform(0.0, 1.0) < 0.3:
-		nc.append(generate_random_NC())
+	# if random.uniform(0.0, 1.0) < 0.3:
+		# nc.append(generate_random_NC())
 	return nc
 
 def generate_random_conjunction():
@@ -456,17 +462,20 @@ def add_rule_to_Rete(rete_net, rule):
 	""" Format of a rule:
 		[ => pre-condition post-condition ]
 		Format of a pre-condition:
-		[ literals ... [nc ... [nc ...] ] ]
+		[ [ literals ... ] [ NC-atoms ... ] ]
 	"""
 	conjunction = []
 	for literal in rule[1]:
 		conjunction.append(get_Rete_literal(literal))
-	conjunction.append(get_Rete_nc(rule[2]))
-	p0 = rete_net.add_production(Rule(*conjunction))
+	conjunction2 = []
+	for literal in rule[2]:
+		conjunction2.append(get_Rete_literal(literal))
+	p0 = rete_net.add_production(Rule(conjunction, Ncc(conjunction2)))
 	# Conclusion = get_Rete_literal(rule[3])
 	return
 
 def get_Rete_nc(nc):
+	""" This is the recursive (nested) algorithm, not used anymore """
 	conjunction = []
 	for literal_or_NC in nc[1:]:
 		if literal_or_NC[0] == 'NC':
@@ -477,9 +486,15 @@ def get_Rete_nc(nc):
 
 def get_Rete_literal(literal):
 	if literal[0] == '~':
-		return Neg(literal[1], str(literal[2]), str(literal[3]))
+		if len(literal) == 4:
+			return Neg(literal[1], str(literal[2]), str(literal[3]))
+		else:
+			return Neg(literal[1], str(literal[2]))
 	else:
-		return Has(literal[0], str(literal[1]), str(literal[2]))
+		if len(literal) == 3:
+			return Has(literal[0], str(literal[1]), str(literal[2]))
+		else:
+			return Has(literal[0], str(literal[1]))
 
 def Evolve():
 	global maxGens, popSize, maxDepth, bouts, p_repro, crossRate, mutationRate

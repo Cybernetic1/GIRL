@@ -1,5 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+
+# Now it is confirmed that NC's cannot be nested, or contain Neg conditions.
+
 import sys
 import os
 
