@@ -1,6 +1,8 @@
 # GILR
 Genetic Inductive Learning of Logic Rules
 
+NOTE: always use Python3
+
 Very simple genetic programming demo
 ====================================
 
@@ -14,15 +16,16 @@ To try Rete
 Rete is like a minimalist logic engine.
 
     python genifer.py
-    
+
 where `python` means `python3`
 
 How to run tests (for Rete)
 ===========================
 
-Install pytest (possibly also pytest-benchmark) via:
+Install pytest via:
 
     pip3 install pytest
-    pip3 install pytest-benchmark
-    
-python3 -m pytest test/*_test.py
+
+And then:
+
+    python -m pytest test/*_test.py

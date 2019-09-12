@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7grep
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 import sys
 import os
@@ -13,7 +13,7 @@ c2 = Has('love', '$a', '$b')
 c3 = Has('female', '$b')
 # net.add_production(Rule(Ncc(c1, Ncc(c2, c3))))
 # net.add_production(Rule(Ncc(c2, Ncc(c3))))
-p0 = net.add_production(Rule(c3, Ncc(c1, c2)))
+p0 = net.add_production(Rule(c3, Ncc(c2, c1)))
 # net.add_production(Rule(c1, Ncc(c2)))
 # net.add_production(Rule(c1, Ncc(c2, c3)))
 # net.add_production(Rule(c2, c3))
