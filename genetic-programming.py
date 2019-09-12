@@ -1,7 +1,10 @@
 # -*- coding: utf8 -*-
 
 # TO-DO:
-# *
+#	* Mysterious bug about "tokens"
+#	* Pass post-conditions to Rete side
+#	* Invention of new predicates
+#	* Run Rete with initial conditions, record inference trace, score rules
 
 # Done:
 # * Now it is confirmed that NC's cannot be nested, or contain Neg conditions.
@@ -94,7 +97,7 @@ p_repro = 0.08
 
 cache = []		# for storing previously-learned best formulas
 
-var_index = 0	# keeping track of logic variables
+var_index = -1	# keeping track of logic variables
 
 def export_rule_as_graph(node, fname):
 	if fname == "stdout":
@@ -151,13 +154,13 @@ def print_rule(rule):
 	return s + " => " + print_literal(rule[3])
 
 def print_nc(nc):
-	s = 'NC['
+	s = '\x1b[32m[ '
 	for literal_or_NC in nc[1:]:
 		if literal_or_NC[0] == 'NC':
 			return s + print_nc(literal_or_NC) + ']'
 		else:
 			s += print_literal(literal_or_NC) + ' '
-	return s + ']'
+	return s + ']\x1b[0m'
 
 def print_literal(literal):
 	if literal[0] == '~':
@@ -195,8 +198,10 @@ def eval_tree(node, time):
 	return node[0](*[arg1, arg2])
 
 def generate_random_formula(maxDepth):
+	global var_index
+	var_index = -1
 	pre_condition  = generate_random_condition(maxDepth)
-	post_condition = generate_random_atom()
+	post_condition = generate_random_post_condition()
 	return ['=>', *pre_condition, post_condition]
 
 # Generate a random (pre-)condition in 2 stages:
@@ -210,7 +215,7 @@ def generate_random_condition(maxDepth, depth = 0):
 def generate_random_NC():
 	""" In the current version of Rete, NC's cannot be nested,
 	nor can they contain Neg (negative) conditions. """
-	nc = ['NC']
+	nc = []
 	while random.uniform(0.0, 1.0) < 0.7:
 		nc.append(generate_random_atom())
 	# if random.uniform(0.0, 1.0) < 0.3:
@@ -233,17 +238,24 @@ def generate_random_atom():
 	arg2 = generate_random_var_or_const()
 	return [predicate, arg1, arg2]
 
-def generate_random_var_or_const():
+def generate_random_post_condition():
+	""" An atom without new variable creation """
+	predicate = 'X' if (random.uniform(0.0, 1.0) > 0.5) else 'O'
+	arg1 = generate_random_var_or_const(False)
+	arg2 = generate_random_var_or_const(False)
+	return [predicate, arg1, arg2]
+
+def generate_random_var_or_const(create = True):
 	""" Result could be old var, new var, or const """
 	global var_index
 	choice = random.uniform(0.0, 1.0)
-	if choice < 0.5:					# constant ∈ {0, 1, 2}
-		return random.randint(0, 2)
-	elif choice < 0.8:					# old var
-		return '?' + str(random.randint(0, var_index))
-	else:								# new var
+	if create and choice > 0.8:				# new var
 		var_index += 1
 		return '?' + str(var_index)
+	elif choice > 0.5 and var_index >= 0:	# old var
+		return '?' + str(random.randint(0, var_index))
+	else:									# constant ∈ {0, 1, 2}
+		return random.randint(0, 2)
 
 def generate_random_inequality(maxDepth, funcs, terms):
 	""" Old code, not used yet """
@@ -464,15 +476,17 @@ def add_rule_to_Rete(rete_net, rule):
 		Format of a pre-condition:
 		[ [ literals ... ] [ NC-atoms ... ] ]
 	"""
+	# print("rule[1] = ", rule[1])
+	# print("rule[2] = ", rule[2])
 	conjunction = []
 	for literal in rule[1]:
 		conjunction.append(get_Rete_literal(literal))
 	conjunction2 = []
 	for literal in rule[2]:
 		conjunction2.append(get_Rete_literal(literal))
-	p0 = rete_net.add_production(Rule(conjunction, Ncc(conjunction2)))
+	p = rete_net.add_production(Rule(*conjunction, Ncc(*conjunction2)))
 	# Conclusion = get_Rete_literal(rule[3])
-	return
+	return p
 
 def get_Rete_nc(nc):
 	""" This is the recursive (nested) algorithm, not used anymore """
@@ -496,6 +510,13 @@ def get_Rete_literal(literal):
 		else:
 			return Has(literal[0], str(literal[1]))
 
+def save_Rete_graph(net, fname):
+	f = open(fname + '.dot', 'w+')
+	f.write(net.dump())
+	f.close()
+	os.system("dot -Tpng %s.dot -o%s.png" % (fname, fname))
+	print("Rete graph saved as %s.png\n" % fname)
+
 def Evolve():
 	global maxGens, popSize, maxDepth, bouts, p_repro, crossRate, mutationRate
 	population = []
@@ -507,6 +528,7 @@ def Evolve():
 			'fitness' : fitness(c['target'])
 		})
 	print("Adding from cache:", len(cache))
+
 	for i in range(0, popSize - len(cache)):
 		print(i, '..', end='\r')
 		sys.stdout.flush()
@@ -516,28 +538,47 @@ def Evolve():
 			'target' : target, \
 			'fitness' : fitness(target)})
 	print()
+
 	pop2 = sorted(population, key = lambda x : x['fitness'], reverse = False)
 	best = pop2[0]
-	rule = best.get('target')
-	print("\nExample logic rule:\n", print_rule(rule))
-	# export_tree_as_graph(rule, "logic-rule")
-	# print("Example rule written to file: logic-rule.png")
-	# plot_population(screen, pop2)
+
+	rete_net = Network()
+	p_nodes = []
+	for candidate in pop2:
+		rule = candidate.get('target')
+		print('●', print_rule(rule))
+		# plot_population(screen, pop2)
+
+		# Feed logic formulas into Rete
+		p = add_rule_to_Rete(rete_net, rule)
+		# save_Rete_graph(rete_net, 'rete-0')
+		p_nodes.append(p)
 
 	print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`—,—{@
 
-	# Feed logic formulas into Rete
-	rete_net = Network()
-	add_rule_to_Rete(rete_net, rule)
+	wmes = [
+		WME('X', '0', '2'),
+		WME('X', '1', '1'),
+		WME('X', '2', '1'),
+		WME('O', '0', '0'),
+		WME('O', '1', '0'),
+		WME('O', '1', '2'),
+		WME('O', '2', '2'),
+		WME('□', '0', '1'),
+		WME('□', '2', '0'),
+	]
+	for wme in wmes:
+		rete_net.add_wme(wme)
 
-	fname = 'rete-0'
-	f = open(fname + '.dot', 'w+')
-	f.write(rete_net.dump())
-	f.close()
-	os.system("dot -Tpng %s.dot -o%s.png" % (fname, fname))
-	print("Rete graph saved as %s.png\n" % fname)
+	for p in p_nodes:
+		if len(p.items) > 0:
+			print("# of results = ", len(p.items))
+			print("\x1b[31;1mResults:\x1b[0m")
+			for i in p.items:
+				print(i)
 
 	input("**** This program works till here....")
+	exit(0)
 
 	for gen in range(0, maxGens):
 		children = []

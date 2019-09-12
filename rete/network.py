@@ -145,7 +145,7 @@ class Network:
 		:rtype: list of TestAtJoinNode
 		"""
 		result = []
-		print("condition = ", c)
+		# print("condition = ", c)
 		for field_of_v, v in c.vars:
 			for idx, cond in enumerate(earlier_conds):
 				if isinstance(cond, Ncc) or isinstance(cond, Neg):

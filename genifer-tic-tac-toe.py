@@ -7,12 +7,12 @@ import os
 from rete.common import Has, Rule, WME, Neg, Ncc, Token
 from rete.network import Network
 
-rete_net = Network()
+net = Network()
 
 c01 = Has('O', '$x', '$x')
 c02 = Has('□', '$y', '$z')
 c03 = Has('>', '$y', '$z')
-rete_net.add_production(Rule(c01, c02, c03))
+net.add_production(Rule(c01, c02, c03))
 
 wmes = [
 	WME('X', '0', '2'),
@@ -26,7 +26,7 @@ wmes = [
 	WME('□', '2', '0'),
 ]
 for wme in wmes:
-	rete_net.add_wme(wme)
+	net.add_wme(wme)
 
 print("# of results = ", len(p0.items))
 print("Results:")
@@ -36,7 +36,7 @@ for i in p0.items:
 print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`—,—{@
 
 f = open("rete.dot", "w+")
-f.write(rete_net.dump())
+f.write(net.dump())
 f.close()
 os.system("dot -Tpng rete.dot -orete.png")
 print("Rete graph saved as rete.png\n")
