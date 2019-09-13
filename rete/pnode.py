@@ -13,6 +13,8 @@ class PNode(BetaNode):
 		self.items = items if items else []
 		self.children = children if children else []
 		self.postcondition = None
+		self.text = ""
+		self.score = 0.0
 		for k, v in kwargs.items():
 			setattr(self, k, v)
 

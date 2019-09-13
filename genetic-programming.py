@@ -2,15 +2,14 @@
 
 # TO-DO:
 #	* Mysterious bug about "tokens"
-#	* Remove empty NCs
-#	* Pass post-conditions to Rete side
 #	* Check if it is valid move, if yes, add as WME, record the move
 #	* If win / lose, assign reward to traced steps
 #	* Play many games
 #	* Invention of new predicates
 
 # Done:
-# * Now it is confirmed that NC's cannot be nested, or contain Neg conditions.
+#	* Now it is confirmed that NC's cannot be nested, or contain Neg conditions.
+#	* Removed empty NCs
 
 # **** NOTE:  In this new version we use rules that are compatible with Rete,
 # that consists only of conjunctions, negations, and negated conjunctions (NC).
@@ -162,7 +161,7 @@ def print_nc(nc):
 	s = ''
 	for atom in nc:
 		s += print_literal(atom) + ' '
-	return '\x1b[32m[ ' + s + ']\x1b[0m'
+	return '\x1b[32m~[ ' + s + ']\x1b[0m'
 
 def print_literal(literal):
 	if literal[0] == '~':
@@ -242,7 +241,7 @@ def generate_random_atom():
 
 def generate_random_post_condition():
 	""" An atom without new variable creation """
-	predicate = 'X' if (random.uniform(0.0, 1.0) > 0.5) else 'O'
+	predicate = 'X' # if (random.uniform(0.0, 1.0) > 0.5) else 'O'
 	arg1 = generate_random_var_or_const(False)
 	arg2 = generate_random_var_or_const(False)
 	return [predicate, arg1, arg2]
@@ -557,13 +556,15 @@ def Evolve():
 		# Feed logic formulas into Rete
 		p = add_rule_to_Rete(rete_net, rule)
 		if p:
-			print('●', print_rule(rule))
+			p.text = print_rule(rule)
+			print('●', p.text)
 			p_nodes.append(p)
 
 	# plot_population(screen, pop2)
 	# save_Rete_graph(rete_net, 'rete-0')
 	print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`—,—{@
 
+	board = [ [0]*3 for i in range(3)]
 	wmes = [
 		WME('X', '0', '2'),
 		WME('X', '1', '1'),
@@ -572,29 +573,44 @@ def Evolve():
 		WME('O', '1', '0'),
 		WME('O', '1', '2'),
 		WME('O', '2', '2'),
-		WME('□', '0', '1'),
-		WME('□', '2', '0'),
+		WME(' ', '0', '1'),
+		WME(' ', '2', '0'),
 	]
 	for wme in wmes:
 		rete_net.add_wme(wme)
+		board[int(wme.F2)][int(wme.F3)] = wme.F1
 
 	for p in p_nodes:
 		if len(p.items) > 0:
 			print(len(p.items), end=' ')
 			print("\x1b[31;1mresults:\x1b[0m")
 			for item in p.items:
-				f2 = getattr(p.postcondition, 'F2')
-				f3 = getattr(p.postcondition, 'F3')
-				if is_var(f2):
-					p.postcondition.F2 = item.get_binding(f2)
-				if is_var(f3):
-					p.postcondition.F3 = item.get_binding(f3)
+				if is_var(p.postcondition.F2):
+					p.postcondition.F2 = item.get_binding(p.postcondition.F2)
+				if is_var(p.postcondition.F3):
+					p.postcondition.F3 = item.get_binding(p.postcondition.F3)
 				print("postcond = ", p.postcondition)
-				# print(item)
+				print("item = ", item)
+				print("production rule = ", p.text)
+				# Check if the square is empty
+				x = int(p.postcondition.F2)
+				y = int(p.postcondition.F3)
+				if board[x][y] == ' ':
+					board[x][y] == 'X'
+					# remove old WME
+					rete_net.remove_wme(WME(' ', p.postcondition.F2, p.postcondition.F3))
+					# add new WME
+					rete_net.add_wme(WME('X', p.postcondition.F2, p.postcondition.F3))
+					# record move
+					# increase score of fired rule slightly
+					p.score += 1.0
+					# check if win / lose, assign rewards accordingly
+				else:
+					# deduct score
+					p.score -= 1.0
 
+	# Rules may suggest different moves 
 	# Actions could be intermediate predicates
-	# Check if it is valid move, if yes, add as WME, record the move
-	# If win / lose, assign reward to traced steps
 	# Play many games
 
 	input("**** This program works till here....")
