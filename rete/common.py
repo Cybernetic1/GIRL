@@ -216,6 +216,9 @@ class Token:
 				jr.wme.negative_join_results.remove(jr)
 		elif isinstance(token.node, NccNode):
 			for result_tok in token.ncc_results:
+				print("result_tok = ", result_tok)
+				print("result_tok.wme = ", result_tok.wme)
+				print("result_tok.wme.tokens = ", result_tok.wme.tokens)
 				result_tok.wme.tokens.remove(result_tok)
 				result_tok.parent.children.remove(result_tok)
 		elif isinstance(token.node, NccPartnerNode):

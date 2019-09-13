@@ -2,6 +2,7 @@
 
 # TO-DO:
 #	* Mysterious bug about "tokens"
+#	* Remove empty NCs
 #	* Pass post-conditions to Rete side
 #	* Check if it is valid move, if yes, add as WME, record the move
 #	* If win / lose, assign reward to traced steps
@@ -156,13 +157,12 @@ def print_rule(rule):
 	return s + " \x1b[31;1m=> " + print_literal(rule[3]) + "\x1b[0m"
 
 def print_nc(nc):
-	s = '\x1b[32m[ '
-	for literal_or_NC in nc[1:]:
-		if literal_or_NC[0] == 'NC':
-			return s + print_nc(literal_or_NC) + ']'
-		else:
-			s += print_literal(literal_or_NC) + ' '
-	return s + ']\x1b[0m'
+	if len(nc) == 0:
+		return "\x08\x08\x08"
+	s = ''
+	for atom in nc:
+		s += print_literal(atom) + ' '
+	return '\x1b[32m[ ' + s + ']\x1b[0m'
 
 def print_literal(literal):
 	if literal[0] == '~':
@@ -487,7 +487,12 @@ def add_rule_to_Rete(rete_net, rule):
 	conjunction2 = []
 	for literal in rule[2]:
 		conjunction2.append(get_Rete_literal(literal))
-	p = rete_net.add_production(Rule(*conjunction, Ncc(*conjunction2)))
+	if conjunction2 != []:
+		p = rete_net.add_production(Rule(*conjunction, Ncc(*conjunction2)))
+	elif conjunction != []:
+		p = rete_net.add_production(Rule(*conjunction))
+	else:
+		return None
 	p.postcondition = get_Rete_literal(rule[3])
 	return p
 
@@ -549,14 +554,14 @@ def Evolve():
 	p_nodes = []
 	for candidate in pop2:
 		rule = candidate.get('target')
-		print('●', print_rule(rule))
-		# plot_population(screen, pop2)
-
 		# Feed logic formulas into Rete
 		p = add_rule_to_Rete(rete_net, rule)
-		# save_Rete_graph(rete_net, 'rete-0')
-		p_nodes.append(p)
+		if p:
+			print('●', print_rule(rule))
+			p_nodes.append(p)
 
+	# plot_population(screen, pop2)
+	# save_Rete_graph(rete_net, 'rete-0')
 	print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`—,—{@
 
 	wmes = [
