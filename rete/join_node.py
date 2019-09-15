@@ -86,8 +86,12 @@ class TestAtJoinNode:
 			self.field_of_arg1, self.condition_number_of_arg2, self.field_of_arg2)
 
 	def dump(self):
-		return "%s %s? %s:%s" % (
-			self.field_of_arg1, self.op, self.condition_number_of_arg2, self.field_of_arg2)
+		if self.op:
+			return "%s %s? %s:%s" % (
+				self.field_of_arg1, self.op, self.condition_number_of_arg2, self.field_of_arg2)
+		else:
+			return "%s =? %s:%s" % (
+				self.field_of_arg1, self.condition_number_of_arg2, self.field_of_arg2)
 
 	def __eq__(self, other):
 		return isinstance(other, TestAtJoinNode) and \

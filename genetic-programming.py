@@ -1,7 +1,9 @@
 # -*- coding: utf8 -*-
 
 # TO-DO:
-#	* Mysterious bug about "tokens"
+
+#	* Bug: remove token, but token not in list. Why?
+#	* What to do with variable instantiation = None in NC's ?
 #	* Check if it is valid move, if yes, add as WME, record the move
 #	* If win / lose, assign reward to traced steps
 #	* Play many games
@@ -10,6 +12,7 @@
 # Done:
 #	* Now it is confirmed that NC's cannot be nested, or contain Neg conditions.
 #	* Removed empty NCs
+#	* Fixed mysterious bug about tokens -- may be caused by empty NCs
 
 # **** NOTE:  In this new version we use rules that are compatible with Rete,
 # that consists only of conjunctions, negations, and negated conjunctions (NC).
@@ -72,7 +75,7 @@ import operator
 import sys
 import math
 import os
-import pygame	# for pause key in Evolve()
+# import pygame	# for pause key in Evolve()
 
 from rete.common import Has, Rule, WME, Neg, Ncc, is_var
 from rete.network import Network
@@ -587,10 +590,14 @@ def Evolve():
 			for item in p.items:
 				if is_var(p.postcondition.F2):
 					p.postcondition.F2 = item.get_binding(p.postcondition.F2)
+					if p.postcondition.F2 is None:
+						p.postcondition.F2 = str(random.randint(0,2))
 				if is_var(p.postcondition.F3):
 					p.postcondition.F3 = item.get_binding(p.postcondition.F3)
-				print("postcond = ", p.postcondition)
+					if p.postcondition.F3 is None:
+						p.postcondition.F3 = str(random.randint(0,2))
 				print("item = ", item)
+				print("postcond = ", p.postcondition)
 				print("production rule = ", p.text)
 				# Check if the square is empty
 				x = int(p.postcondition.F2)

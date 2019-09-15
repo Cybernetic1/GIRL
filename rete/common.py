@@ -76,7 +76,7 @@ class Has:
 class Neg(Has):
 
 	def __repr__(self):
-		return "-(%s %s %s)" % (self.F1, self.F2, self.F3)
+		return "~(%s %s %s)" % (self.F1, self.F2, self.F3)
 
 
 class Rule(list):
@@ -88,7 +88,7 @@ class Rule(list):
 class Ncc(Rule):
 
 	def __repr__(self):
-		return "-%s" % super(Ncc, self).__repr__()
+		return "~%s" % super(Ncc, self).__repr__()
 
 	@property
 	def number_of_conditions(self):

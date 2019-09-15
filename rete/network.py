@@ -69,8 +69,8 @@ class Network:
 			self.buf.write('	"%s" -> "%s";\n' % (node.dump(), child.dump()))
 			self.dump_alpha(child)
 		if node.amem:
-			self.buf.write('	"%s" -> "amem:%s";\n' % (node.dump(), repr(node.amem)))
-			self.buf.write('	"amem:%s" [shape=box, style="rounded,filled", label="amem", fillcolor=gray];\n' % repr(node.amem))
+			self.buf.write('	"%s" -> "⍺M:%s";\n' % (node.dump(), repr(node.amem)))
+			self.buf.write('	"⍺M:%s" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];\n' % repr(node.amem))
 		if node == self.alpha_root:
 			self.buf.write("	}\n")
 
@@ -91,22 +91,24 @@ class Network:
 		if node == self.beta_root:
 			self.buf.write("	subgraph cluster_1 {\n")
 			self.buf.write("	label = beta\n")
-			self.buf.write('	"%s" [label="BetaNode"];\n' % node.dump())
+			self.buf.write('	"%s" [label="β"];\n' % node.dump())
 		if isinstance(node, BetaMemory):
-			self.buf.write('	"%s" [label="BetaMem"];\n' % node.dump())
+			self.buf.write('	"%s" [label="βM"];\n' % node.dump())
 		if isinstance(node, PNode):
-			self.buf.write('	"%s" [label="PNode"];\n' % node.dump())
+			self.buf.write('	"%s" [label="p"];\n' % node.dump())
 		if isinstance(node, NccPartnerNode):
-			self.buf.write('	"%s" [label="NccPartnerNode"];\n' % node.dump())
+			self.buf.write('	"%s" [label="NccPt"];\n' % node.dump())
 			self.buf.write('	"%s" -> "%s";\n' % (node.dump(), node.ncc_node.dump()))
 		if isinstance(node, NccNode):
-			self.buf.write('	"%s" [label="NccNode"];\n' % node.dump())
+			self.buf.write('	"%s" [label="Ncc"];\n' % node.dump())
+		if isinstance(node, NegativeNode):
+			self.buf.write('	"%s" [label="-ve"];\n' % node.dump())
 		if isinstance(node, JoinNode):
 			# dump details of node
-			self.buf.write('	"%s" [shape=box, color=red, label="JoinNode"];\n' % node.dump())
-			self.buf.write('	"%s" -> "amem:%s"\n' % (node.dump(), repr(node.amem)))
+			self.buf.write('	"%s" [shape=box, color=red, label="J"];\n' % node.dump())
+			self.buf.write('	"%s" -> "⍺M:%s"\n' % (node.dump(), repr(node.amem)))
 			# self.buf.write('	"amem:%s" [label="amem"];\n' % repr(node.amem))
-			self.buf.write('	"%s" -> "has:%s"\n' % (node.dump(), repr(node.has)))
+			self.buf.write('	"%s" -> "%s"\n' % (node.dump(), repr(node.has)))
 			for t in node.tests:
 				self.buf.write('	"%s" -> "%s"\n' % (node.dump(), t.dump()))
 		for child in node.children:
