@@ -151,7 +151,7 @@ class Token:
 		self.children = []  # the ones with parent = this token
 		self.join_results = []  # used only on tokens in negative nodes
 		self.ncc_results = []
-		self.owner = None  # Ncc
+		self.owner = parent  # Ncc (bug?)
 		self.binding = binding if binding else {}  # {"$x": "B1"}
 
 		if self.wme:
@@ -203,8 +203,8 @@ class Token:
 		from rete.negative_node import NegativeNode
 		from rete.ncc_node import NccPartnerNode, NccNode
 
-		for child in token.children:
-			cls.delete_token_and_descendents(child)
+		while token.children != []:
+			cls.delete_token_and_descendents(token.children[0])
 		if not isinstance(token.node, NccPartnerNode):
 			token.node.items.remove(token)
 		if token.wme:
