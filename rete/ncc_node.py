@@ -1,4 +1,5 @@
 from rete.common import Token, BetaNode
+import os
 
 class NccNode(BetaNode):
 
@@ -22,9 +23,11 @@ class NccNode(BetaNode):
 		"""
 		new_token = Token(t, w, self, binding)
 		self.items.append(new_token)
+		print("NCC node add token: ", new_token)
 		for result in self.partner.new_result_buffer:
 			self.partner.new_result_buffer.remove(result)
 			new_token.ncc_results.append(result)
+			print("Add to ncc_results: ", result)
 			result.owner = new_token
 		if not new_token.ncc_results:
 			for child in self.children:
@@ -61,6 +64,7 @@ class NccPartnerNode(BetaNode):
 		for token in self.ncc_node.items:
 			if token.parent == owners_t and token.wme == owners_w:
 				token.ncc_results.append(new_result)
+				print("Partner add to ncc_results: ", new_result)
 				new_result.owner = token
 				Token.delete_token_and_descendents(token)
 		self.new_result_buffer.append(new_result)

@@ -26,6 +26,7 @@ class ConstantTestNode:
 		"""
 		:type wme: rete.WME
 		"""
+		print("⍺ activate: wme=%s" % wme)
 		if self.field_to_test != 'no-test':
 			v = getattr(wme, self.field_to_test)
 			v2 = self.thing_the_field_must_equal
@@ -88,7 +89,6 @@ class AlphaMemory:
 		"""
 		:type wme: rete.WME
 		"""
-		print("alpha activate: wme=%s" % wme)
 		if wme in self.items:
 			return
 		self.items.append(wme)

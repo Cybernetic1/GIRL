@@ -203,13 +203,15 @@ class Token:
 		from rete.negative_node import NegativeNode
 		from rete.ncc_node import NccPartnerNode, NccNode
 
-		while token.children != []:
-			cls.delete_token_and_descendents(token.children[0])
-
-		print("*** token = ", token)
+		print("*** delete token = ", token)
 		print("token.owner = ", token.owner)
 		print("token.node = ", token.node)
 		print("token.wme = ", token.wme)
+
+		while token.children != []:
+			print("Looping...")
+			cls.delete_token_and_descendents(token.children[0])
+
 		if token.owner != token.parent:
 			print("token.parent = ", token.parent)
 		if not isinstance(token.node, NccPartnerNode):
@@ -219,6 +221,7 @@ class Token:
 			token.wme.tokens.remove(token)
 		if token.parent:
 			token.parent.children.remove(token)
+
 		if isinstance(token.node, NegativeNode):
 			for jr in token.join_results:
 				jr.wme.negative_join_result.remove(jr)
@@ -235,6 +238,7 @@ class Token:
 			if not token.owner.ncc_results:			# changed from 1 to 0
 				for child in token.node.ncc_node.children:
 					child.left_activation(token.owner, None)
+		print("Next recursion...")
 
 def is_var(v):
 	return v.startswith('$') if v else False
