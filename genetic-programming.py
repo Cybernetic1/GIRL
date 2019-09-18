@@ -92,7 +92,7 @@ const2varFlipRate = 0.5   # probability of "var <--> const"
 
 # Evolution parameters:
 maxGens = 100
-popSize = 100
+popSize = 5
 crossRate = 0.9
 mutationRate = 1.0 / 10
 
@@ -105,6 +105,7 @@ cache = []		# for storing previously-learned best formulas
 var_index = -1	# keeping track of logic variables
 
 def export_rule_as_graph(node, fname):
+	""" This function is currently not used """
 	if fname == "stdout":
 		f = sys.stdout
 	else:
@@ -253,7 +254,7 @@ def generate_random_var_or_const(create = True):
 	""" Result could be old var, new var, or const """
 	global var_index
 	choice = random.uniform(0.0, 1.0)
-	if create and choice > 0.8:				# new var
+	if create and choice > 0.9:				# new var
 		var_index += 1
 		return '$' + str(var_index)
 	elif choice > 0.5 and var_index >= 0:	# old var
@@ -524,7 +525,7 @@ def save_Rete_graph(net, fname):
 	f = open(fname + '.dot', 'w+')
 	f.write(net.dump())
 	f.close()
-	os.system("dot -Tpng %s.dot -o%s.png" % (fname, fname))
+	# os.system("dot -Tpng %s.dot -o%s.png" % (fname, fname))
 	print("Rete graph saved as %s.png\n" % fname)
 
 def Evolve():
@@ -550,7 +551,6 @@ def Evolve():
 	print()
 
 	pop2 = sorted(population, key = lambda x : x['fitness'], reverse = False)
-	best = pop2[0]
 
 	rete_net = Network()
 	p_nodes = []
@@ -564,7 +564,7 @@ def Evolve():
 			p_nodes.append(p)
 
 	# plot_population(screen, pop2)
-	# save_Rete_graph(rete_net, 'rete-0')
+	save_Rete_graph(rete_net, 'rete-0')
 	print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`—,—{@
 
 	board = [ [0]*3 for i in range(3)]
@@ -620,7 +620,8 @@ def Evolve():
 	# Actions could be intermediate predicates
 	# Play many games
 
-	input("**** This program works till here....")
+	print("\x1b[36m**** This program works till here....\n\x1b[0m")
+	os.system("beep -f 2000 -l 50")
 	exit(0)
 
 	for gen in range(0, maxGens):

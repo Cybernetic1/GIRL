@@ -40,13 +40,13 @@ class ConstantTestNode:
 			child.activation(wme)
 
 	@classmethod
-	def build_or_share_alpha_memory(cls, node, path=[]):
+	def build_or_share_alpha_memory(cls, node, path=None):
 		"""
 		:type node: ConstantTestNode
 		:type path: [(field, value)...]
 		:rtype: AlphaMemory
 		"""
-		if not len(path):
+		if not path or len(path) == 0:
 			if node.amem:
 				return node.amem
 			else:
@@ -88,6 +88,7 @@ class AlphaMemory:
 		"""
 		:type wme: rete.WME
 		"""
+		print("alpha activate: wme=%s" % wme)
 		if wme in self.items:
 			return
 		self.items.append(wme)

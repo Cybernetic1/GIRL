@@ -80,7 +80,7 @@ class Network:
 		"""
 		if node.amem:
 			for child in node.amem.successors:
-				self.buf.write('	"%s" -> "%s";\n' % (node.dump(), child.dump()))
+				self.buf.write('	"%s" -> "%s" [color=gray];\n' % (node.dump(), child.dump()))
 		for child in node.children:
 			self.dump_alpha2beta(child)
 
@@ -91,28 +91,38 @@ class Network:
 		if node == self.beta_root:
 			self.buf.write("	subgraph cluster_1 {\n")
 			self.buf.write("	label = beta\n")
-			self.buf.write('	"%s" [label="β"];\n' % node.dump())
+			self.buf.write('	"%s" [label="βroot"];\n' % node.dump())
 		if isinstance(node, BetaMemory):
 			self.buf.write('	"%s" [label="βM"];\n' % node.dump())
 		if isinstance(node, PNode):
-			self.buf.write('	"%s" [label="p"];\n' % node.dump())
+			self.buf.write('	"%s" [style=filled,fillcolor=pink,label="p"];\n' % node.dump())
 		if isinstance(node, NccPartnerNode):
-			self.buf.write('	"%s" [label="NccPt"];\n' % node.dump())
-			self.buf.write('	"%s" -> "%s";\n' % (node.dump(), node.ncc_node.dump()))
+			self.buf.write('	"%s" [style=filled,fillcolor=olivedrab,label="NccPt"];\n' % node.dump())
+			self.buf.write('	"%s" -> "%s" [color=limegreen];\n' % (node.dump(), node.ncc_node.dump()))
 		if isinstance(node, NccNode):
-			self.buf.write('	"%s" [label="Ncc"];\n' % node.dump())
+			self.buf.write('	"%s" [style=filled,fillcolor=limegreen,label="Ncc"];\n' % node.dump())
 		if isinstance(node, NegativeNode):
-			self.buf.write('	"%s" [label="-ve"];\n' % node.dump())
+			self.buf.write('	"%s" [style=filled,fillcolor=green,label="-ve"];\n' % node.dump())
 		if isinstance(node, JoinNode):
 			# dump details of node
-			self.buf.write('	"%s" [shape=box, color=red, label="J"];\n' % node.dump())
+			self.buf.write('	"%s" [shape=box,color=red,label="J"];\n' % node.dump())
 			self.buf.write('	"%s" -> "⍺M:%s"\n' % (node.dump(), repr(node.amem)))
 			# self.buf.write('	"amem:%s" [label="amem"];\n' % repr(node.amem))
+			self.buf.write('	"%s" [style=filled,fillcolor=orange];\n' % repr(node.has))
 			self.buf.write('	"%s" -> "%s"\n' % (node.dump(), repr(node.has)))
 			for t in node.tests:
+				self.buf.write('	"%s" [style=filled,fillcolor=yellow];\n' % t.dump())
 				self.buf.write('	"%s" -> "%s"\n' % (node.dump(), t.dump()))
 		for child in node.children:
-			self.buf.write('	"%s" -> "%s";\n' % (node.dump(), child.dump()))
+			self.buf.write('	"%s" -> "%s"' % (node.dump(), child.dump()))
+			if isinstance(child, NccPartnerNode):
+				self.buf.write('[color=green];\n')
+			elif isinstance(child, NccNode):
+				self.buf.write('[color=limegreen];\n')
+			elif isinstance(child, NegativeNode):
+				self.buf.write('[color=green];\n')
+			else:
+				self.buf.write(';\n')
 			self.dump_beta(child)
 		if node == self.beta_root:
 			self.buf.write("	}\n")
@@ -221,7 +231,7 @@ class Network:
 		for child in parent.children:
 			if isinstance(child, BetaMemory):
 				return child
-		node = BetaMemory(None, parent)
+		node = BetaMemory([], parent)
 		# dummy top beta memory
 		if parent == self.beta_root:
 			node.items.append(Token(None, None))

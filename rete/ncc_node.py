@@ -5,7 +5,7 @@ class NccNode(BetaNode):
 	def __init__(self, children=None, parent=None, items=None, partner=None):
 		"""
 		:type partner: NccPartnerNode
-		:type items: list of rete.Token
+		:type items: list of rete.Token		# Tokens that satisfy the NCC partially
 		"""
 		super(NccNode, self).__init__(children=children, parent=parent)
 		self.items = items if items else []
