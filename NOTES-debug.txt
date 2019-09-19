@@ -1,0 +1,29 @@
+● O(2,2) ⋀ ~O(0,1) ⋀ O(1,1) ⋀ O(2,$0) ⋀ O($0,$0) ⋀ O(2,1) => X(0,2)
+● X(0,0) ⋀ O(1,1) => X(0,0)
+● O(1,$0) ⋀ O($0,$0) ⋀ ~[ X($1,$1) O($2,2) ] => X($1,$1)
+● ~[ O(0,0) X(0,0) X(1,2) O(1,$0) O(0,$0) O(2,0) ] => X($0,2)
+● X(1,2) ⋀ X(2,$0) ⋀ X($0,1) ⋀ O($1,$0) ⋀ ~X(1,$0) => X($1,1)
+
+病句:
+● O(1,$0) ⋀ O($0,$0) ⋀ ~[ X($1,$1) O($2,2) ] => X($1,$1)
+
+事发经过：
+Partner add to ncc_results:  <[(O 1 0), (O 0 0), (X 0 2), (O 1 2)]>
+Delete token...
+
+NCC node add token:  <[(O 1 2), (O 2 2)]>
+    Add to ncc_results:  <[(O 1 0), (O 0 0), (X 0 2), (O 1 2)]>   ***** 疑凶
+    Add to ncc_results:  <[(O 1 0), (O 0 0), (X 2 1), (O 1 2)]>
+    Add to ncc_results:  <[(O 1 2), (O 2 2), (X 1 1), (O 1 2)]>
+
+Partner add to ncc_results:  <[(O 1 2), (O 2 2), (X 0 2), (O 2 2)]>
+Delete token...
+*** delete token =  <[(O 1 2), (O 2 2)]>
+Ncc_results = ...
+result_tok =  <[(O 1 0), (O 0 0), (X 0 2), (O 1 2)]>   ***** 疑凶
+result_tok.wme.tokens = [ .... ]  但里面没有  result_tok
+
+===> 似乎是 token.wme.tokens.append 有遗漏
+
+####################################
+

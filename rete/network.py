@@ -103,6 +103,9 @@ class Network:
 			self.buf.write('	"%s" [style=filled,fillcolor=limegreen,label="Ncc"];\n' % node.dump())
 		if isinstance(node, NegativeNode):
 			self.buf.write('	"%s" [style=filled,fillcolor=green,label="-ve"];\n' % node.dump())
+			for t in node.tests:
+				self.buf.write('	"%s" [style=filled,fillcolor=yellow];\n' % t.dump())
+				self.buf.write('	"%s" -> "%s"\n' % (node.dump(), t.dump()))
 		if isinstance(node, JoinNode):
 			# dump details of node
 			self.buf.write('	"%s" [shape=box,color=red,label="J"];\n' % node.dump())

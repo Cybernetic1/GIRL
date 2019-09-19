@@ -240,5 +240,13 @@ class Token:
 					child.left_activation(token.owner, None)
 		print("Next recursion...")
 
+	@classmethod
+	def delete_descendents_of_token(cls, t):
+		"""
+		:type t: Token
+		"""
+		while t.children != []:
+			cls.delete_token_and_descendents(t.children[0])
+
 def is_var(v):
 	return v.startswith('$') if v else False

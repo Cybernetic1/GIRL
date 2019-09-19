@@ -21,15 +21,16 @@ class NccNode(BetaNode):
 		:type t: rete.Token
 		:type binding: dict
 		"""
+		print("NCC left-activate, wme = ", w)
 		new_token = Token(t, w, self, binding)
 		self.items.append(new_token)
-		print("NCC node add token: ", new_token)
+		print("NCC node.items add token = ", new_token)
 		for result in self.partner.new_result_buffer:
 			self.partner.new_result_buffer.remove(result)
 			new_token.ncc_results.append(result)
-			print("Add to ncc_results: ", result)
+			print("  add to ncc_results: ", result)
 			result.owner = new_token
-		if not new_token.ncc_results:
+		if not new_token.ncc_results:		# if results == []
 			for child in self.children:
 				child.left_activation(new_token, None)
 
@@ -55,6 +56,7 @@ class NccPartnerNode(BetaNode):
 		:type t: rete.Token
 		:type binding: dict
 		"""
+		print("NCC partner left-activate, wme = ", w)
 		new_result = Token(t, w, self, binding)
 		owners_t = t
 		owners_w = w
@@ -64,7 +66,7 @@ class NccPartnerNode(BetaNode):
 		for token in self.ncc_node.items:
 			if token.parent == owners_t and token.wme == owners_w:
 				token.ncc_results.append(new_result)
-				print("Partner add to ncc_results: ", new_result)
+				print("  partner add to ncc_results: ", new_result)
 				new_result.owner = token
-				Token.delete_token_and_descendents(token)
+				Token.delete_descendents_of_token(token)
 		self.new_result_buffer.append(new_result)

@@ -29,6 +29,7 @@ class NegativeNode(BetaNode):
 		:type token: rete.Token
 		:type binding: dict
 		"""
+		print("Neg node left-activate, wme = ", wme)
 		new_token = Token(token, wme, self, binding)
 		self.items.append(new_token)
 		for item in self.amem.items:
@@ -36,7 +37,7 @@ class NegativeNode(BetaNode):
 				jr = NegativeJoinResult(new_token, item)
 				new_token.join_results.append(jr)
 				item.negative_join_result.append(jr)
-		if not new_token.join_results:
+		if not new_token.join_results:			# join results == []
 			for child in self.children:
 				child.left_activation(new_token, None)
 
@@ -44,6 +45,7 @@ class NegativeNode(BetaNode):
 		"""
 		:type wme: rete.WME
 		"""
+		print("Neg node right-activate, wme = ", wme)
 		for t in self.items:
 			if self.perform_join_test(t, wme):
 				if not t.join_results:
