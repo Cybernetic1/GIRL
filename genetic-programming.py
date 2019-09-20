@@ -608,7 +608,7 @@ def Evolve():
 					rete_net.remove_wme(WME(' ', p.postcondition.F2, p.postcondition.F3))
 					# add new WME
 					rete_net.add_wme(WME('X', p.postcondition.F2, p.postcondition.F3))
-					# record move
+					# **** record move
 					# increase score of fired rule slightly
 					p.score += 1.0
 					# check if win / lose, assign rewards accordingly
@@ -616,7 +616,7 @@ def Evolve():
 					# deduct score
 					p.score -= 1.0
 
-	# Rules may suggest different moves 
+	# Rules may suggest different moves, need to choose
 	# Actions could be intermediate predicates
 	# Play many games
 
