@@ -2,17 +2,15 @@
 
 # TO-DO:
 
-#	* Bug: remove token, but token not in list. Why?
-#	* What to do with variable instantiation = None in NC's ?
+#	* After bug fix, NC's may be nested again, or contain Neg conditions.
 #	* Check if it is valid move, if yes, add as WME, record the move
 #	* If win / lose, assign reward to traced steps
 #	* Play many games
 #	* Invention of new predicates
 
 # Done:
-#	* Now it is confirmed that NC's cannot be nested, or contain Neg conditions.
 #	* Removed empty NCs
-#	* Fixed mysterious bug about tokens -- may be caused by empty NCs
+#	* Fixed bug: delete_token_and_descendents ---> delete_descendents_of_tokens
 
 # **** NOTE:  In this new version we use rules that are compatible with Rete,
 # that consists only of conjunctions, negations, and negated conjunctions (NC).
