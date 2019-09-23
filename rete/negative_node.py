@@ -49,7 +49,7 @@ class NegativeNode(BetaNode):
 		for t in self.items:
 			if self.perform_join_test(t, wme):
 				if not t.join_results:
-					Token.delete_token_and_descendents(t)
+					Token.delete_descendents_of_token(t)
 				jr = NegativeJoinResult(t, wme)
 				t.join_results.append(jr)
 				wme.negative_join_result.append(jr)

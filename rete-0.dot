@@ -1,0 +1,233 @@
+digraph {
+	subgraph cluster_1 {
+	label = beta
+	"BetaNode 140419668687000" [label="βroot"];
+	"BetaNode 140419668687000" -> "BetaMemory 140419668687672";
+	"BetaMemory 140419668687672" [label="βM"];
+	"BetaMemory 140419668687672" -> "JoinNode 140419668688008";
+	"JoinNode 140419668688008" [shape=box,color=red,label="J"];
+	"JoinNode 140419668688008" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60078bc50>"
+	"(O 1 0)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668688008" -> "(O 1 0)"
+	"JoinNode 140419668688008" -> "NegativeNode 140419668688288"[color=green];
+	"NegativeNode 140419668688288" [style=filled,fillcolor=green,label="-ve"];
+	"NegativeNode 140419668688288" -> "BetaMemory 140419668688344";
+	"BetaMemory 140419668688344" [label="βM"];
+	"BetaMemory 140419668688344" -> "JoinNode 140419668688568";
+	"JoinNode 140419668688568" [shape=box,color=red,label="J"];
+	"JoinNode 140419668688568" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60078be80>"
+	"(O 0 0)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668688568" -> "(O 0 0)"
+	"JoinNode 140419668688568" -> "PNode 140419668687112";
+	"PNode 140419668687112" [style=filled,fillcolor=pink,label="p"];
+	"BetaMemory 140419668687672" -> "JoinNode 140419668746760";
+	"JoinNode 140419668746760" [shape=box,color=red,label="J"];
+	"JoinNode 140419668746760" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a1d0>"
+	"(X 0 2)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668746760" -> "(X 0 2)"
+	"JoinNode 140419668746760" -> "NegativeNode 140419668746928"[color=green];
+	"NegativeNode 140419668746928" [style=filled,fillcolor=green,label="-ve"];
+	"NegativeNode 140419668746928" -> "PNode 140419668725832";
+	"PNode 140419668725832" [style=filled,fillcolor=pink,label="p"];
+	"BetaNode 140419668687000" -> "NegativeNode 140419668727400"[color=green];
+	"NegativeNode 140419668727400" [style=filled,fillcolor=green,label="-ve"];
+	"NegativeNode 140419668727400" -> "BetaMemory 140419668727456";
+	"BetaMemory 140419668727456" [label="βM"];
+	"BetaMemory 140419668727456" -> "JoinNode 140419668727680";
+	"JoinNode 140419668727680" [shape=box,color=red,label="J"];
+	"JoinNode 140419668727680" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795748>"
+	"(O 2 0)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668727680" -> "(O 2 0)"
+	"JoinNode 140419668727680" -> "BetaMemory 140419668727736";
+	"BetaMemory 140419668727736" [label="βM"];
+	"BetaMemory 140419668727736" -> "JoinNode 140419668727792";
+	"JoinNode 140419668727792" [shape=box,color=red,label="J"];
+	"JoinNode 140419668727792" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60078bc50>"
+	"(O 1 0)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668727792" -> "(O 1 0)"
+	"JoinNode 140419668727792" -> "NegativeNode 140419668727960"[color=green];
+	"NegativeNode 140419668727960" [style=filled,fillcolor=green,label="-ve"];
+	"NegativeNode 140419668727960" -> "BetaMemory 140419668728016";
+	"BetaMemory 140419668728016" [label="βM"];
+	"BetaMemory 140419668728016" -> "JoinNode 140419668728128";
+	"JoinNode 140419668728128" [shape=box,color=red,label="J"];
+	"JoinNode 140419668728128" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795908>"
+	"(X 0 $0)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668728128" -> "(X 0 $0)"
+	"JoinNode 140419668728128" -> "BetaMemory 140419668728184";
+	"BetaMemory 140419668728184" [label="βM"];
+	"BetaMemory 140419668728184" -> "JoinNode 140419668728296";
+	"JoinNode 140419668728296" [shape=box,color=red,label="J"];
+	"JoinNode 140419668728296" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb6007959b0>"
+	"(O 1 $0)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668728296" -> "(O 1 $0)"
+	"F3 =? 4:F3" [style=filled,fillcolor=yellow];
+	"JoinNode 140419668728296" -> "F3 =? 4:F3"
+	"JoinNode 140419668728296" -> "NegativeNode 140419668728408"[color=green];
+	"NegativeNode 140419668728408" [style=filled,fillcolor=green,label="-ve"];
+	"NegativeNode 140419668728408" -> "BetaMemory 140419668728464";
+	"BetaMemory 140419668728464" [label="βM"];
+	"BetaMemory 140419668728464" -> "JoinNode 140419668728744";
+	"JoinNode 140419668728744" [shape=box,color=red,label="J"];
+	"JoinNode 140419668728744" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795b00>"
+	"(O $0 1)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668728744" -> "(O $0 1)"
+	"F2 =? 4:F3" [style=filled,fillcolor=yellow];
+	"JoinNode 140419668728744" -> "F2 =? 4:F3"
+	"F2 =? 5:F3" [style=filled,fillcolor=yellow];
+	"JoinNode 140419668728744" -> "F2 =? 5:F3"
+	"JoinNode 140419668728744" -> "BetaMemory 140419668728800";
+	"BetaMemory 140419668728800" [label="βM"];
+	"BetaMemory 140419668728800" -> "JoinNode 140419668728912";
+	"JoinNode 140419668728912" [shape=box,color=red,label="J"];
+	"JoinNode 140419668728912" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795c18>"
+	"(X $0 $0)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668728912" -> "(X $0 $0)"
+	"F2 =? 4:F3" [style=filled,fillcolor=yellow];
+	"JoinNode 140419668728912" -> "F2 =? 4:F3"
+	"F2 =? 5:F3" [style=filled,fillcolor=yellow];
+	"JoinNode 140419668728912" -> "F2 =? 5:F3"
+	"F2 =? 7:F2" [style=filled,fillcolor=yellow];
+	"JoinNode 140419668728912" -> "F2 =? 7:F2"
+	"F3 =? 4:F3" [style=filled,fillcolor=yellow];
+	"JoinNode 140419668728912" -> "F3 =? 4:F3"
+	"F3 =? 5:F3" [style=filled,fillcolor=yellow];
+	"JoinNode 140419668728912" -> "F3 =? 5:F3"
+	"F3 =? 7:F2" [style=filled,fillcolor=yellow];
+	"JoinNode 140419668728912" -> "F3 =? 7:F2"
+	"JoinNode 140419668728912" -> "BetaMemory 140419668729360";
+	"BetaMemory 140419668729360" [label="βM"];
+	"BetaMemory 140419668729360" -> "JoinNode 140419668729416";
+	"JoinNode 140419668729416" [shape=box,color=red,label="J"];
+	"JoinNode 140419668729416" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb6007959b0>"
+	"(O 1 $0)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668729416" -> "(O 1 $0)"
+	"F3 =? 4:F3" [style=filled,fillcolor=yellow];
+	"JoinNode 140419668729416" -> "F3 =? 4:F3"
+	"F3 =? 5:F3" [style=filled,fillcolor=yellow];
+	"JoinNode 140419668729416" -> "F3 =? 5:F3"
+	"F3 =? 7:F2" [style=filled,fillcolor=yellow];
+	"JoinNode 140419668729416" -> "F3 =? 7:F2"
+	"F3 =? 8:F2" [style=filled,fillcolor=yellow];
+	"JoinNode 140419668729416" -> "F3 =? 8:F2"
+	"JoinNode 140419668729416" -> "BetaMemory 140419668729472";
+	"BetaMemory 140419668729472" [label="βM"];
+	"BetaMemory 140419668729472" -> "JoinNode 140419668746368";
+	"JoinNode 140419668746368" [shape=box,color=red,label="J"];
+	"JoinNode 140419668746368" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a048>"
+	"(X 2 0)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668746368" -> "(X 2 0)"
+	"JoinNode 140419668746368" -> "<rete.ncc_node.NccPartnerNode object at 0x7fb60079a0b8>"[color=green];
+	"<rete.ncc_node.NccPartnerNode object at 0x7fb60079a0b8>" [style=filled,fillcolor=olivedrab,label="NccPt"];
+	"<rete.ncc_node.NccPartnerNode object at 0x7fb60079a0b8>" -> "<rete.ncc_node.NccNode object at 0x7fb600795dd8>" [color=limegreen];
+	"JoinNode 140419668728912" -> "<rete.ncc_node.NccNode object at 0x7fb600795dd8>"[color=limegreen];
+	"<rete.ncc_node.NccNode object at 0x7fb600795dd8>" [style=filled,fillcolor=limegreen,label="Ncc"];
+	"<rete.ncc_node.NccNode object at 0x7fb600795dd8>" -> "PNode 140419668687448";
+	"PNode 140419668687448" [style=filled,fillcolor=pink,label="p"];
+	"BetaNode 140419668687000" -> "NegativeNode 140419668747768"[color=green];
+	"NegativeNode 140419668747768" [style=filled,fillcolor=green,label="-ve"];
+	"NegativeNode 140419668747768" -> "BetaMemory 140419668747824";
+	"BetaMemory 140419668747824" [label="βM"];
+	"BetaMemory 140419668747824" -> "JoinNode 140419668747992";
+	"JoinNode 140419668747992" [shape=box,color=red,label="J"];
+	"JoinNode 140419668747992" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a6a0>"
+	"(X 1 0)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668747992" -> "(X 1 0)"
+	"JoinNode 140419668747992" -> "BetaMemory 140419668748048";
+	"BetaMemory 140419668748048" [label="βM"];
+	"BetaMemory 140419668748048" -> "JoinNode 140419668748216";
+	"JoinNode 140419668748216" [shape=box,color=red,label="J"];
+	"JoinNode 140419668748216" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a780>"
+	"(X 1 2)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668748216" -> "(X 1 2)"
+	"JoinNode 140419668748216" -> "BetaMemory 140419668748328";
+	"BetaMemory 140419668748328" [label="βM"];
+	"BetaMemory 140419668748328" -> "JoinNode 140419668748384";
+	"JoinNode 140419668748384" [shape=box,color=red,label="J"];
+	"JoinNode 140419668748384" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795908>"
+	"(X 0 $0)" [style=filled,fillcolor=orange];
+	"JoinNode 140419668748384" -> "(X 0 $0)"
+	"JoinNode 140419668748384" -> "<rete.ncc_node.NccPartnerNode object at 0x7fb60079a898>"[color=green];
+	"<rete.ncc_node.NccPartnerNode object at 0x7fb60079a898>" [style=filled,fillcolor=olivedrab,label="NccPt"];
+	"<rete.ncc_node.NccPartnerNode object at 0x7fb60079a898>" -> "<rete.ncc_node.NccNode object at 0x7fb60079a7f0>" [color=limegreen];
+	"JoinNode 140419668748216" -> "<rete.ncc_node.NccNode object at 0x7fb60079a7f0>"[color=limegreen];
+	"<rete.ncc_node.NccNode object at 0x7fb60079a7f0>" [style=filled,fillcolor=limegreen,label="Ncc"];
+	"<rete.ncc_node.NccNode object at 0x7fb60079a7f0>" -> "PNode 140419668747712";
+	"PNode 140419668747712" [style=filled,fillcolor=pink,label="p"];
+	}
+	subgraph cluster_0 {
+	label = alpha
+	"no-test" -> "F1==O";
+	"F1==O" -> "F2==1";
+	"F2==1" -> "F3==0";
+	"F3==0" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60078bc50>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb60078bc50>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"F2==1" -> "F3==2";
+	"F3==2" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a278>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a278>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"F2==1" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb6007959b0>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb6007959b0>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"F1==O" -> "F2==0";
+	"F2==0" -> "F3==0";
+	"F3==0" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60078be80>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb60078be80>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"F1==O" -> "F2==2";
+	"F2==2" -> "F3==0";
+	"F3==0" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795748>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795748>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"F2==2" -> "F3==2";
+	"F3==2" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795860>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795860>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"F1==O" -> "F3==1";
+	"F3==1" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795b00>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795b00>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"no-test" -> "F1==X";
+	"F1==X" -> "F2==1";
+	"F2==1" -> "F3==1";
+	"F3==1" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60078bd68>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb60078bd68>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"F2==1" -> "F3==0";
+	"F3==0" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a6a0>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a6a0>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"F2==1" -> "F3==2";
+	"F3==2" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a780>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a780>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"F1==X" -> "F2==0";
+	"F2==0" -> "F3==0";
+	"F3==0" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795630>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795630>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"F2==0" -> "F3==2";
+	"F3==2" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a1d0>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a1d0>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"F2==0" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795908>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795908>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"F1==X" -> "F2==2";
+	"F2==2" -> "F3==0";
+	"F3==0" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a048>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb60079a048>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"F1==X" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795c18>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb600795c18>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"no-test" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7fb60078b828>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7fb60078b828>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	}
+	"F2==1" -> "JoinNode 140419668728296" [color=gray];
+	"F2==1" -> "JoinNode 140419668729416" [color=gray];
+	"F3==0" -> "JoinNode 140419668688008" [color=gray];
+	"F3==0" -> "JoinNode 140419668727792" [color=gray];
+	"F3==0" -> "NegativeNode 140419668728408" [color=gray];
+	"F3==2" -> "NegativeNode 140419668746928" [color=gray];
+	"F3==0" -> "JoinNode 140419668688568" [color=gray];
+	"F3==0" -> "JoinNode 140419668727680" [color=gray];
+	"F3==0" -> "NegativeNode 140419668747768" [color=gray];
+	"F3==2" -> "NegativeNode 140419668727960" [color=gray];
+	"F3==1" -> "JoinNode 140419668728744" [color=gray];
+	"F1==X" -> "JoinNode 140419668728912" [color=gray];
+	"F3==1" -> "NegativeNode 140419668688288" [color=gray];
+	"F3==0" -> "JoinNode 140419668747992" [color=gray];
+	"F3==2" -> "JoinNode 140419668748216" [color=gray];
+	"F2==0" -> "JoinNode 140419668728128" [color=gray];
+	"F2==0" -> "JoinNode 140419668748384" [color=gray];
+	"F3==0" -> "NegativeNode 140419668727400" [color=gray];
+	"F3==2" -> "JoinNode 140419668746760" [color=gray];
+	"F3==0" -> "JoinNode 140419668746368" [color=gray];
+}
