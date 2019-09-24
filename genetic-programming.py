@@ -90,7 +90,9 @@ const2varFlipRate = 0.5   # probability of "var <--> const"
 
 # Evolution parameters:
 maxGens = 100
-popSize = 5
+popSize = 100
+childrenSize = int(popSize * 0.6)
+dropRate = 0.1			# when children size proportion = 40%, 0.1 seems a good choice
 crossRate = 0.9
 mutationRate = 1.0 / 10
 
@@ -175,6 +177,7 @@ def print_literal(literal):
 			str(literal[1]) + ',' + str(literal[2]) + ')'
 
 def read_tree(str):			# assume str is in prefix notation with ()'s
+	""" old code """
 	if str[0] == '(':
 		op = str[1]
 		return [
@@ -184,33 +187,17 @@ def read_tree(str):			# assume str is in prefix notation with ()'s
 			]
 	return None
 
-def eval_tree(node, time):
-	""" Old code """
-	if not isinstance(node, list):
-		if isinstance(node, float):
-			return node
-		# elif dict[node] is not None:
-		elif node == 'label':
-			return data[time - 1]
-		else:
-			return node
-	arg1 = eval_tree(node[1], time)
-	arg2 = eval_tree(node[2], time)
-	if node[0] == operator.truediv and arg2 == 0.0:
-		return float('nan')
-	return node[0](*[arg1, arg2])
-
-def generate_random_formula(maxDepth):
+def generate_random_formula():
 	global var_index
 	var_index = -1
-	pre_condition  = generate_random_condition(maxDepth)
+	pre_condition  = generate_random_condition()
 	post_condition = generate_random_post_condition()
 	return ['=>', *pre_condition, post_condition]
 
 # Generate a random (pre-)condition in 2 stages:
 # 1) a number of atoms (possibly negated)
 # 2) an NC (= negated conjunction, possibly nested)
-def generate_random_condition(maxDepth, depth = 0):
+def generate_random_condition():
 	return [ \
 		generate_random_conjunction(),
 		generate_random_NC() ]
@@ -268,42 +255,13 @@ def generate_random_inequality(maxDepth, funcs, terms):
 	op = operator.gt if (random.uniform(0.0, 1.0) > 0.5) else operator.lt
 	return [op, arg1, arg2]
 
-def count_nodes(node):
-	if not isinstance(node, list):
-		return 1
-	a1 = count_nodes(node[1])
-	a2 = count_nodes(node[2])
-	return a1 + a2 + 1
-
-# ***** Calculate fitness
-def fitness(formula, cond = None, num_trials = 200):
-	""" This is old code from Stock Market (to be modified) """
-	return 0.0
-	sum_err = 0.0
-	for i in range(0, num_trials):
-		time = random.randint(100, datasize - 10)
-		target = eval_tree(formula, time)
-		# print "target = ", target
-		# print "Condition = ", print_tree(cond)
-		# c = eval_tree(cond, time)
-		# if not c:
-		#	continue
-		if math.isnan(target):
-			sum_err += 100000.0
-			continue
-		error = (target - highs[time])
-		sum_err += abs(error)
-		# print "Condition satisfied"
-		# print "profit = ", sum_profit
-		# sum_profit += profit
-	return sum_err / num_trials
-
 def tournament_selection(pop, bouts):
+	""" Select a group, fight, choose 1 winner """
 	selected = []
 	# print "bouts = ", bouts
-	for i in range(0, bouts):
-		selected.append(pop[random.randint(0, len(pop) - 1)])
-	return sorted(selected, key = lambda x: x['fitness'])[0]
+	for i in range(bouts):
+		selected.append(random.choice(pop))
+	return selected.sort(key = lambda x: x.fitness)[0]
 
 def replace_node(node, replacement, node_num, cur_node = 0):
 	if cur_node == node_num:
@@ -363,7 +321,7 @@ def prune2(node, maxDepth, terms, depth = 0):
 	a2 = prune2(node[2], maxDepth, terms, depth)
 	return [node[0], a1, a2]
 
-def crossover(parent1, parent2, maxDepth, terms):
+def crossover(parent1, parent2):
 	pt1 = random.randint(1, count_nodes(parent1) - 1)
 	pt2 = random.randint(1, count_nodes(parent2) - 1)
 	# print "pt 1 & 2 = ", pt1, pt2
@@ -377,97 +335,9 @@ def crossover(parent1, parent2, maxDepth, terms):
 	child2 = prune(child2, maxDepth, terms)
 	return [child1, child2]
 
-# crossover for conditions
-def crossover_cond(parent1, parent2, maxDepth, terms):
-	if random.uniform(0.0, 1.0) > 0.5:
-		return crossover_cond1(parent1, parent2, maxDepth, terms)
-	else:
-		return crossover_cond2(parent1, parent2, maxDepth, terms)
-
-def is_boolean(node):
-	if not isinstance(node, list):
-		return False
-	else:
-		op = node[0]
-		return (op == operator.and_) or (op == operator.or_)
-
-# randomly cross at boolean layer (choose 2 points in boolean layers)
-def crossover_cond1(parent1, parent2, maxDepth, terms):
-	# print "Crossing boolean layer"
-	while True:
-		pt1 = random.randint(1, count_nodes(parent1) - 1)
-		tree1, c = get_node(parent1, pt1)
-		if is_boolean(tree1):		# test if tree is boolean
-			break
-
-	while True:
-		pt2 = random.randint(1, count_nodes(parent2) - 1)
-		tree2, c = get_node(parent2, pt2)
-		if is_boolean(tree2):		# test if tree is boolean
-			break
-
-	# print "tree 1 & 2 = ", tree1, tree2
-	child1, c = replace_node(parent1, copy_tree(tree2), pt1)
-	child1 = prune(child1, maxDepth, terms)
-	child2, c = replace_node(parent2, copy_tree(tree1), pt2)
-	child2 = prune(child2, maxDepth, terms)
-	return [child1, child2]
-
-def is_arith(node):
-	if not isinstance(node, list):
-		return True
-	else:
-		op = node[0]
-		return \
-		(op == operator.add) or \
-		(op == operator.sub) or \
-		(op == operator.mul) or \
-		(op == operator.truediv)
-
-# randomly cross some inequalities? (choose 2 points in inequalities)
-def crossover_cond2(parent1, parent2, maxDepth, terms):
-	# print "Crossing arithmetic layer"
-	while True:
-		pt1 = random.randint(1, count_nodes(parent1) - 1)
-		tree1, c = get_node(parent1, pt1)
-		if is_arith(tree1):		# test if tree is arithmetic
-			break
-
-	while True:
-		pt2 = random.randint(1, count_nodes(parent2) - 1)
-		tree2, c = get_node(parent2, pt2)
-		if is_arith(tree2):		# test if tree is arithmetic
-			break
-
-	# print "tree 1 & 2 = ", tree1, tree2
-	child1, c = replace_node(parent1, copy_tree(tree2), pt1)
-	child1 = prune(child1, maxDepth, terms)
-	child2, c = replace_node(parent2, copy_tree(tree1), pt2)
-	child2 = prune(child2, maxDepth, terms)
-	return [child1, child2]
-
-def mutation(parent, maxDepth, funcs, terms):
+def mutate(parent):
 	point = random.randint(0, count_nodes(parent) - 1)
 	random_tree = generate_random_formula(maxDepth / 2, funcs, terms)
-	child, count = replace_node(parent, random_tree, point)
-	child = prune(child, maxDepth, terms)
-	return child
-
-def mutation_cond(parent, maxDepth, funcs, terms):
-	point = random.randint(0, count_nodes(parent) - 1)
-	# need to determine type of "replacement"
-	tree, c = get_node(parent, point)
-	if is_arith(tree):
-		random_tree = generate_random_formula(maxDepth / 2, funcs, terms)
-	elif is_boolean(tree):
-		random_tree = generate_random_condition(maxDepth / 2, funcs, terms)
-	else:
-		random_tree = generate_random_formula(maxDepth / 2, funcs, terms)
-		if random.uniform(0.0, 1.0) > 0.5:
-			point += 1		# node number of left child
-		else:
-			point += count_nodes(tree[1])	# node number of right child
-
 	child, count = replace_node(parent, random_tree, point)
 	child = prune(child, maxDepth, terms)
 	return child
@@ -526,159 +396,237 @@ def save_Rete_graph(net, fname):
 	# os.system("dot -Tpng %s.dot -o%s.png" % (fname, fname))
 	print("Rete graph saved as %s.png\n" % fname)
 
+# For Tic Tac Toe:
+board = [ [' ']*3 for i in range(3)]
+
+def hasWinner():
+	global board
+
+	for player in ['X', 'O']:
+		tile = player
+
+		# check horizontal
+		for i in [0, 1, 2]:
+			if board[i][0] == tile and board[i][1] == tile and board[i][2] == tile:
+				return player
+
+		# check vertical
+		for j in [0, 1, 2]:
+			if board[0][j] == tile and board[1][j] == tile and board[2][j] == tile:
+				return player
+
+		# check diagonal
+		if board[0][0] == tile and board[1][1] == tile and board[2][2] == tile:
+			return player
+
+		# check backward diagonal
+		if board[0][2] == tile and board[1][1] == tile and board[2][0] == tile:
+			return player
+
+	# ' ' is for game still open
+	for i in [0, 1, 2]:
+		for j in [0, 1, 2]:
+			if board[i][j] == ' ':
+				return ' '
+
+	# '-' is for draw match
+	return '-'
+
+def opponentPlay():
+	global board
+
+	playable2 = []
+	for i in [0, 1, 2]:
+		for j in [0, 1, 2]:
+			if board[i][j] == ' ':
+				playable2.append((i,j))
+	return random.choice(playable2)
+
+# TO-DO: actions could be intermediate predicates
+def playGames(population):
+	global board
+	moves = []				# for recording played moves
+
+	# Add rules to Rete
+	rete_net = Network()
+	for rule in population:
+		p = add_rule_to_Rete(rete_net, rule)
+		if p:
+			print('●', print_rule(rule))
+			rule.p_node = p
+	# save_Rete_graph(rete_net, 'rete-0')
+
+	for n in range(10):		# play game N times
+
+		# Initialize board
+		for i in [0, 1, 2]:
+			for j in [0, 1, 2]:
+				rete_net.add_wme(WME(' ', str(i), str(j)))
+				board[i][j] = ' '
+
+		CurrentPlayer = 'X'		# In the future, may play against self
+		while True:				# Repeat playing moves in single game
+			# collect all playable rules
+			playable = []
+			for r in population:
+				p0 = r.p_node
+				if not p0:
+					continue
+				print(len(p0.items), " instances")
+				for item in p.items:
+					# item = random.choice(p0.items)		# choose an instantiation randomly
+					# Question: are all instances the same?
+					# apply binding to rule's action (ie, post-condition)
+					if is_var(p0.postcondition.F2):
+						p0.postcondition.F2 = item.get_binding(p0.postcondition.F2)
+						if p0.postcondition.F2 is None:
+							p0.postcondition.F2 = str(random.randint(0,2))
+					if is_var(p0.postcondition.F3):
+						p0.postcondition.F3 = item.get_binding(p0.postcondition.F3)
+						if p0.postcondition.F3 is None:
+							p0.postcondition.F3 = str(random.randint(0,2))
+					print("production rule = ", p0.text)
+					print("chosen item = ", item)
+					print("postcond = ", p0.postcondition)
+
+					# Check if the square is empty
+					x = int(p0.postcondition.F2)
+					y = int(p0.postcondition.F3)
+					if board[x][y] == ' ':
+						playable.append(r)
+						r.fitness += 1.0
+					else:
+						r.fitness -= 1.0
+
+			print(len(playable), "\x1b[31;1m playable rules found\x1b[0m")
+
+			if not playable:
+				print("No rules playable")
+				break		# next game
+			# Choose a playable rule randomly
+			r = random.choice(playable)
+			p0 = r.p_node
+
+			board[x][y] == CurrentPlayer
+			# remove old WME
+			rete_net.remove_wme(WME(' ', p0.postcondition.F2, p0.postcondition.F3))
+			# add new WME
+			rete_net.add_wme(WME(CurrentPlayer, p0.postcondition.F2, p0.postcondition.F3))
+			# **** record move: record the rule that is fired
+			moves.append(r)
+			# check if win / lose, assign rewards accordingly
+			winner = hasWinner()
+			if winner == ' ':
+				# let the same set of rules play again
+				# let opponent play (opponent = self? this may be implemented later)
+				# CurrentPlayer = 'O' if CurrentPlayer == 'X' else 'X'
+				i,j = opponentPlay()
+				board[i][j] == 'O'
+				# remove old WME
+				rete_net.remove_wme(WME(' ', str(i), str(j)))
+				# add new WME
+				rete_net.add_wme(WME('O', str(i), str(j)))
+			elif winner == '-':
+				# increase the scores of all played moves by 3.0
+				for r in moves:
+					r.fitness += 3.0
+				break			# next game
+			elif winner == 'X':
+				# increase the scores of all played moves by 10.0
+				for r in moves:
+					r.fitness += 10.0
+				break			# next game
+
 def Evolve():
-	global maxGens, popSize, maxDepth, bouts, p_repro, crossRate, mutationRate
+	global maxGens, popSize, maxDepth, bouts, p_repro, crossRate, mutationRate, childrenSize
 	population = []
 
 	print("Generating population...")
 	for c in cache:
-		population.append({
-			'target' : c['target'],
-			'fitness' : fitness(c['target'])
-		})
-	print("Adding from cache:", len(cache))
+		population.append(c)
+	print("Added from cache:", len(cache))
 
-	for i in range(0, popSize - len(cache)):
-		print(i, '..', end='\r')
-		sys.stdout.flush()
+	for i in range(popSize - len(cache)):
+		# print('...', i, end='\r')
+		# sys.stdout.flush()
 		# print "\tGenerating formula..."
-		target = generate_random_formula(maxDepth)
-		population.append({
-			'target' : target, \
-			'fitness' : fitness(target)})
-	print()
+		rule = generate_random_formula()
+		population.append(rule)
 
-	pop2 = sorted(population, key = lambda x : x['fitness'], reverse = False)
-
-	rete_net = Network()
-	p_nodes = []
-	for candidate in pop2:
-		rule = candidate.get('target')
-		# Feed logic formulas into Rete
-		p = add_rule_to_Rete(rete_net, rule)
-		if p:
-			p.text = print_rule(rule)
-			print('●', p.text)
-			p_nodes.append(p)
-
-	# plot_population(screen, pop2)
-	save_Rete_graph(rete_net, 'rete-0')
 	print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`—,—{@
 
-	board = [ [0]*3 for i in range(3)]
-	wmes = [
-		WME('X', '0', '2'),
-		WME('X', '1', '1'),
-		WME('X', '2', '1'),
-		WME('O', '0', '0'),
-		WME('O', '1', '0'),
-		WME('O', '1', '2'),
-		WME('O', '2', '2'),
-		WME(' ', '0', '1'),
-		WME(' ', '2', '0'),
-	]
-	for wme in wmes:
-		rete_net.add_wme(wme)
-		board[int(wme.F2)][int(wme.F3)] = wme.F1
+	# CO-OPERATIVE EVOLUTIONARY ALGORITHM
+	# ===================================
+	# Randomly generate a set of rules
+	# Repeat until success:
+	#		Play game, evaluate candidates
+	#		Select survivors
+	#		Select parents via tournament; recombine, mutate
 
-	for p in p_nodes:
-		if len(p.items) > 0:
-			print(len(p.items), end=' ')
-			print("\x1b[31;1mresults:\x1b[0m")
-			for item in p.items:
-				if is_var(p.postcondition.F2):
-					p.postcondition.F2 = item.get_binding(p.postcondition.F2)
-					if p.postcondition.F2 is None:
-						p.postcondition.F2 = str(random.randint(0,2))
-				if is_var(p.postcondition.F3):
-					p.postcondition.F3 = item.get_binding(p.postcondition.F3)
-					if p.postcondition.F3 is None:
-						p.postcondition.F3 = str(random.randint(0,2))
-				print("item = ", item)
-				print("postcond = ", p.postcondition)
-				print("production rule = ", p.text)
-				# Check if the square is empty
-				x = int(p.postcondition.F2)
-				y = int(p.postcondition.F3)
-				if board[x][y] == ' ':
-					board[x][y] == 'X'
-					# remove old WME
-					rete_net.remove_wme(WME(' ', p.postcondition.F2, p.postcondition.F3))
-					# add new WME
-					rete_net.add_wme(WME('X', p.postcondition.F2, p.postcondition.F3))
-					# **** record move
-					# increase score of fired rule slightly
-					p.score += 1.0
-					# check if win / lose, assign rewards accordingly
-				else:
-					# deduct score
-					p.score -= 1.0
+	for gen in range(maxGens):
 
-	# Rules may suggest different moves, need to choose
-	# Actions could be intermediate predicates
-	# Play many games
+		print("Evaluating rules...")
+		playGames(population)			# fitness values are returned in {rule.fitness}
+		# population = children
+		population.sort(key = lambda x : x.fitness, reverse = False)
+		# plot_population(screen, population)
+		for rule in population:
+			fitness += rule.fitness
+		print("Average fitness = ", fitness / popSize)
 
-	print("\x1b[36m**** This program works till here....\n\x1b[0m")
-	os.system("beep -f 2000 -l 50")
-	exit(0)
-
-	for gen in range(0, maxGens):
 		children = []
-		# print "\nGenerating children..."
-		while len(children) < popSize:
-			operation = random.uniform(0.0, 1.0)
+		print("\nGenerating children...")
+		while len(children) < childrenSize:
+			# select a group, fight and find 1 winner:
 			p1 = tournament_selection(population, bouts)
-			c1 = {}
-			if operation < p_repro:
-				c1['target'] = copy_tree(p1['target'])
-				# c1['cond'] = copy_tree(p1['cond'])
-			elif operation < p_repro + crossRate:
+			operation = random.uniform(0.0, 1.0)
+			# if operation < p_repro:
+				# c1 = copy_tree(p1)
+			if operation < crossRate:
 				p2 = tournament_selection(population, bouts)
-				c2 = {}
-				c1['target'],c2['target'] = crossover(p1['target'], p2['target'], maxDepth)
-				# c1['cond'],  c2['cond']   = crossover_cond(p1['cond'],   p2['cond'],   maxDepth, terms)
-				# print "***** crossed condition = ", print_tree(c1['cond'])
+				c1,c2 = crossover(p1, p2)
+				# print "***** crossed = ", print_tree(c1)
 				children.append(c2)
-			elif operation < p_repro + crossRate + mutationRate:
-				c1['target'] = mutation(p1['target'], maxDepth, arith_ops)
-				# c1['cond']   = mutation_cond(p1['cond'],   maxDepth, arith_ops, terms)
-				# print "***** mutated condition = ", print_tree(c1['cond'])
-			if len(children) < popSize:
+			elif operation < crossRate + mutationRate:
+				c1 = mutate(p1)
+				# print "***** mutated = ", print_tree(c1)
+			if len(children) < childrenSize:
 				children.append(c1)
 
-		# print "Evaluating children..."
-		for c in children:
-			# print "c's Condition = ", print_tree(c['cond'])
-			c['fitness'] = fitness(c['target'])
-		best['fitness'] = fitness(best['target'], None, 500)
-		# population = children
-		population = sorted(children, key = lambda x : x['fitness'], reverse = False)
-		# plot_population(screen, population)
-		quitting = False
-		pausing = False
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				quitting = True
-			elif event.type == pygame.KEYDOWN:
-				pausing = True
-			elif event.type == pygame.KEYUP:
-				pausing = False
-		while pausing:
-			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
-					quitting = True
-					pausing = False
-				elif event.type == pygame.KEYUP:
-					pausing = False
+		# Add children to population
+		j = 0
+		for i, rule in reversed(list(enumerate(population))):
+			if random.uniform(0.0, 1.0) <= dropRate:
+				population[i] = children[j]
+				j += 1
+				if j == childrenSize:
+					break
+
+		# quitting = False
+		# pausing = False
+		# for event in pygame.event.get():
+			# if event.type == pygame.QUIT:
+				# quitting = True
+			# elif event.type == pygame.KEYDOWN:
+				# pausing = True
+			# elif event.type == pygame.KEYUP:
+				# pausing = False
+		# while pausing:
+			# for event in pygame.event.get():
+				# if event.type == pygame.QUIT:
+					# quitting = True
+					# pausing = False
+				# elif event.type == pygame.KEYUP:
+					# pausing = False
 
 		print("[", gen, "]", end=' ')
-		print("best in pop =", round(population[0]['fitness'],2), "\tprevious best =", round(best['fitness'],2))
-		if population[0]['fitness'] <= best['fitness']:
-			best = population[0]
-		else:
-			population = [best] + population[:-1]
-		# if best['fitness'] == 0:
+
+		# if overall fitness == optimal:
 		#	break
-	return best
+	# return best
 
 Evolve()
+
+print("\x1b[36m**** This program works till here....\n\x1b[0m")
+os.system("beep -f 2000 -l 50")
+exit(0)

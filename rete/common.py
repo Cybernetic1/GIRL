@@ -84,7 +84,6 @@ class Rule(list):
 	def __init__(self, *args):
 		self.extend(args)
 
-
 class Ncc(Rule):
 
 	def __repr__(self):
