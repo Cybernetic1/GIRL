@@ -1,5 +1,4 @@
-from rete.common import FIELDS
-
+from rete.common import FIELDS, DEBUG
 
 class ConstantTestNode:
 
@@ -26,7 +25,7 @@ class ConstantTestNode:
 		"""
 		:type wme: rete.WME
 		"""
-		print("⍺ activate: wme=%s" % wme)
+		DEBUG("⍺ activate: wme=%s" % wme)
 		if self.field_to_test != 'no-test':
 			v = getattr(wme, self.field_to_test)
 			v2 = self.thing_the_field_must_equal

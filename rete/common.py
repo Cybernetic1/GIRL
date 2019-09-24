@@ -150,7 +150,7 @@ class Token:
 		self.children = []  # the ones with parent = this token
 		self.join_results = []  # used only on tokens in negative nodes
 		self.ncc_results = []
-		self.owner = None  # Ncc (bug?)
+		self.owner = parent  # Ncc (bug?)
 		self.binding = binding if binding else {}	# {"$x": "B1"}
 
 		if self.wme:
@@ -202,19 +202,19 @@ class Token:
 		from rete.negative_node import NegativeNode
 		from rete.ncc_node import NccPartnerNode, NccNode
 
-		print("*** delete token = ", token)
-		print("token.owner = ", token.owner)
-		print("token.node = ", token.node)
-		print("token.wme = ", token.wme)
+		DEBUG("*** delete token = ", token)
+		DEBUG("token.owner = ", token.owner)
+		DEBUG("token.node = ", token.node)
+		DEBUG("token.wme = ", token.wme)
 
 		while token.children != []:
-			print("Looping...")
+			DEBUG("Looping...")
 			cls.delete_token_and_descendents(token.children[0])
 
 		if token.owner != token.parent:
-			print("token.parent = ", token.parent)
+			DEBUG("token.parent = ", token.parent)
 		if not isinstance(token.node, NccPartnerNode):
-			print("token.node.items = ", token.node.items)
+			DEBUG("token.node.items = ", token.node.items)
 			token.node.items.remove(token)
 		if token.wme:
 			token.wme.tokens.remove(token)
@@ -225,11 +225,11 @@ class Token:
 			for jr in token.join_results:
 				jr.wme.negative_join_result.remove(jr)
 		elif isinstance(token.node, NccNode):
-			print("token.ncc_results = ", token.ncc_results)
+			DEBUG("token.ncc_results = ", token.ncc_results)
 			for result_tok in token.ncc_results:
-				print("result_tok = ", result_tok)
-				print("result_tok.wme = ", result_tok.wme)
-				print("result_tok.wme.tokens = ", result_tok.wme.tokens)
+				DEBUG("result_tok = ", result_tok)
+				DEBUG("result_tok.wme = ", result_tok.wme)
+				DEBUG("result_tok.wme.tokens = ", result_tok.wme.tokens)
 				result_tok.wme.tokens.remove(result_tok)
 				result_tok.parent.children.remove(result_tok)
 		elif isinstance(token.node, NccPartnerNode):
@@ -237,7 +237,7 @@ class Token:
 			if not token.owner.ncc_results:			# changed from 1 to 0
 				for child in token.node.ncc_node.children:
 					child.left_activation(token.owner, None)
-		print("Next recursion...")
+		DEBUG("Next recursion...")
 
 	@classmethod
 	def delete_descendents_of_token(cls, t):
@@ -249,3 +249,7 @@ class Token:
 
 def is_var(v):
 	return v.startswith('$') if v else False
+
+def DEBUG(*args):
+	# print(*args)
+	return

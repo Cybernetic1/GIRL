@@ -1,4 +1,4 @@
-from rete.common import Token, BetaNode
+from rete.common import Token, BetaNode, DEBUG
 
 
 class NegativeJoinResult:
@@ -29,7 +29,7 @@ class NegativeNode(BetaNode):
 		:type token: rete.Token
 		:type binding: dict
 		"""
-		print("Neg node left-activate, wme = ", wme)
+		DEBUG("Neg node left-activate, wme = ", wme)
 		new_token = Token(token, wme, self, binding)
 		self.items.append(new_token)
 		for item in self.amem.items:
@@ -45,7 +45,7 @@ class NegativeNode(BetaNode):
 		"""
 		:type wme: rete.WME
 		"""
-		print("Neg node right-activate, wme = ", wme)
+		DEBUG("Neg node right-activate, wme = ", wme)
 		for t in self.items:
 			if self.perform_join_test(t, wme):
 				if not t.join_results:

@@ -3,10 +3,8 @@
 # TO-DO:
 
 #	* After bug fix, NC's may be nested again, or contain Neg conditions.
-#	* Check if it is valid move, if yes, add as WME, record the move
-#	* If win / lose, assign reward to traced steps
-#	* Play many games
 #	* Invention of new predicates
+#	* Rete: clear all memories (retain rules)
 
 # Done:
 #	* Removed empty NCs
@@ -75,7 +73,7 @@ import math
 import os
 # import pygame	# for pause key in Evolve()
 
-from rete.common import Has, Rule, WME, Neg, Ncc, is_var
+from rete.common import Has, Rule, WME, Neg, Ncc, is_var, DEBUG
 from rete.network import Network
 from rete.network import PNode
 
@@ -223,7 +221,13 @@ def generate_random_conjunction():
 
 def generate_random_atom():
 	""" An atomic logic formula such as X(a,b) """
-	predicate = 'X' if (random.uniform(0.0, 1.0) > 0.5) else 'O'
+	r = random.uniform(0.0, 1.0)
+	if r < 0.33333:
+		predicate = 'X'
+	elif r < 0.66666:
+		predicate = 'O'
+	else:
+		predicate = ' '
 	arg1 = generate_random_var_or_const()
 	arg2 = generate_random_var_or_const()
 	return [predicate, arg1, arg2]
@@ -261,7 +265,9 @@ def tournament_selection(pop, bouts):
 	# print "bouts = ", bouts
 	for i in range(bouts):
 		selected.append(random.choice(pop))
-	return selected.sort(key = lambda x: x.fitness)[0]
+	# print("len = ", len(pop))
+	selected.sort(key = lambda x: x['fitness'])
+	return selected[0]
 
 def replace_node(node, replacement, node_num, cur_node = 0):
 	if cur_node == node_num:
@@ -449,15 +455,15 @@ def playGames(population):
 
 	# Add rules to Rete
 	rete_net = Network()
-	for rule in population:
-		p = add_rule_to_Rete(rete_net, rule)
+	for candidate in population:
+		p = add_rule_to_Rete(rete_net, candidate['rule'])
 		if p:
-			print('●', print_rule(rule))
-			rule.p_node = p
+			print('●', print_rule(candidate['rule']))
+			candidate['p_node'] = p
 	# save_Rete_graph(rete_net, 'rete-0')
 
 	for n in range(10):		# play game N times
-
+		print("Game ", n)
 		# Initialize board
 		for i in [0, 1, 2]:
 			for j in [0, 1, 2]:
@@ -465,15 +471,17 @@ def playGames(population):
 				board[i][j] = ' '
 
 		CurrentPlayer = 'X'		# In the future, may play against self
-		while True:				# Repeat playing moves in single game
+		for move in range(13):				# Repeat playing moves in single game
+			print("...", move, end=' ')
 			# collect all playable rules
 			playable = []
-			for r in population:
-				p0 = r.p_node
+			for candidate in population:
+				p0 = candidate['p_node']
 				if not p0:
 					continue
-				print(len(p0.items), " instances")
-				for item in p.items:
+				if p0.items:
+					DEBUG(len(p0.items), " instances")
+				for item in p0.items:
 					# item = random.choice(p0.items)		# choose an instantiation randomly
 					# Question: are all instances the same?
 					# apply binding to rule's action (ie, post-condition)
@@ -485,18 +493,18 @@ def playGames(population):
 						p0.postcondition.F3 = item.get_binding(p0.postcondition.F3)
 						if p0.postcondition.F3 is None:
 							p0.postcondition.F3 = str(random.randint(0,2))
-					print("production rule = ", p0.text)
-					print("chosen item = ", item)
-					print("postcond = ", p0.postcondition)
+					DEBUG("production rule = ", p0.text)
+					DEBUG("chosen item = ", item)
+					DEBUG("postcond = ", p0.postcondition)
 
 					# Check if the square is empty
 					x = int(p0.postcondition.F2)
 					y = int(p0.postcondition.F3)
 					if board[x][y] == ' ':
-						playable.append(r)
-						r.fitness += 1.0
+						playable.append(candidate)
+						candidate['fitness'] += 1.0
 					else:
-						r.fitness -= 1.0
+						candidate['fitness'] -= 1.0
 
 			print(len(playable), "\x1b[31;1m playable rules found\x1b[0m")
 
@@ -504,8 +512,8 @@ def playGames(population):
 				print("No rules playable")
 				break		# next game
 			# Choose a playable rule randomly
-			r = random.choice(playable)
-			p0 = r.p_node
+			candidate = random.choice(playable)
+			p0 = candidate['p_node']
 
 			board[x][y] == CurrentPlayer
 			# remove old WME
@@ -513,7 +521,7 @@ def playGames(population):
 			# add new WME
 			rete_net.add_wme(WME(CurrentPlayer, p0.postcondition.F2, p0.postcondition.F3))
 			# **** record move: record the rule that is fired
-			moves.append(r)
+			moves.append(candidate)
 			# check if win / lose, assign rewards accordingly
 			winner = hasWinner()
 			if winner == ' ':
@@ -528,13 +536,21 @@ def playGames(population):
 				rete_net.add_wme(WME('O', str(i), str(j)))
 			elif winner == '-':
 				# increase the scores of all played moves by 3.0
-				for r in moves:
-					r.fitness += 3.0
+				for candidate in moves:
+					candidate['fitness'] += 3.0
+				print("Draw")
 				break			# next game
 			elif winner == 'X':
 				# increase the scores of all played moves by 10.0
-				for r in moves:
-					r.fitness += 10.0
+				for candidate in moves:
+					candidate['fitness'] += 10.0
+				print("X wins")
+				break			# next game
+			elif winner == 'O':
+				# decrease the scores of all played moves by 8.0
+				for candidate in moves:
+					candidate['fitness'] -= 8.0
+				print("O wins")
 				break			# next game
 
 def Evolve():
@@ -542,16 +558,16 @@ def Evolve():
 	population = []
 
 	print("Generating population...")
-	for c in cache:
-		population.append(c)
-	print("Added from cache:", len(cache))
+	# for c in cache:
+		# population.append(c)
+	# print("Added from cache:", len(cache))
 
 	for i in range(popSize - len(cache)):
 		# print('...', i, end='\r')
 		# sys.stdout.flush()
 		# print "\tGenerating formula..."
 		rule = generate_random_formula()
-		population.append(rule)
+		population.append({'rule':rule, 'fitness':0.0, 'p_node':None})
 
 	print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`—,—{@
 
@@ -568,10 +584,11 @@ def Evolve():
 		print("Evaluating rules...")
 		playGames(population)			# fitness values are returned in {rule.fitness}
 		# population = children
-		population.sort(key = lambda x : x.fitness, reverse = False)
+		population.sort(key = lambda x : x['fitness'], reverse = False)
 		# plot_population(screen, population)
-		for rule in population:
-			fitness += rule.fitness
+		fitness = 0.0
+		for candidate in population:
+			fitness += candidate['fitness']
 		print("Average fitness = ", fitness / popSize)
 
 		children = []

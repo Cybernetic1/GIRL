@@ -12,7 +12,7 @@ rete_net = Network()
 c01 = Has('O', '$x', '$x')
 c02 = Has('□', '$y', '$z')
 c03 = Has('>', '$y', '$z')
-rete_net.add_production(Rule(c01, c02, c03))
+p0 = rete_net.add_production(Rule(c01, c02, c03))
 
 wmes = [
 	WME('X', '0', '2'),
