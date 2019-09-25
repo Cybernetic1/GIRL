@@ -448,6 +448,13 @@ def opponentPlay():
 				playable2.append((i,j))
 	return random.choice(playable2)
 
+def printBoard()
+	global board
+	for i in [0, 1, 2]:
+		for j in [0, 1, 2]:
+			print(board[i][j], end='')
+		print()
+
 # TO-DO: actions could be intermediate predicates
 def playGames(population):
 	global board
@@ -472,6 +479,7 @@ def playGames(population):
 
 		CurrentPlayer = 'X'		# In the future, may play against self
 		for move in range(13):				# Repeat playing moves in single game
+			printBoard()
 			print("...", move, end=' ')
 			# collect all playable rules
 			playable = []
