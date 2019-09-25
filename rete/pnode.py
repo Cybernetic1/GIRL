@@ -1,4 +1,4 @@
-from rete.common import BetaNode, Token
+from rete.common import BetaNode, Token, DEBUG
 
 
 class PNode(BetaNode):
@@ -26,7 +26,7 @@ class PNode(BetaNode):
 		"""
 		new_token = Token(token, wme, node=self, binding=binding)
 		self.items.append(new_token)
-		print("**** firing %s\n" % new_token)
+		DEBUG("**** firing %s\n" % new_token)
 
 	def execute(self, *args, **kwargs):
 		raise NotImplementedError

@@ -2,9 +2,12 @@
 
 # TO-DO:
 
+#	* Rete: clear all memories (retain rules)
+#	* Do all bindings lead to same production?
+#	* mysterious bug still exists: negative_node right_activated;
+#		jr.wme.negative_join_result.remove(jr);	jr not in list
 #	* After bug fix, NC's may be nested again, or contain Neg conditions.
 #	* Invention of new predicates
-#	* Rete: clear all memories (retain rules)
 
 # Done:
 #	* Removed empty NCs
@@ -448,12 +451,13 @@ def opponentPlay():
 				playable2.append((i,j))
 	return random.choice(playable2)
 
-def printBoard()
+def printBoard():
 	global board
 	for i in [0, 1, 2]:
+		print(' [', end='')
 		for j in [0, 1, 2]:
 			print(board[i][j], end='')
-		print()
+		print(']')
 
 # TO-DO: actions could be intermediate predicates
 def playGames(population):
@@ -469,79 +473,100 @@ def playGames(population):
 			candidate['p_node'] = p
 	# save_Rete_graph(rete_net, 'rete-0')
 
-	for n in range(10):		# play game N times
-		print("Game ", n)
+	for n in range(1):		# play game N times
+		print("**** Game ", n)
 		# Initialize board
 		for i in [0, 1, 2]:
 			for j in [0, 1, 2]:
 				rete_net.add_wme(WME(' ', str(i), str(j)))
 				board[i][j] = ' '
 
-		CurrentPlayer = 'X'		# In the future, may play against self
-		for move in range(13):				# Repeat playing moves in single game
-			printBoard()
-			print("...", move, end=' ')
-			# collect all playable rules
-			playable = []
-			for candidate in population:
+		CurrentPlayer = 'X'					# In the future, may play against self
+		for move in range(9):				# Repeat playing moves in single game
+			print("    move", move, end='; ')
+
+			if CurrentPlayer == 'X':
+				# collect all playable rules
+				playable = []
+				for candidate in population:
+					p0 = candidate['p_node']
+					if not p0:
+						continue
+					if p0.items:
+						DEBUG(len(p0.items), " instances")
+					for item in p0.items:
+						# item = random.choice(p0.items)		# choose an instantiation randomly
+						# Question: are all instances the same?
+						# apply binding to rule's action (ie, post-condition)
+						if is_var(p0.postcondition.F2):
+							p0.postcondition.F2 = item.get_binding(p0.postcondition.F2)
+							if p0.postcondition.F2 is None:
+								p0.postcondition.F2 = str(random.randint(0,2))
+						if is_var(p0.postcondition.F3):
+							p0.postcondition.F3 = item.get_binding(p0.postcondition.F3)
+							if p0.postcondition.F3 is None:
+								p0.postcondition.F3 = str(random.randint(0,2))
+						DEBUG("production rule = ", print_rule(candidate['rule']))
+						DEBUG("chosen item = ", item)
+						DEBUG("postcond = ", p0.postcondition)
+
+						# Check if the square is empty
+						x = int(p0.postcondition.F2)
+						y = int(p0.postcondition.F3)
+						if board[x][y] == ' ':
+							playable.append(candidate)
+							candidate['fitness'] += 1.0
+						else:
+							candidate['fitness'] -= 1.0
+
+				print(len(playable), "playable rules found ", end='')
+				uniques = []
+				for candidate in playable:
+					if not uniques:
+						uniques.append(candidate)
+						continue
+					exists = False
+					for u in uniques:
+						if candidate['p_node'].postcondition == u['p_node'].postcondition:
+							exists = True
+					if not exists:
+						uniques.append(candidate)
+				print("\x1b[31;1munique moves =", len(uniques), end='\x1b[0m\n')
+
+				if not uniques:
+					print("No rules playable")
+					break		# next game
+				# Choose a playable rule randomly
+				candidate = random.choice(uniques)
 				p0 = candidate['p_node']
-				if not p0:
-					continue
-				if p0.items:
-					DEBUG(len(p0.items), " instances")
-				for item in p0.items:
-					# item = random.choice(p0.items)		# choose an instantiation randomly
-					# Question: are all instances the same?
-					# apply binding to rule's action (ie, post-condition)
-					if is_var(p0.postcondition.F2):
-						p0.postcondition.F2 = item.get_binding(p0.postcondition.F2)
-						if p0.postcondition.F2 is None:
-							p0.postcondition.F2 = str(random.randint(0,2))
-					if is_var(p0.postcondition.F3):
-						p0.postcondition.F3 = item.get_binding(p0.postcondition.F3)
-						if p0.postcondition.F3 is None:
-							p0.postcondition.F3 = str(random.randint(0,2))
-					DEBUG("production rule = ", p0.text)
-					DEBUG("chosen item = ", item)
-					DEBUG("postcond = ", p0.postcondition)
 
-					# Check if the square is empty
-					x = int(p0.postcondition.F2)
-					y = int(p0.postcondition.F3)
-					if board[x][y] == ' ':
-						playable.append(candidate)
-						candidate['fitness'] += 1.0
-					else:
-						candidate['fitness'] -= 1.0
+				x = int(p0.postcondition.F2)
+				y = int(p0.postcondition.F3)
+				board[x][y] = CurrentPlayer
+				print("    played move: X(%d,%d)" % (x,y))
+				# remove old WME
+				rete_net.remove_wme(WME(' ', p0.postcondition.F2, p0.postcondition.F3))
+				# add new WME
+				rete_net.add_wme(WME(CurrentPlayer, p0.postcondition.F2, p0.postcondition.F3))
+				# **** record move: record the rule that is fired
+				moves.append(candidate)
+				
+			else:			# Player = 'O'
+				i,j = opponentPlay()
+				board[i][j] = 'O'
+				print("Opponent move: O(%d,%d)" % (i,j))
+				# remove old WME
+				rete_net.remove_wme(WME(' ', str(i), str(j)))
+				# add new WME
+				rete_net.add_wme(WME('O', str(i), str(j)))
 
-			print(len(playable), "\x1b[31;1m playable rules found\x1b[0m")
-
-			if not playable:
-				print("No rules playable")
-				break		# next game
-			# Choose a playable rule randomly
-			candidate = random.choice(playable)
-			p0 = candidate['p_node']
-
-			board[x][y] == CurrentPlayer
-			# remove old WME
-			rete_net.remove_wme(WME(' ', p0.postcondition.F2, p0.postcondition.F3))
-			# add new WME
-			rete_net.add_wme(WME(CurrentPlayer, p0.postcondition.F2, p0.postcondition.F3))
-			# **** record move: record the rule that is fired
-			moves.append(candidate)
+			printBoard()
 			# check if win / lose, assign rewards accordingly
 			winner = hasWinner()
 			if winner == ' ':
 				# let the same set of rules play again
 				# let opponent play (opponent = self? this may be implemented later)
-				# CurrentPlayer = 'O' if CurrentPlayer == 'X' else 'X'
-				i,j = opponentPlay()
-				board[i][j] == 'O'
-				# remove old WME
-				rete_net.remove_wme(WME(' ', str(i), str(j)))
-				# add new WME
-				rete_net.add_wme(WME('O', str(i), str(j)))
+				CurrentPlayer = 'O' if CurrentPlayer == 'X' else 'X'
 			elif winner == '-':
 				# increase the scores of all played moves by 3.0
 				for candidate in moves:

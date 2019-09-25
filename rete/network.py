@@ -49,6 +49,15 @@ class Network:
 				for child in jr.owner.node.children:
 					child.left_activation(jr.owner, None)
 
+	@classmethod
+	def clear_all_mems(cls):
+		"""
+		Clear all memories while retaining rules network
+		"""
+		# Undo all possible things done by add_wme(), but this may be even more costly than
+		# removing all wmes.  	
+		return
+
 	def dump(self):
 		self.buf = io.StringIO()
 		self.buf.write('digraph {\n')

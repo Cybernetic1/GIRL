@@ -222,11 +222,13 @@ class Token:
 			token.parent.children.remove(token)
 
 		if isinstance(token.node, NegativeNode):
-			for jr in token.join_results:
+			while token.join_results != []:
+				jr = token.join_results[0]
 				jr.wme.negative_join_result.remove(jr)
 		elif isinstance(token.node, NccNode):
 			DEBUG("token.ncc_results = ", token.ncc_results)
-			for result_tok in token.ncc_results:
+			while token.ncc_results != []:
+				result_tok = token.ncc_results[0]
 				DEBUG("result_tok = ", result_tok)
 				DEBUG("result_tok.wme = ", result_tok.wme)
 				DEBUG("result_tok.wme.tokens = ", result_tok.wme.tokens)
