@@ -170,11 +170,11 @@ def print_nc(nc):
 
 def print_literal(literal):
 	if literal[0] == '~':
-		return '~' + literal[1] + '(' + \
+		return '~' + ('□' if literal[1] == ' ' else literal[1]) + '(' + \
 			str(literal[2]) + ',' + str(literal[3]) + ')'
 	else:
 		# print("litertal[0] = ", literal[0])
-		return literal[0] + '(' + \
+		return ('□' if literal[0] == ' ' else literal[0]) + '(' + \
 			str(literal[1]) + ',' + str(literal[2]) + ')'
 
 def read_tree(str):			# assume str is in prefix notation with ()'s
@@ -262,6 +262,16 @@ def generate_random_inequality(maxDepth, funcs, terms):
 	op = operator.gt if (random.uniform(0.0, 1.0) > 0.5) else operator.lt
 	return [op, arg1, arg2]
 
+def length_of_rule(rule):
+	""" Basically, find the length of the rule, where each unit is a point
+	of possible mutation / crossover.
+	In this version, NC's cannot be nested. """
+	return length_of_condition(rule[1]) + length_of_condition(rule[2]) + 1
+
+def length_of_condition(cond):
+	""" Each literal is 1 unit """
+	return len(cond)
+
 def tournament_selection(pop, bouts):
 	""" Select a group, fight, choose 1 winner """
 	selected = []
@@ -330,17 +340,54 @@ def prune2(node, maxDepth, terms, depth = 0):
 	a2 = prune2(node[2], maxDepth, terms, depth)
 	return [node[0], a1, a2]
 
+def cross(parent, subrule, pt1)
+	""" Traverse parent till pt, attach subrule """
+	pt1_ = pt1 - len(parent1[1])
+	if pt1_ < 0:
+		head1 = parent1[1][:pt1]
+		tail1 = parent1[1][pt1:]
+	else:
+		head1 = parent1[2][:pt1_]
+		tail1 = parent1[2][pt1_:]
+
+	pt2_ = pt2 - len(parent2[1])
+	if pt2_ < 0:
+		head2 = parent2[1][:pt2]
+		tail2 = parent2[1][pt2:]
+	else:
+		head2 = parent2[2][:pt2_]
+		tail2 = parent2[2][pt2_:]
+
+	# Even this method has not exhausted the possibilities...
+	if pt1_ < 0 and pt2_ < 0:
+		child1 = ['=>', head1 + tail2, parent2[2], parent2[3]]
+		child2 = ['=>', head2 + tail1, parent1[2], parent1[3]]
+	elif pt1_ < 0 and pt2_ > 0:
+		child1 = ['=>', head1, parent1[2] + tail2, parent2[3]]
+		child2 = ['=>', parent2[2] + tail1, head2 + parent1[2], parent1[3]]
+	elif pt1_ > 0 and pt2_ < 0:
+		child1 = ['=>', parent1[2] + tail2, head1 + parent2[2], parent2[3]]
+		child2 = ['=>', head2, parent2[2] + tail1, parent1[3]]
+	else: # pt1_ > 0 and pt2_ > 0:
+		child1 = ['=>', parent1[1], head1 + tail2, parent2[3]]
+		child2 = ['=>', parent2[1], head2 + tail1, parent1[3]]
+	return
+
 def crossover(parent1, parent2):
-	pt1 = random.randint(1, count_nodes(parent1) - 1)
-	pt2 = random.randint(1, count_nodes(parent2) - 1)
+	""" Find 2 crossover points, cross.
+	We exploit the fact that rules have a somewhat linear structure,
+	even if NCs are allowed to nest. """
+	pt1 = random.randint(1, length_of_rule(parent1) - 1)
+	pt2 = random.randint(1, length_of_rule(parent2) - 1)
 	# print "pt 1 & 2 = ", pt1, pt2
 	# c1, c2 are dummy variables
-	tree1, c1 = get_node(parent1, pt1)
-	tree2, c2 = get_node(parent2, pt2)
+	subrule1 = get_rule_part(parent1, pt1)
+	subrule2 = get_rule_part(parent2, pt2)
 	# print "tree 1 & 2 = ", tree1, tree2
-	child1, c1 = replace_node(parent1, copy_tree(tree2), pt1)
+	child1, c1 = cross(parent1, subrule2, pt1)
+
 	child1 = prune(child1, maxDepth, terms)
-	child2, c2 = replace_node(parent2, copy_tree(tree1), pt2)
+	child2, c2 = replace_node(parent2, copy_tree(subrule1), pt2)
 	child2 = prune(child2, maxDepth, terms)
 	return [child1, child2]
 
@@ -469,7 +516,8 @@ def playGames(population):
 	for candidate in population:
 		p = add_rule_to_Rete(rete_net, candidate['rule'])
 		if p:
-			print('●', print_rule(candidate['rule']))
+			print('●', print_rule(candidate['rule']), end='')
+			print(' (%d)' % length_of_rule(candidate['rule']))
 			candidate['p_node'] = p
 	# save_Rete_graph(rete_net, 'rete-0')
 
@@ -478,6 +526,8 @@ def playGames(population):
 		# Initialize board
 		for i in [0, 1, 2]:
 			for j in [0, 1, 2]:
+				if board[i][j] != ' ':
+					rete_net.remove_wme(WME(board[i][i], str(i), str(j)))
 				rete_net.add_wme(WME(' ', str(i), str(j)))
 				board[i][j] = ' '
 
@@ -531,7 +581,7 @@ def playGames(population):
 							exists = True
 					if not exists:
 						uniques.append(candidate)
-				print("\x1b[31;1munique moves =", len(uniques), end='\x1b[0m\n')
+				print("; unique moves =\x1b[31;1m", len(uniques), end='\x1b[0m\n')
 
 				if not uniques:
 					print("No rules playable")
