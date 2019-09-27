@@ -224,6 +224,7 @@ class Token:
 		if isinstance(token.node, NegativeNode):
 			while token.join_results != []:
 				jr = token.join_results[0]
+				print("(neg) join results = ", jr)
 				jr.wme.negative_join_result.remove(jr)
 		elif isinstance(token.node, NccNode):
 			DEBUG("token.ncc_results = ", token.ncc_results)

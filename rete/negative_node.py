@@ -11,6 +11,8 @@ class NegativeJoinResult:
 		self.owner = owner
 		self.wme = wme
 
+	def __repr__(self):
+		return "NJR.wme:" + repr(self.wme)
 
 class NegativeNode(BetaNode):
 

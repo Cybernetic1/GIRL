@@ -155,10 +155,10 @@ def print_rule(rule):
 	"""
 	# print("rule = ", rule)
 	s = ""
-	for literal in rule[1]:
+	for literal in rule[0]:
 		s += print_literal(literal) + ' ⋀ '
-	s += print_nc(rule[2])
-	return s + " \x1b[31;1m=> " + print_literal(rule[3]) + "\x1b[0m"
+	s += print_nc(rule[1])
+	return s + " \x1b[31;1m=> " + print_literal(rule[2]) + "\x1b[0m"
 
 def print_nc(nc):
 	if len(nc) == 0:
@@ -178,7 +178,7 @@ def print_literal(literal):
 			str(literal[1]) + ',' + str(literal[2]) + ')'
 
 def read_tree(str):			# assume str is in prefix notation with ()'s
-	""" old code """
+	""" old code, needs rewrite """
 	if str[0] == '(':
 		op = str[1]
 		return [
@@ -193,15 +193,18 @@ def generate_random_formula():
 	var_index = -1
 	pre_condition  = generate_random_condition()
 	post_condition = generate_random_post_condition()
-	return ['=>', *pre_condition, post_condition]
+	return [*pre_condition, post_condition]
 
 # Generate a random (pre-)condition in 2 stages:
 # 1) a number of atoms (possibly negated)
 # 2) an NC (= negated conjunction, possibly nested)
 def generate_random_condition():
-	return [ \
-		generate_random_conjunction(),
-		generate_random_NC() ]
+	cond = generate_random_conjunction()
+	nc = generate_random_NC()
+	if not cond and not nc:
+		return generate_random_condition()
+	else:
+		return [cond, nc]
 
 def generate_random_NC():
 	""" In the current version of Rete, NC's cannot be nested,
@@ -266,7 +269,7 @@ def length_of_rule(rule):
 	""" Basically, find the length of the rule, where each unit is a point
 	of possible mutation / crossover.
 	In this version, NC's cannot be nested. """
-	return length_of_condition(rule[1]) + length_of_condition(rule[2]) + 1
+	return length_of_condition(rule[0]) + length_of_condition(rule[1]) + 1
 
 def length_of_condition(cond):
 	""" Each literal is 1 unit """
@@ -281,36 +284,6 @@ def tournament_selection(pop, bouts):
 	# print("len = ", len(pop))
 	selected.sort(key = lambda x: x['fitness'])
 	return selected[0]
-
-def replace_node(node, replacement, node_num, cur_node = 0):
-	if cur_node == node_num:
-		return [replacement, (cur_node + 1)]
-	cur_node += 1
-	if not isinstance(node, list):
-		return [node, cur_node]
-	a1, cur_node = replace_node(node[1], replacement, node_num, cur_node)
-	a2, cur_node = replace_node(node[2], replacement, node_num, cur_node)
-	return [[node[0], a1, a2], cur_node]
-
-def copy_tree(node):
-	# print node
-	if not isinstance(node, list):
-		return node
-	return [node[0], copy_tree(node[1]), copy_tree(node[2])]
-
-def get_node(node, node_num, current_node = 0):
-	if current_node == node_num:
-		return node, (current_node + 1)
-	current_node += 1
-	if not isinstance(node, list):		# is a var or number
-		return [], current_node
-	a1, current_node = get_node(node[1], node_num, current_node)
-	if a1:		# a1 != []
-		return a1, current_node
-	a2, current_node = get_node(node[2], node_num, current_node)
-	if a2:		# a2 != []
-		return a2, current_node
-	return [], current_node		# ?? will we ever get here?
 
 # TO-DO:  prune needs to respect boolean structure
 def prune(node, maxDepth, terms, depth = 0):
@@ -343,19 +316,23 @@ def prune2(node, maxDepth, terms, depth = 0):
 def crossover(parent1, parent2):
 	""" Find 2 crossover points, cross.
 	We exploit the fact that rules have a somewhat linear structure,
-	even if NCs are allowed to nest. """
-	pt1 = random.randint(1, length_of_rule(parent1) - 1)
-	pt2 = random.randint(1, length_of_rule(parent2) - 1)
-	print(parent1, "(%d)" % pt1)
-	print(parent2, "(%d)" % pt2)
+	even if NCs are allowed to nest.
+	This code may potentially work for nested NCs """
+	rule1 = parent1['rule']
+	rule2 = parent2['rule']
+	print(print_rule(rule1))
+	print(print_rule(rule2))
+	pt1 = random.randint(1, length_of_rule(rule1) - 1)
+	pt2 = random.randint(1, length_of_rule(rule2) - 1)
+	print("pt1 = %d, pt2 = %d" % (pt1, pt2))
 
 	# copy head and tail
 	index = 0
 	head1 = []
 	tail1 = []
 	crossed = False
-	for sublist in parent1:
-		remainder = pt - index
+	for sublist in rule1:
+		remainder = pt1 - index
 		if not crossed:
 			if remainder >= len(sublist):
 				index += len(sublist)
@@ -365,9 +342,9 @@ def crossover(parent1, parent2):
 				index += remainder
 				head1.append(sublist[:remainder])
 				tail1.append(sublist[remainder:])
-			if index == pt:
+			if index == pt1:
 				crossed = True
-		else:	# crossed (at this point, index == pt)
+		else:	# crossed (at this point, index == pt1)
 			head1.append([])
 			tail1.append(sublist)
 
@@ -375,8 +352,8 @@ def crossover(parent1, parent2):
 	head2 = []
 	tail2 = []
 	crossed = False
-	for sublist in parent2:
-		remainder = pt - index
+	for sublist in rule2:
+		remainder = pt2 - index
 		if not crossed:
 			if remainder >= len(sublist):
 				index += len(sublist)
@@ -386,34 +363,25 @@ def crossover(parent1, parent2):
 				index += remainder
 				head2.append(sublist[:remainder])
 				tail2.append(sublist[remainder:])
-			if index == pt:
+			if index == pt2:
 				crossed = True
-		else:	# crossed (at this point, index == pt)
+		else:	# crossed (at this point, index == pt2)
 			head2.append([])
 			tail2.append(sublist)
+
+	print(head1, " +++ ", tail1)
+	print(head2, " +++ ", tail2)
 
 	# Construct children
 	child1 = list(map(lambda x, y: x + y, head1, tail2))
 	child2 = list(map(lambda x, y: x + y, head2, tail1))
-	print(child1)
-	print(child2)
-	return child1, child2
+	print(print_rule(child1))
+	print(print_rule(child2))
+	print("^^^^^^^^^^^^^^^^^^^^^")
+	return	{'rule':child1, 'fitness':0.0, 'p_node':None}, \
+			{'rule':child2, 'fitness':0.0, 'p_node':None}
 
-	# Even this method has not exhausted the possibilities...
-	if pt1_ < 0 and pt2_ < 0:
-		child1 = ['=>', head1 + tail2, parent2[2], parent2[3]]
-		child2 = ['=>', head2 + tail1, parent1[2], parent1[3]]
-	elif pt1_ < 0 and pt2_ > 0:
-		child1 = ['=>', head1, parent1[2] + tail2, parent2[3]]
-		child2 = ['=>', parent2[2] + tail1, head2 + parent1[2], parent1[3]]
-	elif pt1_ > 0 and pt2_ < 0:
-		child1 = ['=>', parent1[2] + tail2, head1 + parent2[2], parent2[3]]
-		child2 = ['=>', head2, parent2[2] + tail1, parent1[3]]
-	else: # pt1_ > 0 and pt2_ > 0:
-		child1 = ['=>', parent1[1], head1 + tail2, parent2[3]]
-		child2 = ['=>', parent2[1], head2 + tail1, parent1[3]]
-	return
-
+	""" old code """
 	# print "pt 1 & 2 = ", pt1, pt2
 	# c1, c2 are dummy variables
 	subrule1 = get_rule_part(parent1, pt1)
@@ -424,12 +392,32 @@ def crossover(parent1, parent2):
 	child1 = prune(child1, maxDepth, terms)
 	child2, c2 = replace_node(parent2, copy_tree(subrule1), pt2)
 	child2 = prune(child2, maxDepth, terms)
-	return [child1, child2]
+	return child1, child2
 
 def mutate(parent):
-	point = random.randint(0, count_nodes(parent) - 1)
-	random_tree = generate_random_formula(maxDepth / 2, funcs, terms)
-	child, count = replace_node(parent, random_tree, point)
+	""" move to point and after point, randomly generate """
+	rule = parent['rule']
+	point = random.randint(0, length_of_rule(rule) - 1)
+
+	index = 0
+	for sublist in rule2:
+		remainder = point - index
+		if not crossed:
+			if remainder >= len(sublist):
+				index += len(sublist)
+				head.append(sublist)
+			else:
+				index += remainder
+				head2.append(sublist[:remainder])
+				tail2.append(sublist[remainder:])
+			if index == pt2:
+				crossed = True
+		else:	# crossed (at this point, index == pt2)
+			head2.append([])
+			tail2.append(sublist)
+
+	random_rule = generate_random_formula()
+	child = replace_node(parent, random_tree, point)
 	child = prune(child, maxDepth, terms)
 	return child
 
@@ -444,10 +432,10 @@ def add_rule_to_Rete(rete_net, rule):
 	# print("rule[2] = ", rule[2])
 	# print("rule[3] = ", rule[3])
 	conjunction = []
-	for literal in rule[1]:
+	for literal in rule[0]:
 		conjunction.append(get_Rete_literal(literal))
 	conjunction2 = []
-	for literal in rule[2]:
+	for literal in rule[1]:
 		conjunction2.append(get_Rete_literal(literal))
 	if conjunction2 != []:
 		p = rete_net.add_production(Rule(*conjunction, Ncc(*conjunction2)))
@@ -455,7 +443,7 @@ def add_rule_to_Rete(rete_net, rule):
 		p = rete_net.add_production(Rule(*conjunction))
 	else:
 		return None
-	p.postcondition = get_Rete_literal(rule[3])
+	p.postcondition = get_Rete_literal(rule[2])
 	return p
 
 def get_Rete_nc(nc):
@@ -717,14 +705,14 @@ def Evolve():
 			operation = random.uniform(0.0, 1.0)
 			# if operation < p_repro:
 				# c1 = copy_tree(p1)
-			if operation < crossRate:
+			if operation < mutationRate:
+				c1 = mutate(p1)
+				# print "***** mutated = ", print_tree(c1)
+			else:	# otherwise crossover
 				p2 = tournament_selection(population, bouts)
 				c1, c2 = crossover(p1, p2)
 				# print "***** crossed = ", print_tree(c1)
 				children.append(c2)
-			elif operation < crossRate + mutationRate:
-				c1 = mutate(p1)
-				# print "***** mutated = ", print_tree(c1)
 			if len(children) < childrenSize:
 				children.append(c1)
 
