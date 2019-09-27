@@ -340,7 +340,7 @@ def prune2(node, maxDepth, terms, depth = 0):
 	a2 = prune2(node[2], maxDepth, terms, depth)
 	return [node[0], a1, a2]
 
-def cross(parent, subrule, pt1)
+def cross(parent, subrule, pt1):
 	""" Traverse parent till pt, attach subrule """
 	pt1_ = pt1 - len(parent1[1])
 	if pt1_ < 0:
