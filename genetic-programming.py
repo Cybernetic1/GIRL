@@ -340,23 +340,64 @@ def prune2(node, maxDepth, terms, depth = 0):
 	a2 = prune2(node[2], maxDepth, terms, depth)
 	return [node[0], a1, a2]
 
-def cross(parent, subrule, pt1)
-	""" Traverse parent till pt, attach subrule """
-	pt1_ = pt1 - len(parent1[1])
-	if pt1_ < 0:
-		head1 = parent1[1][:pt1]
-		tail1 = parent1[1][pt1:]
-	else:
-		head1 = parent1[2][:pt1_]
-		tail1 = parent1[2][pt1_:]
+def crossover(parent1, parent2):
+	""" Find 2 crossover points, cross.
+	We exploit the fact that rules have a somewhat linear structure,
+	even if NCs are allowed to nest. """
+	pt1 = random.randint(1, length_of_rule(parent1) - 1)
+	pt2 = random.randint(1, length_of_rule(parent2) - 1)
+	print(parent1, "(%d)" % pt1)
+	print(parent2, "(%d)" % pt2)
 
-	pt2_ = pt2 - len(parent2[1])
-	if pt2_ < 0:
-		head2 = parent2[1][:pt2]
-		tail2 = parent2[1][pt2:]
-	else:
-		head2 = parent2[2][:pt2_]
-		tail2 = parent2[2][pt2_:]
+	# copy head and tail
+	index = 0
+	head1 = []
+	tail1 = []
+	crossed = False
+	for sublist in parent1:
+		remainder = pt - index
+		if not crossed:
+			if remainder >= len(sublist):
+				index += len(sublist)
+				head1.append(sublist)
+				tail1.append([])
+			else:
+				index += remainder
+				head1.append(sublist[:remainder])
+				tail1.append(sublist[remainder:])
+			if index == pt:
+				crossed = True
+		else:	# crossed (at this point, index == pt)
+			head1.append([])
+			tail1.append(sublist)
+
+	index = 0
+	head2 = []
+	tail2 = []
+	crossed = False
+	for sublist in parent2:
+		remainder = pt - index
+		if not crossed:
+			if remainder >= len(sublist):
+				index += len(sublist)
+				head2.append(sublist)
+				tail2.append([])
+			else:
+				index += remainder
+				head2.append(sublist[:remainder])
+				tail2.append(sublist[remainder:])
+			if index == pt:
+				crossed = True
+		else:	# crossed (at this point, index == pt)
+			head2.append([])
+			tail2.append(sublist)
+
+	# Construct children
+	child1 = list(map(lambda x, y: x + y, head1, tail2))
+	child2 = list(map(lambda x, y: x + y, head2, tail1))
+	print(child1)
+	print(child2)
+	return child1, child2
 
 	# Even this method has not exhausted the possibilities...
 	if pt1_ < 0 and pt2_ < 0:
@@ -373,12 +414,6 @@ def cross(parent, subrule, pt1)
 		child2 = ['=>', parent2[1], head2 + tail1, parent1[3]]
 	return
 
-def crossover(parent1, parent2):
-	""" Find 2 crossover points, cross.
-	We exploit the fact that rules have a somewhat linear structure,
-	even if NCs are allowed to nest. """
-	pt1 = random.randint(1, length_of_rule(parent1) - 1)
-	pt2 = random.randint(1, length_of_rule(parent2) - 1)
 	# print "pt 1 & 2 = ", pt1, pt2
 	# c1, c2 are dummy variables
 	subrule1 = get_rule_part(parent1, pt1)
@@ -684,7 +719,7 @@ def Evolve():
 				# c1 = copy_tree(p1)
 			if operation < crossRate:
 				p2 = tournament_selection(population, bouts)
-				c1,c2 = crossover(p1, p2)
+				c1, c2 = crossover(p1, p2)
 				# print "***** crossed = ", print_tree(c1)
 				children.append(c2)
 			elif operation < crossRate + mutationRate:
