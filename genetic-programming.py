@@ -8,6 +8,7 @@
 #		jr.wme.negative_join_result.remove(jr);	jr not in list
 #	* After bug fix, NC's may be nested again, or contain Neg conditions.
 #	* Invention of new predicates
+#	* Custom operators and comparisons
 
 # Done:
 #	* Removed empty NCs
@@ -95,7 +96,7 @@ popSize = 100
 childrenSize = int(popSize * 0.6)
 dropRate = 0.1			# when children size proportion = 40%, 0.1 seems a good choice
 crossRate = 0.9
-mutationRate = 1.0 / 10
+mutationRate = 1.0
 
 maxDepth = 7
 bouts = 5
@@ -201,13 +202,15 @@ def generate_random_formula():
 def generate_random_condition():
 	cond = generate_random_conjunction()
 	nc = generate_random_NC()
+	# New edit: NC can contain negative literals
+	# nc = generate_random_conjunction()
 	if not cond and not nc:
 		return generate_random_condition()
 	else:
 		return [cond, nc]
 
 def generate_random_NC():
-	""" In the current version of Rete, NC's cannot be nested,
+	""" In this version, NC's cannot be nested,
 	nor can they contain Neg (negative) conditions. """
 	nc = []
 	while random.uniform(0.0, 1.0) < 0.7:
@@ -219,18 +222,21 @@ def generate_random_NC():
 def generate_random_conjunction():
 	conjunction = []
 	while random.uniform(0.0, 1.0) < 0.7:
-		if random.uniform(0.0, 1.0) < 0.3:
-			conjunction.append(['~'] + generate_random_atom())
-		else:
-			conjunction.append(generate_random_atom())
+		conjunction.append(generate_random_literal())
 	return conjunction
+
+def generate_random_literal():
+	if random.uniform(0.0, 1.0) < 0.25:
+		return ['~'] + generate_random_atom()
+	else:
+		return generate_random_atom()
 
 def generate_random_atom():
 	""" An atomic logic formula such as X(a,b) """
-	r = random.uniform(0.0, 1.0)
-	if r < 0.33333:
+	choice = random.uniform(0.0, 1.0)
+	if choice < 0.33333:
 		predicate = 'X'
-	elif r < 0.66666:
+	elif choice < 0.66666:
 		predicate = 'O'
 	else:
 		predicate = ' '
@@ -287,6 +293,7 @@ def tournament_selection(pop, bouts):
 
 # TO-DO:  prune needs to respect boolean structure
 def prune(node, maxDepth, terms, depth = 0):
+	""" old code """
 	depth += 1
 	if not isinstance(node, list):
 		return node
@@ -300,6 +307,7 @@ def prune(node, maxDepth, terms, depth = 0):
 		return [node[0], a1, a2]
 
 def prune2(node, maxDepth, terms, depth = 0):
+	""" old code """
 	if depth >= maxDepth - 1:
 		t = terms[random.randint(0, len(terms) - 1)]
 		if t == 'R':
@@ -320,8 +328,8 @@ def crossover(parent1, parent2):
 	This code may potentially work for nested NCs """
 	rule1 = parent1['rule']
 	rule2 = parent2['rule']
-	print(print_rule(rule1))
-	print(print_rule(rule2))
+	print("cross: p1 = ", print_rule(rule1))
+	print("       p2 = ", print_rule(rule2))
 	pt1 = random.randint(1, length_of_rule(rule1) - 1)
 	pt2 = random.randint(1, length_of_rule(rule2) - 1)
 	print("pt1 = %d, pt2 = %d" % (pt1, pt2))
@@ -375,51 +383,50 @@ def crossover(parent1, parent2):
 	# Construct children
 	child1 = list(map(lambda x, y: x + y, head1, tail2))
 	child2 = list(map(lambda x, y: x + y, head2, tail1))
+	# child1 = prune(child1)
+	# child2 = prune(child2)
 	print(print_rule(child1))
 	print(print_rule(child2))
 	print("^^^^^^^^^^^^^^^^^^^^^")
 	return	{'rule':child1, 'fitness':0.0, 'p_node':None}, \
 			{'rule':child2, 'fitness':0.0, 'p_node':None}
 
-	""" old code """
-	# print "pt 1 & 2 = ", pt1, pt2
-	# c1, c2 are dummy variables
-	subrule1 = get_rule_part(parent1, pt1)
-	subrule2 = get_rule_part(parent2, pt2)
-	# print "tree 1 & 2 = ", tree1, tree2
-	child1, c1 = cross(parent1, subrule2, pt1)
-
-	child1 = prune(child1, maxDepth, terms)
-	child2, c2 = replace_node(parent2, copy_tree(subrule1), pt2)
-	child2 = prune(child2, maxDepth, terms)
-	return child1, child2
-
 def mutate(parent):
-	""" move to point and after point, randomly generate """
+	""" YKY's own idea: insert / delete random literal;
+	This can happen in any clause """
 	rule = parent['rule']
+	print("mutate: ", print_rule(rule), end='')
 	point = random.randint(0, length_of_rule(rule) - 1)
+	print(' (%d)' % point)
 
 	index = 0
-	for sublist in rule2:
-		remainder = point - index
+	child = []
+	crossed = False
+	for sublist in rule:
 		if not crossed:
+			remainder = point - index
 			if remainder >= len(sublist):
 				index += len(sublist)
-				head.append(sublist)
+				child.append(sublist)
 			else:
 				index += remainder
-				head2.append(sublist[:remainder])
-				tail2.append(sublist[remainder:])
-			if index == pt2:
+				# index =? point
 				crossed = True
+				choice = random.uniform(0.0, 1.0)		# delete / insert / replace
+				if choice < 0.33333:		# delete
+					child.append(sublist[:remainder])
+					index -= 1
+				if choice < 0.66666:		# insert
+					child.append(sublist[:remainder] + [generate_random_literal()])
+					index += 1
+				else:						# replace
+					child.append(sublist[:remainder] + [generate_random_literal()])
 		else:	# crossed (at this point, index == pt2)
-			head2.append([])
-			tail2.append(sublist)
+			child.append(sublist)
 
-	random_rule = generate_random_formula()
-	child = replace_node(parent, random_tree, point)
-	child = prune(child, maxDepth, terms)
-	return child
+	# child = prune(child)
+	print("mutated: ", print_rule(child))
+	return {'rule':child, 'fitness':0.0, 'p_node':None}
 
 # Add a logic formula to Rete
 def add_rule_to_Rete(rete_net, rule):
@@ -703,8 +710,8 @@ def Evolve():
 			# select a group, fight and find 1 winner:
 			p1 = tournament_selection(population, bouts)
 			operation = random.uniform(0.0, 1.0)
-			# if operation < p_repro:
-				# c1 = copy_tree(p1)
+			# if operation < p_repro:			# from earlier version,
+				# c1 = copy_tree(p1)			# simple reproduction / replication
 			if operation < mutationRate:
 				c1 = mutate(p1)
 				# print "***** mutated = ", print_tree(c1)
