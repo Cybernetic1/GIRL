@@ -393,39 +393,48 @@ def crossover(parent1, parent2):
 
 def mutate(parent):
 	""" YKY's own idea: insert / delete random literal;
-	This can happen in any clause """
+	This can happen in any part of the rule """
 	rule = parent['rule']
 	print("mutate: ", print_rule(rule), end='')
+	# 'point' designates the place where mutation occurs, can be at position 0
 	point = random.randint(0, length_of_rule(rule) - 1)
 	print(' (%d)' % point)
 
 	index = 0
 	child = []
-	crossed = False
-	for sublist in rule:
-		if not crossed:
+	done = False
+	for i, sublist in enumerate(rule):
+		print('sublist %d = %s' % (i, sublist))
+		if not done:
 			remainder = point - index
 			if remainder >= len(sublist):
+				# if remainder = 0 then point = index and list must also be empty
+				# so we can skip to next sublist and continue the operation
 				index += len(sublist)
 				child.append(sublist)
-			else:
+			else:	# designated point is inside sublist, and remainder > 0
 				index += remainder
+				print('remainder=', remainder)
 				# index =? point
-				crossed = True
+				passed = True
 				choice = random.uniform(0.0, 1.0)		# delete / insert / replace
-				if choice < 0.33333:		# delete
+				if choice < 0.33333 and i < 2:			# delete (must not be conclusion)
 					child.append(sublist[:remainder])
 					index -= 1
-				if choice < 0.66666:		# insert
+				elif choice < 0.66666 and i < 2:		# insert
 					child.append(sublist[:remainder] + [generate_random_literal()])
 					index += 1
-				else:						# replace
+				elif i < 2:								# replace
 					child.append(sublist[:remainder] + [generate_random_literal()])
-		else:	# crossed (at this point, index == pt2)
+				else:
+					child.append(generate_random_literal())
+		else:	# mutated (at this point, index == point)
+			# just copy whatever is left
 			child.append(sublist)
 
 	# child = prune(child)
-	print("mutated: ", print_rule(child))
+	print('>> ', child)
+	print('>> ', print_rule(child))
 	return {'rule':child, 'fitness':0.0, 'p_node':None}
 
 # Add a logic formula to Rete
