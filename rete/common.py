@@ -120,7 +120,7 @@ class WME:
 		self.F3 = F3
 		self.amems = []  # the ones containing this WME
 		self.tokens = []  # the ones containing this WME
-		self.negative_join_result = []
+		self.negative_join_results = []
 
 	def __repr__(self):
 		return "(%s %s %s)" % (self.F1, self.F2, self.F3)
@@ -222,20 +222,24 @@ class Token:
 			token.parent.children.remove(token)
 
 		if isinstance(token.node, NegativeNode):
+			print('# token.join_results =', len(token.join_results))
 			while token.join_results != []:
 				jr = token.join_results[0]
-				print("(neg) join results = ", jr)
-				jr.wme.negative_join_result.remove(jr)
+				print("jr = (neg) token.join_results[0] =", jr)
+				print("jr.wme =", jr.wme)
+				print("jr.wme.negative_join_results =", jr.wme.negative_join_results)
+				jr.wme.negative_join_results.remove(jr)
 		elif isinstance(token.node, NccNode):
-			DEBUG("token.ncc_results = ", token.ncc_results)
+			DEBUG("token.ncc_results =", token.ncc_results)
 			while token.ncc_results != []:
 				result_tok = token.ncc_results[0]
-				DEBUG("result_tok = ", result_tok)
-				DEBUG("result_tok.wme = ", result_tok.wme)
-				DEBUG("result_tok.wme.tokens = ", result_tok.wme.tokens)
+				DEBUG("result_tok =", result_tok)
+				DEBUG("result_tok.wme =", result_tok.wme)
+				DEBUG("result_tok.wme.tokens =", result_tok.wme.tokens)
 				result_tok.wme.tokens.remove(result_tok)
 				result_tok.parent.children.remove(result_tok)
 		elif isinstance(token.node, NccPartnerNode):
+			print("token.owner.ncc_results =", token.owner.ncc_results)
 			token.owner.ncc_results.remove(token)
 			if not token.owner.ncc_results:			# changed from 1 to 0
 				for child in token.node.ncc_node.children:
