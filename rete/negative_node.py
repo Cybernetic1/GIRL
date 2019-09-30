@@ -21,7 +21,7 @@ class NegativeNode(BetaNode):
 		:type amem: rete.alpha.AlphaMemory
 		"""
 		super(NegativeNode, self).__init__(children=children, parent=parent)
-		self.items = []
+		self.items = []			# list of tokens
 		self.amem = amem
 		self.tests = tests if tests else []
 
@@ -48,12 +48,15 @@ class NegativeNode(BetaNode):
 		:type wme: rete.WME
 		"""
 		DEBUG("Neg node right-activate, wme = ", wme)
-		for t in self.items:
-			if self.perform_join_test(t, wme):
-				if not t.join_results:
-					Token.delete_descendents_of_token(t)
-				jr = NegativeJoinResult(t, wme)
-				t.join_results.append(jr)
+		for tok in self.items:
+			if self.perform_join_test(tok, wme):
+				# If join_results changes from 0 --> 1, this means the negative node is
+				# previously satisfied but now unsatisfied (ie, non-negative).  Then this
+				# token should not propagate further down, its descendents should be removed.
+				if not tok.join_results:
+					Token.delete_descendents_of_token(tok)
+				jr = NegativeJoinResult(tok, wme)
+				tok.join_results.append(jr)
 				wme.negative_join_results.append(jr)
 
 	def perform_join_test(self, token, wme):

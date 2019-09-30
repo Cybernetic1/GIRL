@@ -150,7 +150,7 @@ class Token:
 		self.children = []  # the ones with parent = this token
 		self.join_results = []  # used only on tokens in negative nodes
 		self.ncc_results = []
-		self.owner = parent  # Ncc (bug?)
+		self.owner = None  # Ncc (bug?)
 		self.binding = binding if binding else {}	# {"$x": "B1"}
 
 		if self.wme:
@@ -201,45 +201,60 @@ class Token:
 		"""
 		from rete.negative_node import NegativeNode
 		from rete.ncc_node import NccPartnerNode, NccNode
+		from rete.alpha import AlphaMemory
+		from rete.beta_memory_node import BetaMemory
 
 		DEBUG("*** delete token = ", token)
 		DEBUG("token.owner = ", token.owner)
 		DEBUG("token.node = ", token.node)
 		DEBUG("token.wme = ", token.wme)
 
-		while token.children != []:
+		while token.children:
 			DEBUG("Looping...")
-			cls.delete_token_and_descendents(token.children[0])
+			child = token.children[0]
+			cls.delete_token_and_descendents(child)
 
 		if token.owner != token.parent:
 			DEBUG("token.parent = ", token.parent)
+
 		if not isinstance(token.node, NccPartnerNode):
 			DEBUG("token.node.items = ", token.node.items)
 			token.node.items.remove(token)
 		if token.wme:
 			token.wme.tokens.remove(token)
 		if token.parent:
+			print('token.parent.children =', token.parent.children)
 			token.parent.children.remove(token)
 
-		if isinstance(token.node, NegativeNode):
+		if isinstance(token.node, AlphaMemory) or isinstance(token.node, BetaMemory):
+			# print('My code actually working')
+			if not token.node.items:
+				for child in token.node.children:
+					print('child =', child)
+					print('child.amem.successors =', child.amem.successors)
+					child.amem.successors.remove(child)
+		elif isinstance(token.node, NegativeNode):
 			print('# token.join_results =', len(token.join_results))
-			while token.join_results != []:
-				jr = token.join_results[0]
+			if not token.node.items:
+				token.node.amem.successors.remove(token.node)
+			while token.join_results:
+				jr = token.join_results.pop()
 				print("jr = (neg) token.join_results[0] =", jr)
 				print("jr.wme =", jr.wme)
 				print("jr.wme.negative_join_results =", jr.wme.negative_join_results)
 				jr.wme.negative_join_results.remove(jr)
 		elif isinstance(token.node, NccNode):
-			DEBUG("token.ncc_results =", token.ncc_results)
-			while token.ncc_results != []:
-				result_tok = token.ncc_results[0]
-				DEBUG("result_tok =", result_tok)
-				DEBUG("result_tok.wme =", result_tok.wme)
-				DEBUG("result_tok.wme.tokens =", result_tok.wme.tokens)
+			print("token.ncc_results =", token.ncc_results)
+			while token.ncc_results:
+				result_tok = token.ncc_results.pop()
+				print("result_tok =", result_tok)
+				print("result_tok.wme =", result_tok.wme)
+				print("result_tok.wme.tokens =", result_tok.wme.tokens)
 				result_tok.wme.tokens.remove(result_tok)
 				result_tok.parent.children.remove(result_tok)
 		elif isinstance(token.node, NccPartnerNode):
-			print("token.owner.ncc_results =", token.owner.ncc_results)
+			print('token.owner =', token.owner)
+			print('token.owner.ncc_results =', token.owner.ncc_results)
 			token.owner.ncc_results.remove(token)
 			if not token.owner.ncc_results:			# changed from 1 to 0
 				for child in token.node.ncc_node.children:
@@ -251,12 +266,13 @@ class Token:
 		"""
 		:type t: Token
 		"""
-		while t.children != []:
-			cls.delete_token_and_descendents(t.children[0])
+		while t.children:
+			tok = t.children[0]
+			cls.delete_token_and_descendents(tok)
 
 def is_var(v):
 	return v.startswith('$') if v else False
 
 def DEBUG(*args):
-	# print(*args)
+	print(*args)
 	return

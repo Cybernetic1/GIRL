@@ -41,10 +41,11 @@ class Network:
 		"""
 		for am in wme.amems:
 			am.items.remove(wme)
-		while wme.tokens != []:
-			Token.delete_token_and_descendents(wme.tokens[0])
-		while wme.negative_join_results != []:
-			jr = wme.negative_join_results[0]
+		while wme.tokens:
+			tok = wme.tokens[0]
+			Token.delete_token_and_descendents(tok)
+		while wme.negative_join_results:
+			jr = wme.negative_join_results.pop()
 			jr.owner.join_results.remove(jr)
 			if not jr.owner.join_results:
 				for child in jr.owner.node.children:

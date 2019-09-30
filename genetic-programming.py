@@ -759,7 +759,8 @@ def Evolve():
 					# pausing = False
 
 		print("[", gen, "]", end=' ')
-
+		os.system('beep -f 2000 -l 100')
+		exit(0)
 		# if overall fitness == optimal:
 		#	break
 	# return best

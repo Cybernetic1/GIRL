@@ -24,12 +24,13 @@ class NccNode(BetaNode):
 		DEBUG("NCC left-activate, wme = ", w)
 		new_token = Token(t, w, self, binding)
 		self.items.append(new_token)
+		new_token.ncc_results = []
 		DEBUG("NCC node.items add token = ", new_token)
 		for result in self.partner.new_result_buffer:
 			self.partner.new_result_buffer.remove(result)
+			result.owner = new_token
 			new_token.ncc_results.append(result)
 			DEBUG("  add to ncc_results: ", result)
-			result.owner = new_token
 		if not new_token.ncc_results:		# if results == []
 			for child in self.children:
 				child.left_activation(new_token, None)
@@ -45,6 +46,7 @@ class NccPartnerNode(BetaNode):
 		super(NccPartnerNode, self).__init__(children=children, parent=parent)
 		self.ncc_node = ncc_node
 		self.number_of_conditions = number_of_conditions
+		# do not change the following using default value = [];  this is a Python trap
 		self.new_result_buffer = new_result_buffer if new_result_buffer else []
 
 	def dump(self):
@@ -63,10 +65,14 @@ class NccPartnerNode(BetaNode):
 		for i in range(self.number_of_conditions):
 			owners_w = owners_t.wme
 			owners_t = owners_t.parent
+		found = False
 		for token in self.ncc_node.items:
 			if token.parent == owners_t and token.wme == owners_w:
-				token.ncc_results.append(new_result)
 				DEBUG("  partner add to ncc_results: ", new_result)
 				new_result.owner = token
+				token.ncc_results.append(new_result)
 				Token.delete_descendents_of_token(token)
-		self.new_result_buffer.append(new_result)
+				found = True
+		if not found:
+			new_result.owner = 'buffed'
+			self.new_result_buffer.append(new_result)
