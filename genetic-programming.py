@@ -603,7 +603,7 @@ def playGames(population):
 			candidate['p_node'] = p
 	# save_Rete_graph(rete_net, 'rete-0')
 
-	for n in range(1):		# play game N times
+	for n in range(50):		# play game N times
 		print("**** Game ", n)
 		# Initialize board
 		for i in [0, 1, 2]:
@@ -803,7 +803,7 @@ def Evolve():
 
 		print("[", gen, "]", end=' ')
 		os.system('aplay -q /home/yky/beep.wav')
-		exit(0)
+
 		# if overall fitness == optimal:
 		#	break
 	# return best
