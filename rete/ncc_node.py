@@ -74,5 +74,5 @@ class NccPartnerNode(BetaNode):
 				Token.delete_descendents_of_token(token)
 				found = True
 		if not found:
-			new_result.owner = 'buffed'
+			# new_result.owner = 'buffed'
 			self.new_result_buffer.append(new_result)

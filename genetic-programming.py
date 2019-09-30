@@ -759,7 +759,7 @@ def Evolve():
 					# pausing = False
 
 		print("[", gen, "]", end=' ')
-		os.system('beep -f 2000 -l 100')
+		os.system('aplay -q /home/yky/beep.wav')
 		exit(0)
 		# if overall fitness == optimal:
 		#	break

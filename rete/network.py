@@ -171,7 +171,7 @@ class Network:
 		:rtype: list of TestAtJoinNode
 		"""
 		result = []
-		# print("condition = ", c)
+		# DEBUG("condition = ", c)
 		for field_of_v, v in c.vars:
 			for idx, cond in enumerate(earlier_conds):
 				if isinstance(cond, Ncc) or isinstance(cond, Neg):
@@ -329,7 +329,7 @@ class Network:
 			elif isinstance(cond, Has):
 				# **** Added by YKY:  check if cond is a custom operator
 				op = getattr(cond, 'F1')
-				# print("op = ", op)
+				# DEBUG("op = ", op)
 				if op not in ['>', '<', '=', '!=']:
 					# op = None
 					current_node = self.build_or_share_beta_memory(current_node)
