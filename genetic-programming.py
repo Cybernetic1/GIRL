@@ -391,20 +391,59 @@ def crossover(parent1, parent2):
 	return	{'rule':child1, 'fitness':0.0, 'p_node':None}, \
 			{'rule':child2, 'fitness':0.0, 'p_node':None}
 
+def get_largest_var_index(rule):
+	max_index = 0
+	for lit in rule[0]:
+		i = get_largest_var_index2(lit)
+		if i > max_index:
+			max_index = i
+	for lit in rule[1]:
+		i = get_largest_var_index2(lit)
+		if i > max_index:
+			max_index = i
+	i = get_largest_var_index2(rule[2])
+	if i > max_index:
+		max_index = i
+	return max_index
+
+def get_largest_var_index2(literal):
+	max_index = 0
+	if literal[0] == '~':
+		for i in [1,2,3]:
+			if type(literal[i]) == str and literal[i][0] == '$':
+				index = int(literal[i][1:])
+				if index > max_index:
+					max_index = index
+	else:
+		for i in [0,1,2]:
+			if type(literal[i]) == str and literal[i][0] == '$':
+				index = int(literal[i][1:])
+				if index > max_index:
+					max_index = index
+	return max_index
+
 def mutate(parent):
 	""" YKY's own idea: insert / delete random literal;
 	This can happen in any part of the rule """
 	rule = parent['rule']
-	print("mutate: ", print_rule(rule), end='')
+	print("+++ ", print_rule(rule), end='')
 	# 'point' designates the place where mutation occurs, can be at position 0
 	point = random.randint(0, length_of_rule(rule) - 1)
-	print(' (%d)' % point)
+	choice = random.randint(1, 3)		# delete / insert / replace
+	print(' (%s %d)' % ('delete' if choice == 1 else 'insert' if choice == 2 \
+		else 'replace', point))
+
+	# New problem: generate_random_literal uses variables that is not indexed from
+	# the formula to be mutated.  The variable index should come from the range of the
+	# original variables + 1.
 
 	index = 0
 	child = []
 	done = False
 	for i, sublist in enumerate(rule):
-		print('sublist %d = %s' % (i, sublist))
+		global var_index
+		var_index = get_largest_var_index(rule)
+		# print('sublist %d = %s' % (i, sublist))
 		if not done:
 			remainder = point - index
 			if remainder >= len(sublist):
@@ -414,27 +453,31 @@ def mutate(parent):
 				child.append(sublist)
 			else:	# designated point is inside sublist, and remainder > 0
 				index += remainder
-				print('remainder=', remainder)
+				# print('remainder=', remainder)
 				# index =? point
-				passed = True
-				choice = random.uniform(0.0, 1.0)		# delete / insert / replace
-				if choice < 0.33333 and i < 2:			# delete (must not be conclusion)
-					child.append(sublist[:remainder])
+				done = True
+				if choice == 1 and i < 2:			# delete (must not be conclusion)
+					# print('delete')
+					child.append(sublist[:remainder] + sublist[remainder + 1:])
 					index -= 1
-				elif choice < 0.66666 and i < 2:		# insert
-					child.append(sublist[:remainder] + [generate_random_literal()])
+				elif choice == 2 and i < 2:		# insert (cannot be conclusion)
+					# print('insert')
+					child.append(sublist[:remainder] + [generate_random_literal()] \
+						+ sublist[remainder:])
 					index += 1
 				elif i < 2:								# replace
-					child.append(sublist[:remainder] + [generate_random_literal()])
-				else:
-					child.append(generate_random_literal())
+					# print('replace')
+					child.append(sublist[:remainder] + [generate_random_literal()] \
+						+ sublist[remainder + 1:])
+				else:									# mutate conclusion
+					child.append(generate_random_atom())
 		else:	# mutated (at this point, index == point)
 			# just copy whatever is left
 			child.append(sublist)
 
 	# child = prune(child)
-	print('>> ', child)
-	print('>> ', print_rule(child))
+	# print('>> ', child)
+	print('●', print_rule(child))
 	return {'rule':child, 'fitness':0.0, 'p_node':None}
 
 # Add a logic formula to Rete
