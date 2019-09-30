@@ -2,27 +2,49 @@
 # * What would be training example?  Probably manipulation of relation graphs
 # * 
 
-from GeneticProgramming import Evolve, maxGens, maxDepth, popSize, \
-	bouts, p_repro, crossRate, mutationRate, cache, datasize
-
 import pygame
 from numpy import * 		# used in plotting
 import plotly.plotly as py	# communicate with external plotly server
 import plotly.graph_objs as go
 
-data = []
+from genetic_programming import Evolve, maxGens, maxDepth, popSize, \
+	bouts, crossRate, mutationRate, cache
 
-print("Reading data....")
-with open("data.txt") as datafile:
-	for line in datafile:
-		nums = line[:-3].split(',')		# get rid of ';' at end of line
-		data.append(float(nums[1]))
+import tkinter as tk
+root = tk.Tk()
+root.title("Genetic evolution of logic rules")
 
-datasize = len(data)
-print("Data size = ", datasize)
+pygame.init()
 
-def plot_population(screen, pop):
-	screen.fill((0x00,0x00,0x00))
+screen1 = pygame.display.set_mode((120, 120))
+pygame.display.set_caption("TicTacToe")
+# draw_board([['X', 'O', ' '],['X', 'O', ' '],['X', 'O', ' ']])
+
+# screen2 = pygame.display.set_mode((1000, 500))
+# pygame.display.set_caption("Population fitness")
+
+def draw_board(board):
+	screen1.fill((0xff,0xff,0xff))
+	for z in [39, 79]:
+		pygame.draw.line(screen1, (0x00,0x00,0x00), [z,0], [z,120], 2)
+		pygame.draw.line(screen1, (0x00,0x00,0x00), [0,z], [120,z], 2)
+	for i in [0,1,2]:
+		for j in [0,1,2]:
+			x1 = i * 40
+			x2 = i * 40 + 40
+			y1 = j * 40
+			y2 = j * 40 + 40
+			if board[i][j] == 'X':
+				pygame.draw.line(screen1, (0x00,0x00,0xff), [x1+5, y1+5], [x2-5, y2-5], 4)
+				pygame.draw.line(screen1, (0x00,0x00,0xff), [x2-5, y1+5], [x1+5, y2-5], 4)
+			elif board[i][j] == 'O':
+				pygame.draw.circle(screen1, (0xff,0x00,0x00), (x1+20, y1+20), 15, 3)
+			# else:
+				# pygame.draw.rect(screen1, (0xff,0xff,0xff), (x1, y1, x2, y2))
+	pygame.display.flip()
+
+def plot_population(pop):
+	screen2.fill((0x00,0x00,0x00))
 	H = 500
 	h = float(H) - 3.0
 	x = 1.0
@@ -35,7 +57,7 @@ def plot_population(screen, pop):
 		z = child['fitness']
 		x += dx
 		if z < 0.0:
-			pygame.draw.line(screen, (0xFF,0x00,0x00), [int(x),H], [int(x),H+int(z*1.0)], dn)
+			pygame.draw.line(screen2, (0xFF,0x00,0x00), [int(x),H], [int(x),H+int(z*1.0)], dn)
 		else:
 			y = h / (1.0 + math.exp(-0.001*z))
 			# y = int(z * h / ymax)
@@ -43,33 +65,25 @@ def plot_population(screen, pop):
 			#	y = H - 3
 			# elif y > H - 3:
 			#	y = H - 3
-			pygame.draw.line(screen, (0x00,0x00,0xFF), [int(x),H], [int(x),H-y], dn)
+			pygame.draw.line(screen2, (0x00,0x00,0xFF), [int(x),H], [int(x),H-y], dn)
 	pygame.display.flip()
 
-import tkinter as tk
-root = tk.Tk()
-root.title("Genetic algorithm test")
-best = {}
-
 def butt_train_pop():
-	global maxGens, popSize, maxDepth, bouts, p_repro, crossRate, mutationRate
-	global best
-	maxGens  = int(text1.get("1.0", tk.END)[:-1])
-	popSize  = int(text1c.get("1.0", tk.END)[:-1])
+	from genetic_programming import Evolve, maxGens, maxDepth, popSize, \
+		bouts, crossRate, mutationRate, cache
+	# global maxGens, popSize, maxDepth, bouts, crossRate, mutationRate
+	# global best
+	maxGens = int(text1.get("1.0", tk.END)[:-1])
+	popSize = int(text1c.get("1.0", tk.END)[:-1])
 	maxDepth = int(text1b.get("1.0", tk.END)[:-1])
-	bouts     = int(text1a.get("1.0", tk.END)[:-1])
-	p_repro   = float(text0c.get("1.0", tk.END)[:-1])
-	crossRate   = float(text0b.get("1.0", tk.END)[:-1])
-	mutationRate     = float(text0a.get("1.0", tk.END)[:-1])
+	bouts = int(text1a.get("1.0", tk.END)[:-1])
+	# p_repro = float(text0c.get("1.0", tk.END)[:-1])
+	crossRate = float(text0b.get("1.0", tk.END)[:-1])
+	mutationRate = float(text0a.get("1.0", tk.END)[:-1])
 
 	# execute the algorithm
-	pygame.init()
-	screen = pygame.display.set_mode((1000, 500))
-	pygame.display.set_caption("Population fitness")
-
-	best = Evolve()
+	Evolve()
 	print("Done!")
-	print("best fitness = ", round(best['fitness'],4))
 	from subprocess import call
 	call(["beep"])
 
@@ -262,10 +276,10 @@ tk.Label(root, text="P(mutate)").grid(row=0, column=1, sticky=tk.W)
 text0a = tk.Text(root, height=1, width=10)
 text0a.grid(row=0,column=1,sticky=tk.E)
 text0a.insert(tk.END, str(mutationRate))
-tk.Label(root, text="P(repro)").grid(row=0, column=2, sticky=tk.W)
+tk.Label(root, text="P(___)").grid(row=0, column=2, sticky=tk.W)
 text0c = tk.Text(root, height=1, width=10)
 text0c.grid(row=0,column=2,sticky=tk.E)
-text0c.insert(tk.END, str(p_repro))
+text0c.insert(tk.END, str(0.0))
 
 button2 = tk.Button(root, text="Train population", command=butt_train_pop)
 button2.grid(row=2,column=0)
@@ -325,8 +339,8 @@ textC.insert(tk.END, "results.csv")
 # buttonD.grid(row=1,column=0)
 # buttonD = tk.Button(root, text="Plot OHLC", command=plot_OHLC)
 # buttonD.grid(row=13,column=0)
-msg = tk.Message(root, width=800, text="(C) LK Lam, YKY 2015")
-msg.grid(row=14,column=0,columnspan=3)
+msg = tk.Message(root, width=800, text="(C) YKY 2019")
+msg.grid(row=14,column=0,columnspan=3,sticky=tk.E)
 
 root.mainloop()
 exit(0)

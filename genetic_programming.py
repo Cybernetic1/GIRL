@@ -75,11 +75,13 @@ import operator
 import sys
 import math
 import os
-# import pygame	# for pause key in Evolve()
+# import pygame	# for displaying game board
 
 from rete.common import Has, Rule, WME, Neg, Ncc, is_var, DEBUG
 from rete.network import Network
 from rete.network import PNode
+
+import GUI
 
 # ============ Global variables ==============
 
@@ -96,7 +98,7 @@ popSize = 100
 childrenSize = int(popSize * 0.6)
 dropRate = 0.1			# when children size proportion = 40%, 0.1 seems a good choice
 crossRate = 0.9
-mutationRate = 1.0
+mutationRate = 0.1
 
 maxDepth = 7
 bouts = 5
@@ -332,7 +334,7 @@ def crossover(parent1, parent2):
 	print("       p2 = ", print_rule(rule2))
 	pt1 = random.randint(1, length_of_rule(rule1) - 1)
 	pt2 = random.randint(1, length_of_rule(rule2) - 1)
-	print("pt1 = %d, pt2 = %d" % (pt1, pt2))
+	# print("pt1 = %d, pt2 = %d" % (pt1, pt2))
 
 	# copy head and tail
 	index = 0
@@ -377,17 +379,17 @@ def crossover(parent1, parent2):
 			head2.append([])
 			tail2.append(sublist)
 
-	print(head1, " +++ ", tail1)
-	print(head2, " +++ ", tail2)
+	# print(head1, " +++ ", tail1)
+	# print(head2, " +++ ", tail2)
 
 	# Construct children
 	child1 = list(map(lambda x, y: x + y, head1, tail2))
 	child2 = list(map(lambda x, y: x + y, head2, tail1))
 	# child1 = prune(child1)
 	# child2 = prune(child2)
-	print(print_rule(child1))
-	print(print_rule(child2))
-	print("^^^^^^^^^^^^^^^^^^^^^")
+	# print(print_rule(child1))
+	# print(print_rule(child2))
+	# print("^^^^^^^^^^^^^^^^^^^^^")
 	return	{'rule':child1, 'fitness':0.0, 'p_node':None}, \
 			{'rule':child2, 'fitness':0.0, 'p_node':None}
 
@@ -426,12 +428,12 @@ def mutate(parent):
 	""" YKY's own idea: insert / delete random literal;
 	This can happen in any part of the rule """
 	rule = parent['rule']
-	print("+++ ", print_rule(rule), end='')
+	# print("+++ ", print_rule(rule), end='')
 	# 'point' designates the place where mutation occurs, can be at position 0
 	point = random.randint(0, length_of_rule(rule) - 1)
 	choice = random.randint(1, 3)		# delete / insert / replace
-	print(' (%s %d)' % ('delete' if choice == 1 else 'insert' if choice == 2 \
-		else 'replace', point))
+	# print(' (%s %d)' % ('delete' if choice == 1 else 'insert' if choice == 2 \
+		# else 'replace', point))
 
 	# New problem: generate_random_literal uses variables that is not indexed from
 	# the formula to be mutated.  The variable index should come from the range of the
@@ -477,7 +479,7 @@ def mutate(parent):
 
 	# child = prune(child)
 	# print('>> ', child)
-	print('●', print_rule(child))
+	# print('●', print_rule(child))
 	return {'rule':child, 'fitness':0.0, 'p_node':None}
 
 # Add a logic formula to Rete
@@ -590,6 +592,7 @@ def printBoard():
 
 # TO-DO: actions could be intermediate predicates
 def playGames(population):
+	from GUI import draw_board
 	global board
 	moves = []				# for recording played moves
 
@@ -601,10 +604,10 @@ def playGames(population):
 			print('●', print_rule(candidate['rule']), end='')
 			print(' (%d)' % length_of_rule(candidate['rule']))
 			candidate['p_node'] = p
-	# save_Rete_graph(rete_net, 'rete-0')
+	# save_Rete_graph(rete_net, 'rete_0')
 
 	for n in range(50):		# play game N times
-		print("**** Game ", n)
+		print("**** Game ", n, end='\n')
 		# Initialize board
 		for i in [0, 1, 2]:
 			for j in [0, 1, 2]:
@@ -651,7 +654,7 @@ def playGames(population):
 						else:
 							candidate['fitness'] -= 1.0
 
-				print(len(playable), "playable rules found ", end='')
+				print(len(playable), "playable rules ", end='')
 				uniques = []
 				for candidate in playable:
 					if not uniques:
@@ -692,7 +695,8 @@ def playGames(population):
 				# add new WME
 				rete_net.add_wme(WME('O', str(i), str(j)))
 
-			printBoard()
+			# printBoard()
+			draw_board(board)
 			# check if win / lose, assign rewards accordingly
 			winner = hasWinner()
 			if winner == ' ':
@@ -802,14 +806,15 @@ def Evolve():
 					# pausing = False
 
 		print("[", gen, "]", end=' ')
-		os.system('aplay -q /home/yky/beep.wav')
+		# os.system('aplay -q /home/yky/beep.wav')
+		os.system("beep -f 2000 -l 50")
 
 		# if overall fitness == optimal:
 		#	break
 	# return best
 
-Evolve()
+# Evolve()
 
-print("\x1b[36m**** This program works till here....\n\x1b[0m")
-os.system("beep -f 2000 -l 50")
-exit(0)
+# print("\x1b[36m**** This program works till here....\n\x1b[0m")
+# os.system("beep -f 2000 -l 50")
+# exit(0)
