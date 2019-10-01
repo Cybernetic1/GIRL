@@ -3,6 +3,7 @@
 # * 
 
 import pygame
+import os
 from numpy import * 		# used in plotting
 import plotly.plotly as py	# communicate with external plotly server
 import plotly.graph_objs as go
@@ -14,10 +15,18 @@ import tkinter as tk
 root = tk.Tk()
 root.title("Genetic evolution of logic rules")
 
-pygame.init()
+embed = tk.Frame(root,width=120,height=120)		# creates embed frame for pygame window
+# embed.grid(columnspan=(140),rowspan=130)		# adds grid
+tk.Label(root,text="Tic Tac Toe").grid(row=0,column=3)
+embed.grid(row=1,column=3,rowspan=5,padx=10,pady=10)
+# embed.pack(side = tk.LEFT)						# packs window to the left
+# buttonwin = tk.Frame(root,width=100,height=120)
+# buttonwin.pack(side = tk.LEFT)
+root.update()
+os.environ['SDL_WINDOWID'] = str(embed.winfo_id())
+# os.environ['SDL_VIDEODRIVER'] = 'windib'
 
-screen1 = pygame.display.set_mode((120, 120))
-pygame.display.set_caption("TicTacToe")
+# pygame.display.set_caption("TicTacToe")
 # draw_board([['X', 'O', ' '],['X', 'O', ' '],['X', 'O', ' ']])
 
 # screen2 = pygame.display.set_mode((1000, 500))
@@ -268,79 +277,107 @@ def butt_clear_cache():
 
 # [s] save best formula\n\
 # [l] load best formula\n\
-tk.Label(root, text="P(cross)").grid(row=0, column=0, sticky=tk.W)
-text0b = tk.Text(root, height=1, width=10)
-text0b.grid(row=0,column=0)
-text0b.insert(tk.END, str(crossRate))
-tk.Label(root, text="P(mutate)").grid(row=0, column=1, sticky=tk.W)
-text0a = tk.Text(root, height=1, width=10)
-text0a.grid(row=0,column=1,sticky=tk.E)
-text0a.insert(tk.END, str(mutationRate))
-tk.Label(root, text="P(___)").grid(row=0, column=2, sticky=tk.W)
-text0c = tk.Text(root, height=1, width=10)
-text0c.grid(row=0,column=2,sticky=tk.E)
-text0c.insert(tk.END, str(0.0))
-
 button2 = tk.Button(root, text="Train population", command=butt_train_pop)
-button2.grid(row=2,column=0)
-tk.Label(root, text="#Gens").grid(row=2, column=1, sticky=tk.W)
-text1 = tk.Text(root, height=1, width=10)
-text1.grid(row=2,column=1,sticky=tk.E)
-text1.insert(tk.END, str(maxGens))
-tk.Label(root, text="bouts").grid(row=1, column=2, sticky=tk.W)
-text1a = tk.Text(root, height=1, width=10)
-text1a.grid(row=1,column=2,sticky=tk.E)
-text1a.insert(tk.END, str(bouts))
-tk.Label(root, text="depth").grid(row=2, column=2, sticky=tk.W)
-text1b = tk.Text(root, height=1, width=10)
-text1b.grid(row=2,column=2,sticky=tk.E)
-text1b.insert(tk.END, str(maxDepth))
-tk.Label(root, text="pop size").grid(row=1, column=1, sticky=tk.W)
-text1c = tk.Text(root, height=1, width=10)
-text1c.grid(row=1,column=1,sticky=tk.E)
+button2.grid(row=0,column=0,sticky=tk.W)
+
+tk.Label(root,text="ℙ(crossover)",foreground='grey').grid(row=1, column=1, sticky=tk.W)
+text0b = tk.Text(root,height=1,width=10)
+text0b.grid(row=1,column=1,sticky=tk.E)
+text0b.insert(tk.END, str(crossRate))
+text0b.configure(state=tk.DISABLED,foreground='grey')
+
+tk.Label(root,text="ℙ(mutate)").grid(row=1, column=2, sticky=tk.W)
+text0a = tk.Text(root, height=1, width=10)
+text0a.grid(row=1,column=2,sticky=tk.E)
+text0a.insert(tk.END, str(mutationRate))
+# tk.Label(root, text="P(___)").grid(row=0, column=2, sticky=tk.W)
+# text0c = tk.Text(root, height=1, width=10)
+# text0c.grid(row=1,column=2,sticky=tk.E)
+# text0c.insert(tk.END, str(0.0))
+
+tk.Label(root,text="population size").grid(row=2, column=1, sticky=tk.W)
+text1c = tk.Text(root,height=1,width=10)
+text1c.grid(row=2,column=1,sticky=tk.E)
 text1c.insert(tk.END, str(popSize))
 
-button3 = tk.Button(root, text="export best formula as graph", command=butt_export_graph)
-button3.grid(row=3,column=0)
+tk.Label(root,text="# generations").grid(row=2, column=2, sticky=tk.W)
+text1 = tk.Text(root, height=1, width=10)
+text1.grid(row=2,column=2,sticky=tk.E)
+text1.insert(tk.END, str(maxGens))
+
+tk.Label(root,text="bouts").grid(row=3, column=1, sticky=tk.W)
+text1a = tk.Text(root, height=1, width=10)
+text1a.grid(row=3,column=1,sticky=tk.E)
+text1a.insert(tk.END, str(bouts))
+
+tk.Label(root,text="depth",foreground='grey').grid(row=3, column=2, sticky=tk.W)
+text1b = tk.Text(root, height=1, width=10)
+text1b.grid(row=3,column=2,sticky=tk.E)
+text1b.insert(tk.END, str(maxDepth))
+text1b.configure(state=tk.DISABLED,foreground='grey')
+
+button3 = tk.Button(root,text="export Rete network as graph", command=butt_export_graph, state=tk.DISABLED)
+button3.grid(row=4,column=0,sticky=tk.W)
 text2 = tk.Text(root, height=1, width=50)
-text2.grid(row=3,column=1,columnspan=2)
-text2.insert(tk.END, "formula.dot")
-button4 = tk.Button(root, text="print best formula", command=butt_print_best)
-button4.grid(row=4,column=0)
-button5 = tk.Button(root, text="verify best formula", command=butt_verify_best)
-button5.grid(row=5,column=0)
-button6 = tk.Button(root, text="verify best formula with full history", command=butt_verify_best_full)
-button6.grid(row=6,column=0)
-button7 = tk.Button(root, text="read best formula", command=butt_read_best)
-button7.grid(row=7,column=0)
+text2.grid(row=4,column=1,columnspan=2)
+text2.insert(tk.END, "rete_network.dot")
+text2.configure(state=tk.DISABLED,foreground='grey')
+
+button4 = tk.Button(root,text="examine rules", command=butt_print_best, state=tk.DISABLED)
+button4.grid(row=5,column=0,sticky=tk.W)
+
+button5 = tk.Button(root,text="verify rules", command=butt_verify_best, state=tk.DISABLED)
+button5.grid(row=6,column=0,sticky=tk.W)
+
+button6 = tk.Button(root,text="verify rules with full history", command=butt_verify_best_full, state=tk.DISABLED)
+button6.grid(row=7,column=0,sticky=tk.W)
+
+button7 = tk.Button(root,text="read rules from file", command=butt_read_best, state=tk.DISABLED)
+button7.grid(row=8,column=0,sticky=tk.W)
 text7 = tk.Text(root, height=1, width=50)
-text7.grid(row=7,column=1,columnspan=2)
+text7.grid(row=8,column=1,columnspan=2)
 # text7.insert(tk.END, "f1")
-button8 = tk.Button(root, text="write best formula", command=butt_write_best)
-button8.grid(row=8,column=0)
+
+button8 = tk.Button(root,text="write rules to file", command=butt_write_best, state=tk.DISABLED)
+button8.grid(row=9,column=0,sticky=tk.W)
 text8 = tk.Text(root, height=1, width=50)
-text8.grid(row=8,column=1,columnspan=2)
+text8.grid(row=9,column=1,columnspan=2)
 # text8.insert(tk.END, "f1")
-button9 = tk.Button(root, text="input best formula in Lisp format", command=butt_input_best)
-button9.grid(row=9,column=0)
+
+button9 = tk.Button(root,text="insert rule in Lisp format", command=butt_input_best, state=tk.DISABLED)
+button9.grid(row=10,column=0,sticky=tk.W)
 text9 = tk.Text(root, height=1, width=50)
-text9.grid(row=9,column=1,columnspan=2)
-text9.insert(tk.END, "(+ 1 2)")
-buttonA = tk.Button(root, text="clear formula cache", command=butt_clear_cache)
-buttonA.grid(row=10,column=0)
+text9.grid(row=10,column=1,columnspan=2)
+text9.insert(tk.END, "(loves john mary)")
+text9.configure(state=tk.DISABLED,foreground='grey')
+
+buttonA = tk.Button(root,text="clear rules cache", command=butt_clear_cache, state=tk.DISABLED)
+buttonA.grid(row=11,column=0,sticky=tk.W)
 msgA = tk.Message(root, width=100, text="cache size = " + str(len(cache)))
-msgA.grid(row=10,column=1)
-buttonC = tk.Button(root, text="save as Excel", command=butt_export_Excel)
-buttonC.grid(row=12,column=0)
+msgA.grid(row=11,column=1,sticky=tk.W)
+
+buttonC = tk.Button(root,text="save as Excel", command=butt_export_Excel, state=tk.DISABLED)
+buttonC.grid(row=12,column=0,sticky=tk.W)
 textC = tk.Text(root, height=1, width=50)
 textC.grid(row=12,column=1,columnspan=2)
-textC.insert(tk.END, "results.csv")
+textC.insert(tk.END, "rules.csv")
+textC.configure(state=tk.DISABLED,foreground='grey')
+
 # buttonD = tk.Button(root, text="quit", command=exit)
 # buttonD.grid(row=1,column=0)
 # buttonD = tk.Button(root, text="Plot OHLC", command=plot_OHLC)
 # buttonD.grid(row=13,column=0)
 msg = tk.Message(root, width=800, text="(C) YKY 2019")
 msg.grid(row=14,column=0,columnspan=3,sticky=tk.E)
+root.update()
+
+pygame.init()
+screen1 = pygame.display.set_mode((120,120))
+screen1.fill((0xff,0xff,0xff))
+for z in [39, 79]:
+	pygame.draw.line(screen1, (0x00,0x00,0x00), [z,0], [z,120], 2)
+	pygame.draw.line(screen1, (0x00,0x00,0x00), [0,z], [120,z], 2)
+pygame.display.flip()
 
 root.mainloop()
 exit(0)

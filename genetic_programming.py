@@ -1,18 +1,16 @@
 # -*- coding: utf8 -*-
 
 # TO-DO:
-
-#	* Rete: clear all memories (retain rules)
+#	* Invention of new predicates -- this may be the reason behind failure to converge
 #	* Do all bindings lead to same production?
-#	* mysterious bug still exists: negative_node right_activated;
-#		jr.wme.negative_join_result.remove(jr);	jr not in list
-#	* After bug fix, NC's may be nested again, or contain Neg conditions.
-#	* Invention of new predicates
+#	* After bug fix, NC's may be nested again, or contain Neg conditions
 #	* Custom operators and comparisons
+#	* Rete: clear all memories (retain rules)
 
 # Done:
 #	* Removed empty NCs
 #	* Fixed bug: delete_token_and_descendents ---> delete_descendents_of_tokens
+#	* fixed a couple more bugs in Rete
 
 # **** NOTE:  In this new version we use rules that are compatible with Rete,
 # that consists only of conjunctions, negations, and negated conjunctions (NC).
@@ -75,7 +73,6 @@ import operator
 import sys
 import math
 import os
-# import pygame	# for displaying game board
 
 from rete.common import Has, Rule, WME, Neg, Ncc, is_var, DEBUG
 from rete.network import Network
@@ -93,10 +90,10 @@ const2varRatio = 0.6      # 0.6 means 60% consts
 const2varFlipRate = 0.5   # probability of "var <--> const"
 
 # Evolution parameters:
-maxGens = 100
-popSize = 100
-childrenSize = int(popSize * 0.6)
-dropRate = 0.1			# when children size proportion = 40%, 0.1 seems a good choice
+maxGens = 50
+popSize = 150
+childrenSize = int(popSize * 0.4)
+dropRate = 0.08			# when children size proportion = 40%, 0.1 seems a good choice
 crossRate = 0.9
 mutationRate = 0.1
 
@@ -330,8 +327,8 @@ def crossover(parent1, parent2):
 	This code may potentially work for nested NCs """
 	rule1 = parent1['rule']
 	rule2 = parent2['rule']
-	print("cross: p1 = ", print_rule(rule1))
-	print("       p2 = ", print_rule(rule2))
+	# print("cross: p1 = ", print_rule(rule1))
+	# print("       p2 = ", print_rule(rule2))
 	pt1 = random.randint(1, length_of_rule(rule1) - 1)
 	pt2 = random.randint(1, length_of_rule(rule2) - 1)
 	# print("pt1 = %d, pt2 = %d" % (pt1, pt2))
@@ -594,20 +591,20 @@ def printBoard():
 def playGames(population):
 	from GUI import draw_board
 	global board
-	moves = []				# for recording played moves
+	win = draw = stall = lose = 0
 
 	# Add rules to Rete
 	rete_net = Network()
 	for candidate in population:
 		p = add_rule_to_Rete(rete_net, candidate['rule'])
 		if p:
-			print('●', print_rule(candidate['rule']), end='')
-			print(' (%d)' % length_of_rule(candidate['rule']))
+			print('●', print_rule(candidate['rule']), end='\n')
+			# print(' (%d)' % length_of_rule(candidate['rule']))
 			candidate['p_node'] = p
 	# save_Rete_graph(rete_net, 'rete_0')
 
-	for n in range(50):		# play game N times
-		print("**** Game ", n, end='\n')
+	for n in range(1000):		# play game N times
+		print("\t\tGame ", n, end='\r')
 		# Initialize board
 		for i in [0, 1, 2]:
 			for j in [0, 1, 2]:
@@ -617,8 +614,9 @@ def playGames(population):
 				board[i][j] = ' '
 
 		CurrentPlayer = 'X'					# In the future, may play against self
+		moves = []							# for recording played moves
 		for move in range(9):				# Repeat playing moves in single game
-			print("    move", move, end='; ')
+			# print("    move", move, end='; ')
 
 			if CurrentPlayer == 'X':
 				# collect all playable rules
@@ -654,7 +652,7 @@ def playGames(population):
 						else:
 							candidate['fitness'] -= 1.0
 
-				print(len(playable), "playable rules ", end='')
+				# print(len(playable), "playable rules ", end='')
 				uniques = []
 				for candidate in playable:
 					if not uniques:
@@ -666,10 +664,11 @@ def playGames(population):
 							exists = True
 					if not exists:
 						uniques.append(candidate)
-				print("; unique moves =\x1b[31;1m", len(uniques), end='\x1b[0m\n')
+				# print("; unique moves =\x1b[31;1m", len(uniques), end='\x1b[0m\n')
 
 				if not uniques:
-					print("No rules playable")
+					# print("No rules playable")
+					stall += 1
 					break		# next game
 				# Choose a playable rule randomly
 				candidate = random.choice(uniques)
@@ -678,7 +677,7 @@ def playGames(population):
 				x = int(p0.postcondition.F2)
 				y = int(p0.postcondition.F3)
 				board[x][y] = CurrentPlayer
-				print("    played move: X(%d,%d)" % (x,y))
+				# print("    played move: X(%d,%d)" % (x,y))
 				# remove old WME
 				rete_net.remove_wme(WME(' ', p0.postcondition.F2, p0.postcondition.F3))
 				# add new WME
@@ -689,14 +688,14 @@ def playGames(population):
 			else:			# Player = 'O'
 				i,j = opponentPlay()
 				board[i][j] = 'O'
-				print("Opponent move: O(%d,%d)" % (i,j))
+				# print("Opponent move: O(%d,%d)" % (i,j))
 				# remove old WME
 				rete_net.remove_wme(WME(' ', str(i), str(j)))
 				# add new WME
 				rete_net.add_wme(WME('O', str(i), str(j)))
 
-			# printBoard()
-			draw_board(board)
+			# printBoard()		# this is text mode
+			draw_board(board)	# graphics mode
 			# check if win / lose, assign rewards accordingly
 			winner = hasWinner()
 			if winner == ' ':
@@ -707,20 +706,24 @@ def playGames(population):
 				# increase the scores of all played moves by 3.0
 				for candidate in moves:
 					candidate['fitness'] += 3.0
-				print("Draw")
+				# print("Draw")
+				draw += 1
 				break			# next game
 			elif winner == 'X':
 				# increase the scores of all played moves by 10.0
 				for candidate in moves:
 					candidate['fitness'] += 10.0
-				print("X wins")
+				# print("X wins")
+				win += 1
 				break			# next game
 			elif winner == 'O':
 				# decrease the scores of all played moves by 8.0
 				for candidate in moves:
 					candidate['fitness'] -= 8.0
-				print("O wins")
+				# print("O wins")
+				lose += 1
 				break			# next game
+	return win, draw, stall, lose
 
 def Evolve():
 	global maxGens, popSize, maxDepth, bouts, p_repro, crossRate, mutationRate, childrenSize
@@ -748,20 +751,30 @@ def Evolve():
 	#		Select survivors
 	#		Select parents via tournament; recombine, mutate
 
+	print('win, draw, stall, lose')
+	average_fitness = 0.0
 	for gen in range(maxGens):
 
-		print("Evaluating rules...")
-		playGames(population)			# fitness values are returned in {rule.fitness}
+		# print("Evaluating rules...")
+		for candidate in population:
+			candidate['fitness'] = 0.0
+		# fitness values are returned in {rule.fitness}:
+		win, draw, stall, lose = playGames(population)
+		print('%d -- %d -- %d -- %d , ' % (win, draw, stall, lose), end='')
 		# population = children
 		population.sort(key = lambda x : x['fitness'], reverse = False)
 		# plot_population(screen, population)
 		fitness = 0.0
 		for candidate in population:
 			fitness += candidate['fitness']
-		print("Average fitness = ", fitness / popSize)
+		last_fitness = average_fitness
+		average_fitness = fitness / popSize
+		diff = average_fitness - last_fitness
+		print('avg fitness = %.1f' % average_fitness, end='')
+		print('  %s%.1f\x1b[0m' % ('\x1b[32m↑' if diff > 0 else '\x1b[31m↓', abs(diff)))
 
 		children = []
-		print("\nGenerating children...")
+		# print("\nGenerating children...")
 		while len(children) < childrenSize:
 			# select a group, fight and find 1 winner:
 			p1 = tournament_selection(population, bouts)
