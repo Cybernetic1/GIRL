@@ -1,8 +1,6 @@
 # GILR
 Genetic Inductive Learning of Logic Rules
 
-NOTE: always use Python3
-
 Very simple genetic programming demo
 ====================================
 
@@ -10,7 +8,7 @@ The simple demo is translated to Python (from Ruby) from the book _Clever Algori
 
 ![Clever Algorithms](Clever_Algorithms_cover.jpg)
 
-Run by:
+Run via (note: always use Python3):
 
     python genetic_programming_1.py
 
