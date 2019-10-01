@@ -458,6 +458,7 @@ def mutate(parent):
 				if choice == 1 and i < 2:			# delete (must not be conclusion)
 					# print('delete')
 					child.append(sublist[:remainder] + sublist[remainder + 1:])
+					# NOTE that the list[i:] notation allows index to be > list length
 					index -= 1
 				elif choice == 2 and i < 2:		# insert (cannot be conclusion)
 					# print('insert')
@@ -684,7 +685,7 @@ def playGames(population):
 				rete_net.add_wme(WME(CurrentPlayer, p0.postcondition.F2, p0.postcondition.F3))
 				# **** record move: record the rule that is fired
 				moves.append(candidate)
-				
+
 			else:			# Player = 'O'
 				i,j = opponentPlay()
 				board[i][j] = 'O'
