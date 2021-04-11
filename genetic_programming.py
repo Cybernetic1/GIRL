@@ -1,16 +1,23 @@
 # -*- coding: utf8 -*-
 
 # TO-DO:
-#	* Invention of new predicates -- this may be the reason behind failure to converge
-#	* Do all bindings lead to same production?
-#	* After bug fix, NC's may be nested again, or contain Neg conditions
-#	* Custom operators and comparisons
-#	* Rete: clear all memories (retain rules)
+# * HTML GUI -- how would Python communicate with Javascript?
+#	-  
+# * May need multi-step reasoning, but how?
+# * rule is sometimes bodiless --- when does it arise?
+# * Invention of new predicates -- this may be reason behind failure to converge
+#		- see if / how Rete supports it
+#		- keep a list of invented predicates
+#		- predicates can only be invented in generate_postconditions
+# * Do all bindings lead to same production?
+# * After bug fix, NC's may be nested again, or contain Neg conditions
+# * Custom operators and comparisons
+# * Rete: clear all memories (retain rules)
 
 # Done:
-#	* Removed empty NCs
-#	* Fixed bug: delete_token_and_descendents ---> delete_descendents_of_tokens
-#	* fixed a couple more bugs in Rete
+# * Removed empty NCs
+# * Fixed bug: delete_token_and_descendents ---> delete_descendents_of_tokens
+# * fixed a couple more bugs in Rete
 
 # **** NOTE:  In this new version we use rules that are compatible with Rete,
 # that consists only of conjunctions, negations, and negated conjunctions (NC).
@@ -68,22 +75,28 @@
 #	post-condition = just one positive atom
 #	literal = atomic proposition optionally preceded by a negation sign
 
-import random
+from random import randint, uniform, choice
 import operator
 import sys
 import math
 import os
 
-from rete.common import Has, Rule, WME, Neg, Ncc, is_var, DEBUG
+from rete.common import Has, Rule, WME, Neg, Ncc, is_var # , DEBUG
 from rete.network import Network
 from rete.network import PNode
 
-import GUI
+# Comment out if you don't need GUI:
+# from new_GUI import drawBoard
+import new_GUI
+
+def DEBUG(*args):
+	# print(*args)
+	return
 
 # ============ Global variables ==============
 
 # Logic parameters:
-numPreds = 10
+numPreds = 10	# not used yet
 numVars = 4
 numConsts = 30
 const2varRatio = 0.6      # 0.6 means 60% consts
@@ -91,7 +104,7 @@ const2varFlipRate = 0.5   # probability of "var <--> const"
 
 # Evolution parameters:
 maxGens = 50
-popSize = 150
+popSize = 300
 childrenSize = int(popSize * 0.4)
 dropRate = 0.08			# when children size proportion = 40%, 0.1 seems a good choice
 crossRate = 0.9
@@ -101,9 +114,17 @@ maxDepth = 7
 bouts = 5
 p_repro = 0.08
 
-cache = []		# for storing previously-learned best formulas
+cache = []			# for storing previously-learned best formulas
 
-var_index = -1	# keeping track of logic variables
+var_index = -1		# for creating new logic variables
+pred_index = -1		# for creating new predicates
+
+# For Tic Tac Toe:
+board = [ [' ']*3 for i in range(3)]
+moves = []
+
+# For Rete:
+rete_net = None		# declare as global
 
 def export_rule_as_graph(node, fname):
 	""" This function is currently not used """
@@ -212,40 +233,55 @@ def generate_random_NC():
 	""" In this version, NC's cannot be nested,
 	nor can they contain Neg (negative) conditions. """
 	nc = []
-	while random.uniform(0.0, 1.0) < 0.7:
+	while uniform(0.0, 1.0) < 0.7:
 		nc.append(generate_random_atom())
-	# if random.uniform(0.0, 1.0) < 0.3:
+	# if uniform(0.0, 1.0) < 0.3:
 		# nc.append(generate_random_NC())
 	return nc
 
 def generate_random_conjunction():
 	conjunction = []
-	while random.uniform(0.0, 1.0) < 0.7:
+	while uniform(0.0, 1.0) < 0.7:
 		conjunction.append(generate_random_literal())
 	return conjunction
 
 def generate_random_literal():
-	if random.uniform(0.0, 1.0) < 0.25:
+	if uniform(0.0, 1.0) < 0.25:
 		return ['~'] + generate_random_atom()
 	else:
 		return generate_random_atom()
 
 def generate_random_atom():
-	""" An atomic logic formula such as X(a,b) """
-	choice = random.uniform(0.0, 1.0)
-	if choice < 0.33333:
+	""" An atomic logic formula such as X(a,b).
+	This function will not invent new predicates """
+	global pred_index
+	# choice 0, 1, 2 = X, O, ' ' respectively
+	choice = randint(0, pred_index + 3)
+	if choice == 0:
 		predicate = 'X'
-	elif choice < 0.66666:
+	elif choice == 1:
 		predicate = 'O'
-	else:
+	elif choice == 2:
 		predicate = ' '
+	else:
+		predicate = 'P' + str(choice - 3)
 	arg1 = generate_random_var_or_const()
 	arg2 = generate_random_var_or_const()
 	return [predicate, arg1, arg2]
 
 def generate_random_post_condition():
-	""" An atom without new variable creation """
-	predicate = 'X' # if (random.uniform(0.0, 1.0) > 0.5) else 'O'
+	""" An atom with possibly new predicate invention,
+	but not new variable creation """
+	global pred_index
+	if uniform(0.0, 1.0) > 0.2:
+		predicate = 'X'		# this would be an 'action'
+	else:
+		# infer old predicate or generate a new one:
+		if pred_index >= 0 and uniform(0.0, 1.0) > 0.1:
+			predicate = 'P' + str(randint(0, pred_index))
+		else:
+			pred_index += 1
+			predicate = 'P' + str(pred_index)
 	arg1 = generate_random_var_or_const(False)
 	arg2 = generate_random_var_or_const(False)
 	return [predicate, arg1, arg2]
@@ -253,21 +289,21 @@ def generate_random_post_condition():
 def generate_random_var_or_const(create = True):
 	""" Result could be old var, new var, or const """
 	global var_index
-	choice = random.uniform(0.0, 1.0)
+	choice = uniform(0.0, 1.0)
 	if create and choice > 0.9:				# new var
 		var_index += 1
 		return '$' + str(var_index)
 	elif choice > 0.5 and var_index >= 0:	# old var
-		return '$' + str(random.randint(0, var_index))
+		return '$' + str(randint(0, var_index))
 	else:									# constant ∈ {0, 1, 2}
-		return random.randint(0, 2)
+		return randint(0, 2)
 
 def generate_random_inequality(maxDepth, funcs, terms):
 	""" Old code, not used yet """
 	# determine maxDepth = ?
 	arg1 = generate_random_formula(maxDepth, funcs, terms)
 	arg2 = generate_random_formula(maxDepth, funcs, terms)
-	op = operator.gt if (random.uniform(0.0, 1.0) > 0.5) else operator.lt
+	op = operator.gt if (uniform(0.0, 1.0) > 0.5) else operator.lt
 	return [op, arg1, arg2]
 
 def length_of_rule(rule):
@@ -285,7 +321,7 @@ def tournament_selection(pop, bouts):
 	selected = []
 	# print "bouts = ", bouts
 	for i in range(bouts):
-		selected.append(random.choice(pop))
+		selected.append(choice(pop))
 	# print("len = ", len(pop))
 	selected.sort(key = lambda x: x['fitness'])
 	return selected[0]
@@ -308,9 +344,9 @@ def prune(node, maxDepth, terms, depth = 0):
 def prune2(node, maxDepth, terms, depth = 0):
 	""" old code """
 	if depth >= maxDepth - 1:
-		t = terms[random.randint(0, len(terms) - 1)]
+		t = terms[randint(0, len(terms) - 1)]
 		if t == 'R':
-			return random.uniform(-5.0, +5.0)
+			return uniform(-5.0, +5.0)
 		else:
 			return t
 	depth += 1
@@ -327,10 +363,12 @@ def crossover(parent1, parent2):
 	This code may potentially work for nested NCs """
 	rule1 = parent1['rule']
 	rule2 = parent2['rule']
-	# print("cross: p1 = ", print_rule(rule1))
-	# print("       p2 = ", print_rule(rule2))
-	pt1 = random.randint(1, length_of_rule(rule1) - 1)
-	pt2 = random.randint(1, length_of_rule(rule2) - 1)
+	if length_of_rule(rule1) == 1:
+		print("cross: p1 = ", print_rule(rule1), rule1[0], rule1[1], rule1[2])
+	if length_of_rule(rule2) == 1:
+		print("cross: p2 = ", print_rule(rule2), rule2[0], rule2[1], rule2[2])
+	pt1 = randint(1, length_of_rule(rule1) - 1)
+	pt2 = randint(1, length_of_rule(rule2) - 1)
 	# print("pt1 = %d, pt2 = %d" % (pt1, pt2))
 
 	# copy head and tail
@@ -387,6 +425,10 @@ def crossover(parent1, parent2):
 	# print(print_rule(child1))
 	# print(print_rule(child2))
 	# print("^^^^^^^^^^^^^^^^^^^^^")
+	if length_of_rule(child1) == 1:
+		print("cross: p1 = ", print_rule(child1), child1[0], child1[1], child1[2])
+	if length_of_rule(child2) == 1:
+		print("cross: p2 = ", print_rule(child2), child2[0], child2[1], child2[2])
 	return	{'rule':child1, 'fitness':0.0, 'p_node':None}, \
 			{'rule':child2, 'fitness':0.0, 'p_node':None}
 
@@ -427,8 +469,8 @@ def mutate(parent):
 	rule = parent['rule']
 	# print("+++ ", print_rule(rule), end='')
 	# 'point' designates the place where mutation occurs, can be at position 0
-	point = random.randint(0, length_of_rule(rule) - 1)
-	choice = random.randint(1, 3)		# delete / insert / replace
+	point = randint(0, length_of_rule(rule) - 1)
+	choice = randint(1, 3)		# delete / insert / replace
 	# print(' (%s %d)' % ('delete' if choice == 1 else 'insert' if choice == 2 \
 		# else 'replace', point))
 
@@ -534,9 +576,6 @@ def save_Rete_graph(net, fname):
 	# os.system("dot -Tpng %s.dot -o%s.png" % (fname, fname))
 	print("Rete graph saved as %s.png\n" % fname)
 
-# For Tic Tac Toe:
-board = [ [' ']*3 for i in range(3)]
-
 def hasWinner():
 	global board
 
@@ -578,7 +617,7 @@ def opponentPlay():
 		for j in [0, 1, 2]:
 			if board[i][j] == ' ':
 				playable2.append((i,j))
-	return random.choice(playable2)
+	return choice(playable2)
 
 def printBoard():
 	global board
@@ -590,22 +629,22 @@ def printBoard():
 
 # TO-DO: actions could be intermediate predicates
 def playGames(population):
-	from GUI import draw_board
-	global board
+	global board, moves, rete_net
 	win = draw = stall = lose = 0
 
 	# Add rules to Rete
 	rete_net = Network()
+	# print("\x1b[43m-----------------------------------------------\x1b[0m")
 	for candidate in population:
 		p = add_rule_to_Rete(rete_net, candidate['rule'])
 		if p:
-			print('●', print_rule(candidate['rule']), end='\n')
+			# print('●', print_rule(candidate['rule']), end='\n')
 			# print(' (%d)' % length_of_rule(candidate['rule']))
 			candidate['p_node'] = p
 	# save_Rete_graph(rete_net, 'rete_0')
 
 	for n in range(1000):		# play game N times
-		print("\t\tGame ", n, end='\r')
+		print("\r\t\tGame ", n, end='\r')
 		# Initialize board
 		for i in [0, 1, 2]:
 			for j in [0, 1, 2]:
@@ -620,71 +659,9 @@ def playGames(population):
 			# print("    move", move, end='; ')
 
 			if CurrentPlayer == 'X':
-				# collect all playable rules
-				playable = []
-				for candidate in population:
-					p0 = candidate['p_node']
-					if not p0:
-						continue
-					if p0.items:
-						DEBUG(len(p0.items), " instances")
-					for item in p0.items:
-						# item = random.choice(p0.items)		# choose an instantiation randomly
-						# Question: are all instances the same?
-						# apply binding to rule's action (ie, post-condition)
-						if is_var(p0.postcondition.F2):
-							p0.postcondition.F2 = item.get_binding(p0.postcondition.F2)
-							if p0.postcondition.F2 is None:
-								p0.postcondition.F2 = str(random.randint(0,2))
-						if is_var(p0.postcondition.F3):
-							p0.postcondition.F3 = item.get_binding(p0.postcondition.F3)
-							if p0.postcondition.F3 is None:
-								p0.postcondition.F3 = str(random.randint(0,2))
-						DEBUG("production rule = ", print_rule(candidate['rule']))
-						DEBUG("chosen item = ", item)
-						DEBUG("postcond = ", p0.postcondition)
-
-						# Check if the square is empty
-						x = int(p0.postcondition.F2)
-						y = int(p0.postcondition.F3)
-						if board[x][y] == ' ':
-							playable.append(candidate)
-							candidate['fitness'] += 1.0
-						else:
-							candidate['fitness'] -= 1.0
-
-				# print(len(playable), "playable rules ", end='')
-				uniques = []
-				for candidate in playable:
-					if not uniques:
-						uniques.append(candidate)
-						continue
-					exists = False
-					for u in uniques:
-						if candidate['p_node'].postcondition == u['p_node'].postcondition:
-							exists = True
-					if not exists:
-						uniques.append(candidate)
-				# print("; unique moves =\x1b[31;1m", len(uniques), end='\x1b[0m\n')
-
-				if not uniques:
-					# print("No rules playable")
+				if play_1_move(population, CurrentPlayer):	# Stalled?
 					stall += 1
-					break		# next game
-				# Choose a playable rule randomly
-				candidate = random.choice(uniques)
-				p0 = candidate['p_node']
-
-				x = int(p0.postcondition.F2)
-				y = int(p0.postcondition.F3)
-				board[x][y] = CurrentPlayer
-				# print("    played move: X(%d,%d)" % (x,y))
-				# remove old WME
-				rete_net.remove_wme(WME(' ', p0.postcondition.F2, p0.postcondition.F3))
-				# add new WME
-				rete_net.add_wme(WME(CurrentPlayer, p0.postcondition.F2, p0.postcondition.F3))
-				# **** record move: record the rule that is fired
-				moves.append(candidate)
+					break						# game-over, next game
 
 			else:			# Player = 'O'
 				i,j = opponentPlay()
@@ -695,8 +672,8 @@ def playGames(population):
 				# add new WME
 				rete_net.add_wme(WME('O', str(i), str(j)))
 
-			# printBoard()		# this is text mode
-			draw_board(board)	# graphics mode
+			# printBoard()				# this is text mode
+			new_GUI.draw_board()		# graphics mode
 			# check if win / lose, assign rewards accordingly
 			winner = hasWinner()
 			if winner == ' ':
@@ -726,6 +703,82 @@ def playGames(population):
 				break			# next game
 	return win, draw, stall, lose
 
+# ALGORITHM:
+# 1) REPEAT: apply rules and collect all results
+#		update RETE Working Memory
+# 2) Select 1 playable result and play it
+def play_1_move(population, CurrentPlayer):
+	# 1) collect all playable rules
+	playable = []
+	for candidate in population:
+		p0 = candidate['p_node']
+		if not p0:
+			continue
+		if p0.items:
+			DEBUG(len(p0.items), " instances")
+		for item in p0.items:
+			# item = choice(p0.items)		# choose an instantiation randomly
+			# Question: are all instances the same?
+			# apply binding to rule's action (ie, post-condition)
+			if is_var(p0.postcondition.F2):
+				p0.postcondition.F2 = item.get_binding(p0.postcondition.F2)
+				if p0.postcondition.F2 is None:
+					p0.postcondition.F2 = str(randint(0,2))
+			if is_var(p0.postcondition.F3):
+				p0.postcondition.F3 = item.get_binding(p0.postcondition.F3)
+				if p0.postcondition.F3 is None:
+					p0.postcondition.F3 = str(randint(0,2))
+			DEBUG("production rule = ", print_rule(candidate['rule']))
+			DEBUG("chosen item = ", item)
+			DEBUG("postcond = ", p0.postcondition)
+
+			# Here I assumed postcond = X = action
+			# But now postcond can be a predicate P_i
+			# rete_net.add_wme(WME(CurrentPlayer, p0.postcondition.F2, p0.postcondition.F3))
+			# 
+			# Check if the square is empty
+			x = int(p0.postcondition.F2)
+			y = int(p0.postcondition.F3)
+			if board[x][y] == ' ':
+				playable.append(candidate)
+				candidate['fitness'] += 1.0
+			else:
+				candidate['fitness'] -= 1.0
+
+	# print(len(playable), "playable rules ", end='')
+	uniques = []
+	for candidate in playable:
+		if not uniques:
+			uniques.append(candidate)
+			continue
+		exists = False
+		for u in uniques:
+			if candidate['p_node'].postcondition == u['p_node'].postcondition:
+				exists = True
+		if not exists:
+			uniques.append(candidate)
+	# print("; unique moves =\x1b[31;1m", len(uniques), end='\x1b[0m\n')
+
+	if not uniques:
+		# print("No rules playable")
+		return True		# next game
+
+	# 2) Choose a playable rule randomly
+	candidate = choice(uniques)
+	p0 = candidate['p_node']
+
+	x = int(p0.postcondition.F2)
+	y = int(p0.postcondition.F3)
+	board[x][y] = CurrentPlayer
+	# print("    played move: X(%d,%d)" % (x,y))
+	# remove old WME
+	rete_net.remove_wme(WME(' ', p0.postcondition.F2, p0.postcondition.F3))
+	# add new WME
+	rete_net.add_wme(WME(CurrentPlayer, p0.postcondition.F2, p0.postcondition.F3))
+	# **** record move: record the rule that is fired
+	moves.append(candidate)
+	return False
+
 def Evolve():
 	global maxGens, popSize, maxDepth, bouts, p_repro, crossRate, mutationRate, childrenSize
 	population = []
@@ -752,16 +805,19 @@ def Evolve():
 	#		Select survivors
 	#		Select parents via tournament; recombine, mutate
 
-	print('win, draw, stall, lose')
+	print('Win\tLose\tDraw\tStall')
 	average_fitness = 0.0
 	for gen in range(maxGens):
+		if gen > 0:
+			break
 
 		# print("Evaluating rules...")
 		for candidate in population:
 			candidate['fitness'] = 0.0
 		# fitness values are returned in {rule.fitness}:
 		win, draw, stall, lose = playGames(population)
-		print('%d -- %d -- %d -- %d , ' % (win, draw, stall, lose), end='')
+		print('                                            ', end='\r')
+		print('W %d\tL %d\tD %d\tS %d\t' % (win, lose, draw, stall), end='')
 		# population = children
 		population.sort(key = lambda x : x['fitness'], reverse = False)
 		# plot_population(screen, population)
@@ -771,15 +827,15 @@ def Evolve():
 		last_fitness = average_fitness
 		average_fitness = fitness / popSize
 		diff = average_fitness - last_fitness
-		print('avg fitness = %.1f' % average_fitness, end='')
-		print('  %s%.1f\x1b[0m' % ('\x1b[32m↑' if diff > 0 else '\x1b[31m↓', abs(diff)))
+		print('avg fitness %.1f' % average_fitness, end='')
+		print(' %s%.1f\x1b[0m' % ('\x1b[32m▲' if diff > 0 else '\x1b[31m▼', abs(diff)))
 
 		children = []
 		# print("\nGenerating children...")
 		while len(children) < childrenSize:
 			# select a group, fight and find 1 winner:
 			p1 = tournament_selection(population, bouts)
-			operation = random.uniform(0.0, 1.0)
+			operation = uniform(0.0, 1.0)
 			# if operation < p_repro:			# from earlier version,
 				# c1 = copy_tree(p1)			# simple reproduction / replication
 			if operation < mutationRate:
@@ -796,7 +852,7 @@ def Evolve():
 		# Add children to population
 		j = 0
 		for i, rule in reversed(list(enumerate(population))):
-			if random.uniform(0.0, 1.0) <= dropRate:
+			if uniform(0.0, 1.0) <= dropRate:
 				population[i] = children[j]
 				j += 1
 				if j == childrenSize:
@@ -819,7 +875,7 @@ def Evolve():
 				# elif event.type == pygame.KEYUP:
 					# pausing = False
 
-		print("[", gen, "]", end=' ')
+		print("Gen[", gen, "]", end=' ')
 		# os.system('aplay -q /home/yky/beep.wav')
 		os.system("beep -f 2000 -l 50")
 
@@ -827,7 +883,8 @@ def Evolve():
 		#	break
 	# return best
 
-# Evolve()
+if not "new_GUI" in sys.modules:
+	Evolve()
 
 # print("\x1b[36m**** This program works till here....\n\x1b[0m")
 # os.system("beep -f 2000 -l 50")

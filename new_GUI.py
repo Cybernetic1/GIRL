@@ -2,55 +2,61 @@
 # * What would be training example?  Probably manipulation of relation graphs
 # * 
 
-import pygame
 import os
 from numpy import * 		# used in plotting
 import chart_studio.plotly as py	# communicate with external plotly server
 import plotly.graph_objs as go
 
 from genetic_programming import Evolve, maxGens, maxDepth, popSize, \
-	bouts, crossRate, mutationRate, cache
+	bouts, crossRate, mutationRate, cache, board
 
-import tkinter as tk
-root = tk.Tk()
-root.title("Genetic evolution of logic rules")
+# title("Genetic evolution of logic rules")
 
-embed = tk.Frame(root,width=120,height=120)		# creates embed frame for pygame window
-# embed.grid(columnspan=(140),rowspan=130)		# adds grid
-tk.Label(root,text="Tic Tac Toe").grid(row=0,column=3)
-embed.grid(row=1,column=3,rowspan=5,padx=10,pady=10)
-# embed.pack(side = tk.LEFT)						# packs window to the left
-# buttonwin = tk.Frame(root,width=100,height=120)
-# buttonwin.pack(side = tk.LEFT)
-root.update()
-os.environ['SDL_WINDOWID'] = str(embed.winfo_id())
-# os.environ['SDL_VIDEODRIVER'] = 'windib'
+# Install this Flask extension:
+#	pip3 install flask-sse
+#	sudo apt install redis-server (needed?)
 
-# pygame.display.set_caption("TicTacToe")
-# draw_board([['X', 'O', ' '],['X', 'O', ' '],['X', 'O', ' ']])
+from flask import Flask, send_from_directory
+from flask_sse import sse
+from multiprocessing import Process
 
-# screen2 = pygame.display.set_mode((1000, 500))
-# pygame.display.set_caption("Population fitness")
+app = Flask(__name__, static_folder="web/")
+app.config["REDIS_URL"] = "redis://localhost"
+app.register_blueprint(sse, url_prefix='/SSE')
 
-def draw_board(board):
-	screen1.fill((0xff,0xff,0xff))
-	for z in [39, 79]:
-		pygame.draw.line(screen1, (0x00,0x00,0x00), [z,0], [z,120], 2)
-		pygame.draw.line(screen1, (0x00,0x00,0x00), [0,z], [120,z], 2)
-	for i in [0,1,2]:
-		for j in [0,1,2]:
-			x1 = i * 40
-			x2 = i * 40 + 40
-			y1 = j * 40
-			y2 = j * 40 + 40
-			if board[i][j] == 'X':
-				pygame.draw.line(screen1, (0x00,0x00,0xff), [x1+5, y1+5], [x2-5, y2-5], 4)
-				pygame.draw.line(screen1, (0x00,0x00,0xff), [x2-5, y1+5], [x1+5, y2-5], 4)
-			elif board[i][j] == 'O':
-				pygame.draw.circle(screen1, (0xff,0x00,0x00), (x1+20, y1+20), 15, 3)
-			# else:
-				# pygame.draw.rect(screen1, (0xff,0xff,0xff), (x1, y1, x2, y2))
-	pygame.display.flip()
+@app.route('/evolve')
+def start_evolve():
+	# from genetic_programming import Evolve, maxGens, maxDepth, popSize, \
+	#	bouts, crossRate, mutationRate, cache
+	# global maxGens, popSize, maxDepth, bouts, crossRate, mutationRate
+	# global best
+	# maxGens = int(text1.get("1.0", tk.END)[:-1])
+
+	# execute the algorithm as a process:
+	heavy_process = Process(target=Evolve, daemon=True)
+	heavy_process.start()
+	return "Evolve started!"
+
+@app.route('/send')
+def send_message():
+	sse.publish({"message": "Hello!"}, type='message')
+	return "Message sent!"
+
+@app.route('/favicon.ico')
+def favicon():
+	return send_from_directory(app.root_path,
+		'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+def draw_board():
+	global board
+	# Send through SSE to GUI.js such that it plots the board
+	sse.publish({"data" : "".join(map("".join,board))}, type="message")
+	return
+
+# def start_server():
+app.run(host='127.0.0.1', port=7000)
+
+print("Here?")
 
 def plot_population(pop):
 	screen2.fill((0x00,0x00,0x00))
@@ -77,6 +83,7 @@ def plot_population(pop):
 			pygame.draw.line(screen2, (0x00,0x00,0xFF), [int(x),H], [int(x),H-y], dn)
 	pygame.display.flip()
 
+"""
 def butt_train_pop():
 	from genetic_programming import Evolve, maxGens, maxDepth, popSize, \
 		bouts, crossRate, mutationRate, cache
@@ -370,14 +377,4 @@ buttonD.grid(row=13,column=0)
 msg = tk.Message(root, width=800, text="(C) YKY 2019")
 msg.grid(row=14,column=0,columnspan=3,sticky=tk.E)
 root.update()
-
-pygame.init()
-screen1 = pygame.display.set_mode((120,120))
-screen1.fill((0xff,0xff,0xff))
-for z in [39, 79]:
-	pygame.draw.line(screen1, (0x00,0x00,0x00), [z,0], [z,120], 2)
-	pygame.draw.line(screen1, (0x00,0x00,0x00), [0,z], [120,z], 2)
-pygame.display.flip()
-
-root.mainloop()
-exit(0)
+"""
