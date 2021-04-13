@@ -87,10 +87,10 @@ from rete.network import PNode
 
 # Comment out if you don't need GUI:
 # from new_GUI import drawBoard
-import new_GUI
+# import new_GUI
 
 def DEBUG(*args):
-	# print(*args)
+	print(*args)
 	return
 
 # ============ Global variables ==============
@@ -179,7 +179,10 @@ def print_rule(rule):
 	for literal in rule[0]:
 		s += print_literal(literal) + ' ⋀ '
 	s += print_nc(rule[1])
-	return s + " \x1b[31;1m=> " + print_literal(rule[2]) + "\x1b[0m"
+	if rule[2][0][0] == 'P':
+		return s + " \x1b[32;1m=> " + print_literal(rule[2]) + "\x1b[0m"
+	else:
+		return s + " \x1b[31;1m=> " + print_literal(rule[2]) + "\x1b[0m"
 
 def print_nc(nc):
 	if len(nc) == 0:
@@ -638,7 +641,7 @@ def playGames(population):
 	for candidate in population:
 		p = add_rule_to_Rete(rete_net, candidate['rule'])
 		if p:
-			# print('●', print_rule(candidate['rule']), end='\n')
+			print('●', print_rule(candidate['rule']), end='\n')
 			# print(' (%d)' % length_of_rule(candidate['rule']))
 			candidate['p_node'] = p
 	# save_Rete_graph(rete_net, 'rete_0')
@@ -672,8 +675,8 @@ def playGames(population):
 				# add new WME
 				rete_net.add_wme(WME('O', str(i), str(j)))
 
-			# printBoard()				# this is text mode
-			new_GUI.draw_board()		# graphics mode
+			printBoard()				# this is text mode
+			# new_GUI.draw_board()		# graphics mode
 			# check if win / lose, assign rewards accordingly
 			winner = hasWinner()
 			if winner == ' ':
@@ -707,16 +710,24 @@ def playGames(population):
 # 1) REPEAT: apply rules and collect all results
 #		update RETE Working Memory
 # 2) Select 1 playable result and play it
+# Each rule candidate could have multiple instances
+# should we add all P_i's to WM?
+# 1) every rule may infer a (non-action) proposition P_i
+# 2) every rule has its instantiations that should be assumed
+# 3) can we simply accept all such propositions in the same Working-Memory state?
 def play_1_move(population, CurrentPlayer):
 	# 1) collect all playable rules
 	playable = []
 	for candidate in population:
-		p0 = candidate['p_node']
+		p0 = candidate['p_node']			# a p-node seems to be the "results" node
 		if not p0:
 			continue
 		if p0.items:
-			DEBUG(len(p0.items), " instances")
+			DEBUG(len(p0.items), "instances")
 		for item in p0.items:
+			DEBUG("production rule =", print_rule(candidate['rule']))
+			DEBUG("chosen item =", item)
+			DEBUG("postcond =", p0.postcondition)
 			# item = choice(p0.items)		# choose an instantiation randomly
 			# Question: are all instances the same?
 			# apply binding to rule's action (ie, post-condition)
@@ -728,14 +739,15 @@ def play_1_move(population, CurrentPlayer):
 				p0.postcondition.F3 = item.get_binding(p0.postcondition.F3)
 				if p0.postcondition.F3 is None:
 					p0.postcondition.F3 = str(randint(0,2))
-			DEBUG("production rule = ", print_rule(candidate['rule']))
-			DEBUG("chosen item = ", item)
-			DEBUG("postcond = ", p0.postcondition)
+			DEBUG("postcond =", p0.postcondition, "<-- after binding")
 
 			# Here I assumed postcond = X = action
 			# But now postcond can be a predicate P_i
-			# rete_net.add_wme(WME(CurrentPlayer, p0.postcondition.F2, p0.postcondition.F3))
-			# 
+			head = p0.postcondition.F1
+			DEBUG("the head=", head)
+			if head[0] == 'P':
+				rete_net.add_wme(WME(head, p0.postcondition.F2, p0.postcondition.F3))
+				input("added proposition to WM...")		# pause
 			# Check if the square is empty
 			x = int(p0.postcondition.F2)
 			y = int(p0.postcondition.F3)
