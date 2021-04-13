@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">  
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Tic Tac Toe</title>
+
+		<style type="text/css">
+			body {
+				font-size: 130%;
+				font-family: "Trebuchet MS",Verdana, Arial, Helvetica, sans-serif;
+				background-color: #000000;
+				color: #eeeeee;
+				}
+
+			td {
+				font-size: 50px;
+				text-align: center;
+				}
+
+			table {
+				border: 1px solid #999999;
+				margin: 10px;
+				}
+
+			td {
+				border: 1px solid #999999;
+				height: 60px;
+				width: 60px;
+				}
+
+			.X {
+			  color: #3377FF;
+				}
+
+			.O {
+			  color: #FF5555;
+				}
+
+			button {
+				font-size: 110%;
+				border: None;
+				border-radius: 7px;
+				background-color: #578dd0;
+				cursor: pointer;
+				margin: 5px;
+				}
+
+			button:hover {
+				background-color: #FFAAAA;
+			}
+
+			input {
+				font-size: 115%;
+				border-radius: 10px;
+				}
+
+		</style>
+	</head>
+
+	<body>
+		<div style="width:fit-content; float:left;">
+			<table>
+			  <tr><td id="T0" class="X">X</td><td id="T1"> </td><td id="T2"> </td></tr>
+			  <tr><td id="T3"> </td><td id="T4" class="O">O</td><td id="T5"> </td></tr>
+			  <tr><td id="T6"> </td><td id="T7"> </td><td id="T8" class="X">X</td></tr>
+			</table>
+		</div>
+
+		<div style="float:left;">
+		<button id="train">Train</button>
+		<br style="clear:both;"/>
+
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+		<script charset="utf-8" src="GUI.js"></script>
+
+	</body>
+</html>
