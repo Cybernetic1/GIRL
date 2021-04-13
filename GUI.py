@@ -5,8 +5,8 @@
 import pygame
 import os
 from numpy import * 		# used in plotting
-import plotly.plotly as py	# communicate with external plotly server
-import plotly.graph_objs as go
+# import plotly.plotly as py	# communicate with external plotly server
+# import plotly.graph_objs as go
 
 from genetic_programming import Evolve, maxGens, maxDepth, popSize, \
 	bouts, crossRate, mutationRate, cache
