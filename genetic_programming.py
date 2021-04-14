@@ -90,7 +90,7 @@ from rete.network import PNode
 # import new_GUI
 
 def DEBUG(*args):
-	print(*args)
+	# print(*args)
 	return
 
 # ============ Global variables ==============
@@ -630,7 +630,32 @@ def printBoard():
 			print(board[i][j], end='')
 		print(']')
 
-# TO-DO: actions could be intermediate predicates
+# UPDATE ALGORITHM FOR REINFORCEMENT LEARNING
+# ===========================================
+# For each inferred post-cond, the rule.fire += ε
+# Then for each time step, the "fire" values of every rule AMORTIZE.
+# At the time of REWARD, we reward all rules that has recently fired.
+# 有个问题係: if a rule recently fired, but has no influence on the rewarded rule?
+# The point is: at least I can more easily detect the antecedents during backward
+# chaining.
+# Another problem: what about instantiations? So the "fire" should be recorded
+# as instantiated POST-CONDs of a rule.
+# Recording all instantiations of post-conds may be costly but there seems no
+# other alternatives.
+
+# Another question is how to express the BELLMAN condition or update formula.
+# The "state" would be the WM for each inference step.
+# The "action" would be the inference post-cond.
+# So the Bellman condition says: V(x) = Expect[ R +  γ V(x') ]
+# which means we have to establish a value function over STATES x = WM contents.
+# But this is different from value functions over RULES.
+# The rules are more like ACTIONS taking a state to a new state.  
+# So how come I am valuing actions instead of states?
+# Perhaps it is a kind of Q-learning?
+
+# So the algorithm is:
+# 
+
 def playGames(population):
 	global board, moves, rete_net
 	win = draw = stall = lose = 0
@@ -641,7 +666,7 @@ def playGames(population):
 	for candidate in population:
 		p = add_rule_to_Rete(rete_net, candidate['rule'])
 		if p:
-			print('●', print_rule(candidate['rule']), end='\n')
+			# print('●', print_rule(candidate['rule']), end='\n')
 			# print(' (%d)' % length_of_rule(candidate['rule']))
 			candidate['p_node'] = p
 	# save_Rete_graph(rete_net, 'rete_0')
@@ -675,7 +700,7 @@ def playGames(population):
 				# add new WME
 				rete_net.add_wme(WME('O', str(i), str(j)))
 
-			printBoard()				# this is text mode
+			# printBoard()				# this is text mode
 			# new_GUI.draw_board()		# graphics mode
 			# check if win / lose, assign rewards accordingly
 			winner = hasWinner()
@@ -714,49 +739,96 @@ def playGames(population):
 # should we add all P_i's to WM?
 # 1) every rule may infer a (non-action) proposition P_i
 # 2) every rule has its instantiations that should be assumed
+#	-- why are instantiations different? because of substitution into rules.
+#	-- but are these subsitutions mutually compatible or exclusive?
+#	-- seems compatible, eg: all men are mortal => Socrates and Plato are mortal.
 # 3) can we simply accept all such propositions in the same Working-Memory state?
+#	-- in other words, if head[0] == P then we always add postcond to WM.
+# 4) TO-DO:  we can iterate the "INFERENCE" step multiple times, before making
+#		an action.
+# NOTE: When a variable is unbound, we simply assign random values to it;
+#		This seems reasonable, as we regard unbound predicates as STOCHASTIC.
 def play_1_move(population, CurrentPlayer):
+
+	# **** Part A: pure INFERENCE step(s) ****
+	i_infer = 0
+	max_infer = 3
+	while i_infer < max_infer:
+		i_infer += 1
+		for candidate in population:
+			p0 = candidate['p_node']		# a p-node seems to be the "results" node
+			if not p0:
+				continue
+			if p0.items:
+				DEBUG(len(p0.items), "instances")
+			for item in p0.items:
+				# **** Previously I assumed postcond = X = action
+				# **** But now postcond can be a predicate P_i
+				head = p0.postcondition.F1
+				DEBUG("the head=", head)
+				if head[0] == 'P':
+
+					DEBUG("production rule =", print_rule(candidate['rule']))
+					DEBUG("chosen item =", item)
+					DEBUG("postcond =", p0.postcondition)
+					# Question: are all instances the same?
+					# apply binding to rule's action (ie, post-condition)
+					if is_var(p0.postcondition.F2):
+						p0.postcondition.F2 = item.get_binding(p0.postcondition.F2)
+						if p0.postcondition.F2 is None:
+							p0.postcondition.F2 = str(randint(0,2))
+					if is_var(p0.postcondition.F3):
+						p0.postcondition.F3 = item.get_binding(p0.postcondition.F3)
+						if p0.postcondition.F3 is None:
+							p0.postcondition.F3 = str(randint(0,2))
+					DEBUG("postcond =", p0.postcondition, "<-- after binding")
+
+					# **** Add to Working Memory:
+					rete_net.add_wme(WME(head, p0.postcondition.F2, p0.postcondition.F3))
+					# input("added proposition to WM...")		# pause
+					continue			# continue to next instantiation...
+
+	# **** Part B: action step ****
 	# 1) collect all playable rules
 	playable = []
 	for candidate in population:
-		p0 = candidate['p_node']			# a p-node seems to be the "results" node
+		p0 = candidate['p_node']		# a p-node seems to be the "results" node
 		if not p0:
 			continue
 		if p0.items:
 			DEBUG(len(p0.items), "instances")
 		for item in p0.items:
-			DEBUG("production rule =", print_rule(candidate['rule']))
-			DEBUG("chosen item =", item)
-			DEBUG("postcond =", p0.postcondition)
-			# item = choice(p0.items)		# choose an instantiation randomly
-			# Question: are all instances the same?
-			# apply binding to rule's action (ie, post-condition)
-			if is_var(p0.postcondition.F2):
-				p0.postcondition.F2 = item.get_binding(p0.postcondition.F2)
-				if p0.postcondition.F2 is None:
-					p0.postcondition.F2 = str(randint(0,2))
-			if is_var(p0.postcondition.F3):
-				p0.postcondition.F3 = item.get_binding(p0.postcondition.F3)
-				if p0.postcondition.F3 is None:
-					p0.postcondition.F3 = str(randint(0,2))
-			DEBUG("postcond =", p0.postcondition, "<-- after binding")
 
-			# Here I assumed postcond = X = action
-			# But now postcond can be a predicate P_i
 			head = p0.postcondition.F1
-			DEBUG("the head=", head)
-			if head[0] == 'P':
-				rete_net.add_wme(WME(head, p0.postcondition.F2, p0.postcondition.F3))
-				input("added proposition to WM...")		# pause
-			# Check if the square is empty
-			x = int(p0.postcondition.F2)
-			y = int(p0.postcondition.F3)
-			if board[x][y] == ' ':
-				playable.append(candidate)
-				candidate['fitness'] += 1.0
-			else:
-				candidate['fitness'] -= 1.0
+			if head[0] != 'P':
+				# **** Here, the post-cond must be an ACTION ****
 
+				DEBUG("production rule =", print_rule(candidate['rule']))
+				DEBUG("chosen item =", item)
+				DEBUG("postcond =", p0.postcondition)
+				# item = choice(p0.items)		# choose an instantiation randomly
+				# Question: are all instances the same?
+				# apply binding to rule's action (ie, post-condition)
+				if is_var(p0.postcondition.F2):
+					p0.postcondition.F2 = item.get_binding(p0.postcondition.F2)
+					if p0.postcondition.F2 is None:
+						p0.postcondition.F2 = str(randint(0,2))
+				if is_var(p0.postcondition.F3):
+					p0.postcondition.F3 = item.get_binding(p0.postcondition.F3)
+					if p0.postcondition.F3 is None:
+						p0.postcondition.F3 = str(randint(0,2))
+				DEBUG("postcond =", p0.postcondition, "<-- after binding")
+
+				# Check if the square is empty
+				x = int(p0.postcondition.F2)
+				y = int(p0.postcondition.F3)
+				if board[x][y] == ' ':
+					playable.append(candidate)		# append to 'playable' list
+					candidate['fitness'] += 1.0
+				else:
+					candidate['fitness'] -= 1.0
+
+	# **** Randomly choose 1 playable move and play it ****
 	# print(len(playable), "playable rules ", end='')
 	uniques = []
 	for candidate in playable:
@@ -820,8 +892,8 @@ def Evolve():
 	print('Win\tLose\tDraw\tStall')
 	average_fitness = 0.0
 	for gen in range(maxGens):
-		if gen > 0:
-			break
+		# if gen > 0:
+			# break
 
 		# print("Evaluating rules...")
 		for candidate in population:
