@@ -651,7 +651,7 @@ def printBoard():
 # But this is different from value functions over RULES.
 # The rules are more like ACTIONS taking a state to a new state.  
 # So how come I am valuing actions instead of states?
-# Perhaps it is a kind of Q-learning?
+# Perhaps it is a kind of Q-learning?  Q(a|x).
 
 # So the algorithm is:
 # 
