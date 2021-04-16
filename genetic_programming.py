@@ -652,9 +652,10 @@ def printBoard():
 # The rules are more like ACTIONS taking a state to a new state.  
 # So how come I am valuing actions instead of states?
 # Perhaps it is a kind of Q-learning?  Q(a|x).
+# Bellman update formula:  V(x) += η[ R + γ V(x') - V(x) ]
+# for Q-learning:  Q(x,a) += η[ R + γ max Q(x',a') - Q(x,a) ]
+# for SARSA: Q(x,a) += η[ R + γ Q(x',a') - Q(x,a) ]
 
-# So the algorithm is:
-# 
 
 def playGames(population):
 	global board, moves, rete_net
