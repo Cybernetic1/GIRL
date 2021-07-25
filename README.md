@@ -1,23 +1,42 @@
-GILR
+GIRL
 ====
 
-Genetic Inductive Learning of Logic Rules
+GIRL = **G**enetic **I**nduction of **R**elational **R**ules.
+
+This is my attempt to use genetic programming to learn first-order logic rules to solve the game of Tic Tac Toe. 
+
+
+It also makes use of the **Rete** production system for logic inference.
+
+So far it has not been successful in solving Tic Tac Toe, but I think it's getting close &#128578;
 
 Code borrowed from...
 ---------------------
 
-This very simple genetic programming demo is translated to Python (from Ruby) from the book _Clever Algorithms_ by Jason Brownlee:
+This very simple genetic programming demo is translated from Ruby to Python from the book _Clever Algorithms_ by Jason Brownlee:
 
 ![Clever Algorithms](Clever_Algorithms_cover.jpg)
 
 Run via (note: always use Python3):
 
-    python genetic_programming_1.py
+    python genetic_programming_[original-demo].py
 
-This code is the predecessor of my code.
+This code is the **predecessor** of my code.
+
+Pittsburgh vs Michigan approach
+-------------------------------
+
+My algorithm is special in that it evolves an entire **set** of logic rules to play a game, where each rule has its own fitness value.  This is called the "**Michigan**" approach.  See the excerpt below:
+
+![]([Freitas]_quote_1.jpg)
+
+![]([Freitas]_quote_2.jpg)
+
 
 Flow chart of logic formula generation
 --------------------------------------
+
+This flow chart helps to understand the code in `GIRL.py`:
 
 ![Flow chart](program-flow-chart_resized.png)
  
@@ -52,22 +71,22 @@ Genetic evolution of logic Rules
 
 You can try the current version:
 
-    python genetic_programming.py
+    python GIRL.py
 
-The randomly generated logic rules are like this:
+The randomly generated logic rules are like this, for example:
 
 ![](logic_rules_screenshot.png)
 
 where
 
-* white = conjunction
+* grey = conjunction
 * green = negated conjunction
 * red = conclusion
 
-The current algorithm _fails_ to converge for Tic-Tac-Toe because the rules are 'flat' in the sense that they don't support new predicate invention.  That means the current logic performs only 1 inference step per game move.  I predict that Tic-Tac-Toe can be solved once we have multi-step inference, with predicate invention.
+The current algorithm _fails_ to converge for Tic-Tac-Toe because the rules the current algorithm performs only 1 inference step per game move.  I predict that Tic-Tac-Toe can be solved once we have multi-step inference.
 
-How to run tests (for Rete)
----------------------------
+How to run Rete tests
+---------------------
 
 Install PyTest via:
 
