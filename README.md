@@ -1,5 +1,16 @@
 # GIRL
 
+[0. Introduction](https://github.com/Cybernetic1/GIRL#0-introduction) 
+[1. Code borrowed from...](https://github.com/Cybernetic1/GIRL#1-code-borrowed-from) 
+[2. Pittsburgh vs Michigan approach](https://github.com/Cybernetic1/GIRL#2-pittsburgh-vs-michigan-approach)
+[3. Flow chart of logic formula generation](https://github.com/Cybernetic1/GIRL#3-flow-chart-of-logic-formula-generation)
+[4. Rete algorithm](https://github.com/Cybernetic1/GIRL#4-rete-algorithm)
+[5. Genetic evolution of logic Rules](https://github.com/Cybernetic1/GIRL#5-genetic-evolution-of-logic-rules)
+[6. How to run the Rete tests](https://github.com/Cybernetic1/GIRL#6-how-to-run-the-rete-tests)
+[7. PyGame GUI dependency](https://github.com/Cybernetic1/GIRL#7-gygame-gui-dependency) 
+
+## 0. Introduction
+
 GIRL = **G**enetic **I**nduction of **R**elational **R**ules.
 
 This is my attempt to use genetic programming to learn first-order logic rules to solve the game of Tic Tac Toe. 
@@ -77,7 +88,11 @@ where
 * green = negated conjunction
 * red = conclusion
 
-The current algorithm _fails_ to converge for Tic-Tac-Toe because the rules the current algorithm performs only 1 inference step per game move.  I predict that Tic-Tac-Toe can be solved once we have multi-step inference.
+The current algorithm _fails_ to converge for Tic-Tac-Toe:
+
+![](run-results.png)
+
+Failure is probably because the current algorithm performs only 1 inference step per game move.  I predict that Tic-Tac-Toe can be solved once we have **multi-step** inference.
 
 ## 6. How to run the Rete tests
 
@@ -90,7 +105,7 @@ And then:
     python -m pytest test/*_test.py
 
 
-## 7. GyGame GUI dependency
+## 7. PyGame GUI dependency
 
 The GUI is like this:
 
