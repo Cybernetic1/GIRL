@@ -1,4 +1,4 @@
-<font size="6"> 
+<font size="5"> 
 
 # GILR
 
@@ -21,6 +21,8 @@ Flow chart of logic formula generation
 ======================================
 
 ![Flow chart](program-flow-chart_resized.png)
+
+<img src="https://github.com/Cybernetic1/GILR/raw/master/program-flow-chart_resized.png" width=100% height=100%>
 
 Rete algorithm
 ==============
