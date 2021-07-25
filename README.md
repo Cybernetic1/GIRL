@@ -22,6 +22,8 @@ Flow chart of logic formula generation
 
 ![Flow chart](program-flow-chart_resized.jpg)
 
+ <img src="program-flow-chart_resized.jpg" width="656" height="698">
+ 
 Rete algorithm
 ==============
 
