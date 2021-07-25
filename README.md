@@ -1,11 +1,10 @@
-<font size="5"> 
-
-# GILR
+GILR
+====
 
 Genetic Inductive Learning of Logic Rules
 
-Genetic programming code (borrowed)
-====================================
+Code borrowed from...
+---------------------
 
 This very simple genetic programming demo is translated to Python (from Ruby) from the book _Clever Algorithms_ by Jason Brownlee:
 
@@ -18,14 +17,12 @@ Run via (note: always use Python3):
 This code is the predecessor of my code.
 
 Flow chart of logic formula generation
-======================================
+--------------------------------------
 
-![Flow chart](program-flow-chart_resized.jpg)
-
- <img src="program-flow-chart_resized.jpg" width="656" height="698">
+![Flow chart](program-flow-chart_resized.png)
  
 Rete algorithm
-==============
+--------------
 
 Rete is like a minimalist logic engine.  The version we use here is called NaiveRete, from Github:
 
@@ -51,7 +48,7 @@ There is also a paper, originally in French, which explains Rete in more abstrac
 The original NaiveRete code has a few bugs that I fixed with great pain, and with the help of Doorenbos' thesis.
 
 Genetic evolution of logic Rules
-================================
+--------------------------------
 
 You can try the current version:
 
@@ -70,7 +67,7 @@ where
 The current algorithm _fails_ to converge for Tic-Tac-Toe because the rules are 'flat' in the sense that they don't support new predicate invention.  That means the current logic performs only 1 inference step per game move.  I predict that Tic-Tac-Toe can be solved once we have multi-step inference, with predicate invention.
 
 How to run tests (for Rete)
-===========================
+---------------------------
 
 Install PyTest via:
 
@@ -82,7 +79,7 @@ And then:
 
 
 GyGame GUI dependency
-=====================
+---------------------
 
 The GUI is like this:
 
@@ -93,5 +90,3 @@ It requires PyGame:
     sudo apt install python3-pygame
 
 I will prepare a version that does not use a graphic interface.
-
- </font>
