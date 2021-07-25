@@ -10,8 +10,8 @@ It also makes use of the **Rete** production system for logic inference.
 
 So far it has not been successful in solving Tic Tac Toe, but I think it's getting close &#128578;
 
-Code borrowed from...
----------------------
+1. Code borrowed from...
+-----------------------
 
 This very simple genetic programming demo is translated from Ruby to Python from the book _Clever Algorithms_ by Jason Brownlee:
 
@@ -23,7 +23,7 @@ Run via (note: always use Python3):
 
 This code is the **predecessor** of my code.
 
-Pittsburgh vs Michigan approach
+2. Pittsburgh vs Michigan approach
 -------------------------------
 
 My algorithm is special in that it evolves an entire **set** of logic rules to play a game, where each rule has its own fitness value.  This is called the "**Michigan**" approach.  See the excerpt below:
@@ -33,14 +33,14 @@ My algorithm is special in that it evolves an entire **set** of logic rules to p
 ![]([Freitas]_quote_2.jpg)
 
 
-Flow chart of logic formula generation
+3. Flow chart of logic formula generation
 --------------------------------------
 
 This flow chart helps to understand the code in `GIRL.py`:
 
 ![Flow chart](program-flow-chart_resized.png)
  
-Rete algorithm
+4. Rete algorithm
 --------------
 
 Rete is like a minimalist logic engine.  The version we use here is called NaiveRete, from Github:
@@ -66,7 +66,7 @@ There is also a paper, originally in French, which explains Rete in more abstrac
 
 The original NaiveRete code has a few bugs that I fixed with great pain, and with the help of Doorenbos' thesis.
 
-Genetic evolution of logic Rules
+5. Genetic evolution of logic Rules
 --------------------------------
 
 You can try the current version:
@@ -85,7 +85,7 @@ where
 
 The current algorithm _fails_ to converge for Tic-Tac-Toe because the rules the current algorithm performs only 1 inference step per game move.  I predict that Tic-Tac-Toe can be solved once we have multi-step inference.
 
-How to run Rete tests
+6. How to run the Rete tests
 ---------------------
 
 Install PyTest via:
@@ -97,7 +97,7 @@ And then:
     python -m pytest test/*_test.py
 
 
-GyGame GUI dependency
+7. GyGame GUI dependency
 ---------------------
 
 The GUI is like this:
