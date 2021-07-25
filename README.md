@@ -20,9 +20,7 @@ This code is the predecessor of my code.
 Flow chart of logic formula generation
 ======================================
 
-![Flow chart](program-flow-chart_resized.png)
-
-<img src="https://github.com/Cybernetic1/GILR/raw/master/program-flow-chart_resized.png" width=100% height=100%>
+![Flow chart](program-flow-chart_resized.jpg)
 
 Rete algorithm
 ==============
