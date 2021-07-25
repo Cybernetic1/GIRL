@@ -1,12 +1,19 @@
 # GIRL
 
 [0. Introduction](https://github.com/Cybernetic1/GIRL#0-introduction) 
+
 [1. Code borrowed from...](https://github.com/Cybernetic1/GIRL#1-code-borrowed-from) 
+
 [2. Pittsburgh vs Michigan approach](https://github.com/Cybernetic1/GIRL#2-pittsburgh-vs-michigan-approach)
+
 [3. Flow chart of logic formula generation](https://github.com/Cybernetic1/GIRL#3-flow-chart-of-logic-formula-generation)
+
 [4. Rete algorithm](https://github.com/Cybernetic1/GIRL#4-rete-algorithm)
+
 [5. Genetic evolution of logic Rules](https://github.com/Cybernetic1/GIRL#5-genetic-evolution-of-logic-rules)
+
 [6. How to run the Rete tests](https://github.com/Cybernetic1/GIRL#6-how-to-run-the-rete-tests)
+
 [7. PyGame GUI dependency](https://github.com/Cybernetic1/GIRL#7-gygame-gui-dependency) 
 
 ## 0. Introduction
