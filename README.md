@@ -1,10 +1,13 @@
+<font size="6"> 
+
 # GILR
+
 Genetic Inductive Learning of Logic Rules
 
-Very simple genetic programming demo
+Genetic programming code (borrowed)
 ====================================
 
-The simple demo is translated to Python (from Ruby) from the book _Clever Algorithms_ by Jason Brownlee:
+This very simple genetic programming demo is translated to Python (from Ruby) from the book _Clever Algorithms_ by Jason Brownlee:
 
 ![Clever Algorithms](Clever_Algorithms_cover.jpg)
 
@@ -13,6 +16,11 @@ Run via (note: always use Python3):
     python genetic_programming_1.py
 
 This code is the predecessor of my code.
+
+Flow chart of logic formula generation
+======================================
+
+![Flow chart](program-flow-chart_resized.png)
 
 Rete algorithm
 ==============
@@ -35,6 +43,8 @@ This is an example of a Rete network (with only 1 logic rule):
 ![example Rete network](rete_graph_ncc_test.png)
 
 The PhD thesis [[Doorenbos 1995].PDF](basic_Rete_algorithm_[Doorenbos1995].pdf) is also included in this repository.  It explains the basic Rete algorithm very clearly and provides pseudo-code.  NaiveRete is based on the pseudo-code in this paper, in particular Appendix A.
+
+There is also a paper, originally in French, which explains Rete in more abstract terms, which I partly translated into English: [[Fages and Lissajoux 1992].PDF](Fages_Lissajoux1992.pdf).
 
 The original NaiveRete code has a few bugs that I fixed with great pain, and with the help of Doorenbos' thesis.
 
@@ -81,3 +91,5 @@ It requires PyGame:
     sudo apt install python3-pygame
 
 I will prepare a version that does not use a graphic interface.
+
+ </font>

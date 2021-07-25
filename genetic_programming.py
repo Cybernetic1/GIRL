@@ -1,20 +1,21 @@
 # -*- coding: utf8 -*-
 
 # TO-DO:
-# * HTML GUI -- how would Python communicate with Javascript?
-#	-  
+# * Fail to converge for mysterious reason...
+#	need a way to measure whether a set of rules is winning or losing on average
 # * May need multi-step reasoning, but how?
 # * rule is sometimes bodiless --- when does it arise?
-# * Invention of new predicates -- this may be reason behind failure to converge
-#		- see if / how Rete supports it
-#		- keep a list of invented predicates
-#		- predicates can only be invented in generate_postconditions
 # * Do all bindings lead to same production?
 # * After bug fix, NC's may be nested again, or contain Neg conditions
 # * Custom operators and comparisons
 # * Rete: clear all memories (retain rules)
+# * HTML GUI -- how would Python communicate with Javascript?
 
 # Done:
+# * Invention of new predicates
+#		- see if / how Rete supports it
+#		- keep a list of invented predicates
+#		- predicates should only be invented in generate_postconditions
 # * Removed empty NCs
 # * Fixed bug: delete_token_and_descendents ---> delete_descendents_of_tokens
 # * fixed a couple more bugs in Rete
@@ -23,6 +24,12 @@
 # that consists only of conjunctions, negations, and negated conjunctions (NC).
 # NCs can be nested to any level.  So the general form of a rule is: a conjunction,
 # followed by some negated atoms, followed by a possibly nested NC.
+
+# How the score is calculated
+# ===========================	
+# * moves are saved during a game
+# * at game's end, moves are added or subtracted scores
+#
 
 # * Objective function:
 #		The KB would be run many times
@@ -256,7 +263,7 @@ def generate_random_literal():
 
 def generate_random_atom():
 	""" An atomic logic formula such as X(a,b).
-	This function will not invent new predicates """
+	This function does not invent new predicates! """
 	global pred_index
 	# choice 0, 1, 2 = X, O, ' ' respectively
 	choice = randint(0, pred_index + 3)
@@ -267,7 +274,7 @@ def generate_random_atom():
 	elif choice == 2:
 		predicate = ' '
 	else:
-		predicate = 'P' + str(choice - 3)
+		predicate = 'P' + str(choice - 3)	# use an existing predicate
 	arg1 = generate_random_var_or_const()
 	arg2 = generate_random_var_or_const()
 	return [predicate, arg1, arg2]
@@ -750,7 +757,7 @@ def playGames(population):
 # NOTE: When a variable is unbound, we simply assign random values to it;
 #		This seems reasonable, as we regard unbound predicates as STOCHASTIC.
 def play_1_move(population, CurrentPlayer):
-
+	global moves
 	# **** Part A: pure INFERENCE step(s) ****
 	i_infer = 0
 	max_infer = 3
