@@ -5,22 +5,31 @@
 [1. Genetic Algorithm](https://github.com/Cybernetic1/GIRL#1-genetic-algorithm)
 
    -- Pittsburgh vs Michigan approach
+   
    -- Standard Evolutionary Algorithm
+   
    -- Structure of the Genome
+   
    -- Code borrowed from...
  
 [2. Evolution of Logic Rules](https://github.com/Cybernetic1/GIRL#2-evolution-of-logic-rules)
 
    -- Structure of a Rule
+   
    -- Flow Chart for Generating Random Logic Formulas
+   
    -- Scoring of Rules
+   
    -- Score Update from the Reinforcement-Learning Perspective
+   
    -- Running the Code
+   
    -- Why It Fails to Converge?
 
 [3. Rete algorithm](https://github.com/Cybernetic1/GIRL#3-rete-algorithm)
 
    -- Understanding Rete
+   
    -- How to run the Rete tests
  
 [4. Graphical Interface for Tic Tac Toe](https://github.com/Cybernetic1/GIRL#5-graphical-interface-for-tic-tac-toe) 
@@ -48,12 +57,12 @@ My algorithm is special in that it evolves an entire **set** of logic rules to p
 
 ### Standard Evolutionary Algorithm
 
- - Initialize population
- - Repeat until success:
-  --   Select parents
-  --   Recombine, mutate
-  --   Evaluate
-  --   Select survivors
+* Initialize population
+* Repeat until success:
+    - Select parents
+    - Recombine, mutate
+    - Evaluate
+    - Select survivors
 
 ### Structure of the Genome
 
@@ -62,7 +71,7 @@ My algorithm is special in that it evolves an entire **set** of logic rules to p
  * Each rule = [ head => tail ]
  * Heads and tails are composed from "var" symbols and "const" symbols.
  * Rules have variable length, OK?
-   -- as long as their lengths can decrease during learning
+     - as long as their lengths can decrease during learning
 
 ### Code borrowed from...
 
@@ -80,11 +89,11 @@ This code is the **predecessor** of my code.
 
 ### Structure of a Rule
 
- *	pre-condition => post-condition
- *	pre-condition = list of positive/negative atoms, followed by an NC part
- *	NC = NC[ list of atoms... ]
- *	post-condition = just one positive atom
- *	literal = atomic proposition optionally preceded by a negation sign
+ * pre-condition => post-condition
+ * pre-condition = list of positive/negative atoms, followed by an NC part
+ * NC = NC[ list of atoms... ]
+ * post-condition = just one positive atom
+ * literal = atomic proposition optionally preceded by a negation sign
 
 ### Flow chart of logic formula generation
 
@@ -118,10 +127,10 @@ Another question is how to express the **Bellman Condition** or update formula.
 * But this is different from value functions over **rules**.
 * The rules are more like **actions** taking a state to a new state.
 * So how come I am evaluating actions instead of states?
--- Perhaps it is a kind of Q-learning?  Q(a|x).
--- Bellman update formula:  V(x) += η[ R + γ V(x') - V(x) ]
--- for Q-learning:  Q(x,a) += η[ R + γ max Q(x',a') - Q(x,a) ]
--- for SARSA: Q(x,a) += η[ R + γ Q(x',a') - Q(x,a) ]
+    - Perhaps it is a kind of Q-learning?  Q(a|x).
+    - Bellman update formula:  V(x) += η[ R + γ V(x') - V(x) ]
+    - for Q-learning:  Q(x,a) += η[ R + γ max Q(x',a') - Q(x,a) ]
+    - for SARSA: Q(x,a) += η[ R + γ Q(x',a') - Q(x,a) ]
 
 ### Running the GIRL Code
 
