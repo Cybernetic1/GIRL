@@ -4,33 +4,24 @@
 
 [1. Genetic Algorithm](https://github.com/Cybernetic1/GIRL#1-genetic-algorithm)
 
-   -- Pittsburgh vs Michigan approach
-   
-   -- Standard Evolutionary Algorithm
-   
-   -- Structure of the Genome
-   
-   -- Code borrowed from...
+ * Pittsburgh vs Michigan approach
+ * Standard Evolutionary Algorithm
+ * Structure of the Genome
+ * Code borrowed from...
  
 [2. Evolution of Logic Rules](https://github.com/Cybernetic1/GIRL#2-evolution-of-logic-rules)
 
-   -- Structure of a Rule
-   
-   -- Flow Chart for Generating Random Logic Formulas
-   
-   -- Scoring of Rules
-   
-   -- Score Update from the Reinforcement-Learning Perspective
-   
-   -- Running the Code
-   
-   -- Why It Fails to Converge?
+* Structure of a Rule
+* Flow Chart for Generating Random Logic Formulas
+* Scoring of Rules
+* Score Update from the Reinforcement-Learning Perspective
+* Running the Code
+* Why It Fails to Converge?
 
 [3. Rete algorithm](https://github.com/Cybernetic1/GIRL#3-rete-algorithm)
 
-   -- Understanding Rete
-   
-   -- How to run the Rete tests
+* Understanding Rete
+* How to run the Rete tests
  
 [4. Graphical Interface for Tic Tac Toe](https://github.com/Cybernetic1/GIRL#5-graphical-interface-for-tic-tac-toe) 
 
