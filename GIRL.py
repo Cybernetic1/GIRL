@@ -603,33 +603,6 @@ def printBoard():
 			print(board[i][j], end='')
 		print(']')
 
-# UPDATE ALGORITHM FOR REINFORCEMENT LEARNING
-# ===========================================
-# For each inferred post-cond, the rule.fire += ε
-# Then for each time step, the "fire" values of every rule AMORTIZE.
-# At the time of REWARD, we reward all rules that has recently fired.
-# 有个问题係: if a rule recently fired, but has no influence on the rewarded rule?
-# The point is: at least I can more easily detect the antecedents during backward
-# chaining.
-# Another problem: what about instantiations? So the "fire" should be recorded
-# as instantiated POST-CONDs of a rule.
-# Recording all instantiations of post-conds may be costly but there seems no
-# other alternatives.
-
-# Another question is how to express the BELLMAN condition or update formula.
-# The "state" would be the WM for each inference step.
-# The "action" would be the inference post-cond.
-# So the Bellman condition says: V(x) = Expect[ R +  γ V(x') ]
-# which means we have to establish a value function over STATES x = WM contents.
-# But this is different from value functions over RULES.
-# The rules are more like ACTIONS taking a state to a new state.  
-# So how come I am valuing actions instead of states?
-# Perhaps it is a kind of Q-learning?  Q(a|x).
-# Bellman update formula:  V(x) += η[ R + γ V(x') - V(x) ]
-# for Q-learning:  Q(x,a) += η[ R + γ max Q(x',a') - Q(x,a) ]
-# for SARSA: Q(x,a) += η[ R + γ Q(x',a') - Q(x,a) ]
-
-
 def playGames(population):
 	global board, moves, rete_net
 	win = draw = stall = lose = 0

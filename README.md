@@ -57,12 +57,12 @@ My algorithm is special in that it evolves an entire **set** of logic rules to p
 
 ### Structure of the Genome
 
- * The genome is a set of rules, which evolve co-operatively.
- * Each candidate = just one rule.
- * Each rule = [ head => tail ]
+ * The **genome** is a set of rules, which evolve co-operatively.
+ * Each **candidate** = just one rule.
+ * Each **rule** = [ head => tail ]
  * Heads and tails are composed from "var" symbols and "const" symbols.
- * Rules have variable length, OK?
-     - as long as their lengths can decrease during learning
+ 
+ Is it OK for rules to have variable length?  Yes, as long as their lengths can *decrease* during learning.
 
 ### Code borrowed from...
 
@@ -166,9 +166,9 @@ This is an example of a Rete network (with only 1 logic rule):
 
 ![example Rete network](rete_graph_ncc_test.png)
 
-The PhD thesis [[Doorenbos 1995].PDF](basic_Rete_algorithm_[Doorenbos1995].pdf) is also included in this repository.  It explains the basic Rete algorithm very clearly and provides pseudo-code.  NaiveRete is based on the pseudo-code in this paper, in particular Appendix A.
+The PhD thesis [[Doorenbos 1995].pdf](basic_Rete_algorithm_[Doorenbos1995].pdf) is also included in this repository.  It explains the basic Rete algorithm very clearly and provides pseudo-code.  NaiveRete is based on the pseudo-code in this paper, in particular Appendix A.
 
-There is also a paper, originally in French, which explains Rete in more abstract terms, which I partly translated into English: [[Fages and Lissajoux 1992].PDF](Fages_Lissajoux1992.pdf).
+There is also a paper, originally in French, which explains Rete in more abstract terms, which I partly translated into English: [[Fages and Lissajoux 1992].pdf](Fages_Lissajoux1992.pdf).
 
 The original NaiveRete code has a few bugs that I fixed with great pain, and with the help of Doorenbos' thesis.
 
