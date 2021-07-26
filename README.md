@@ -2,19 +2,28 @@
 
 [0. Introduction](https://github.com/Cybernetic1/GIRL#0-introduction) 
 
-[1. Code borrowed from...](https://github.com/Cybernetic1/GIRL#1-code-borrowed-from) 
+[1. Genetic Algorithm](https://github.com/Cybernetic1/GIRL#1-genetic-algorithm)
 
-[2. Pittsburgh vs Michigan approach](https://github.com/Cybernetic1/GIRL#2-pittsburgh-vs-michigan-approach)
+   -- Pittsburgh vs Michigan approach
+   -- Standard Evolutionary Algorithm
+   -- Structure of the Genome
+   -- Code borrowed from...
+ 
+[2. Evolution of Logic Rules](https://github.com/Cybernetic1/GIRL#2-evolution-of-logic-rules)
 
-[3. Flow chart of logic formula generation](https://github.com/Cybernetic1/GIRL#3-flow-chart-of-logic-formula-generation)
+   -- Structure of a Rule
+   -- Flow Chart for Generating Random Logic Formulas
+   -- Scoring of Rules
+   -- Score Update from the Reinforcement-Learning Perspective
+   -- Running the Code
+   -- Why It Fails to Converge?
 
-[4. Rete algorithm](https://github.com/Cybernetic1/GIRL#4-rete-algorithm)
+[3. Rete algorithm](https://github.com/Cybernetic1/GIRL#3-rete-algorithm)
 
-[5. Genetic evolution of logic Rules](https://github.com/Cybernetic1/GIRL#5-genetic-evolution-of-logic-rules)
-
-[6. How to run the Rete tests](https://github.com/Cybernetic1/GIRL#6-how-to-run-the-rete-tests)
-
-[7. PyGame GUI dependency](https://github.com/Cybernetic1/GIRL#7-gygame-gui-dependency) 
+   -- Understanding Rete
+   -- How to run the Rete tests
+ 
+[4. Graphical Interface for Tic Tac Toe](https://github.com/Cybernetic1/GIRL#5-graphical-interface-for-tic-tac-toe) 
 
 ## 0. Introduction
 
@@ -27,7 +36,35 @@ It also makes use of the **Rete** production system for logic inference.
 
 So far it has not been successful in solving Tic Tac Toe, but I think it's getting close &#128578;
 
-## 1. Code borrowed from...
+## 1. Genetic Algorithm
+
+### Pittsburgh vs Michigan approach
+
+My algorithm is special in that it evolves an entire **set** of logic rules to play a game, where each rule has its own fitness value.  This is called the "**Michigan**" approach.  See the excerpt below:
+
+![]([Freitas]_quote_1.jpg)
+
+![]([Freitas]_quote_2.jpg)
+
+### Standard Evolutionary Algorithm
+
+ - Initialize population
+ - Repeat until success:
+  --   Select parents
+  --   Recombine, mutate
+  --   Evaluate
+  --   Select survivors
+
+### Structure of the Genome
+
+ * The genome is a set of rules, which evolve co-operatively.
+ * Each candidate = just one rule.
+ * Each rule = [ head => tail ]
+ * Heads and tails are composed from "var" symbols and "const" symbols.
+ * Rules have variable length, OK?
+   -- as long as their lengths can decrease during learning
+
+### Code borrowed from...
 
 This very simple genetic programming demo is translated from Ruby to Python from the book _Clever Algorithms_ by Jason Brownlee:
 
@@ -39,22 +76,78 @@ Run via (note: always use Python3):
 
 This code is the **predecessor** of my code.
 
-## 2. Pittsburgh vs Michigan approach
+## 2. Evolution of Logic Rules
 
-My algorithm is special in that it evolves an entire **set** of logic rules to play a game, where each rule has its own fitness value.  This is called the "**Michigan**" approach.  See the excerpt below:
+### Structure of a Rule
 
-![]([Freitas]_quote_1.jpg)
+ *	pre-condition => post-condition
+ *	pre-condition = list of positive/negative atoms, followed by an NC part
+ *	NC = NC[ list of atoms... ]
+ *	post-condition = just one positive atom
+ *	literal = atomic proposition optionally preceded by a negation sign
 
-![]([Freitas]_quote_2.jpg)
-
-
-## 3. Flow chart of logic formula generation
+### Flow chart of logic formula generation
 
 This flow chart helps to understand the code in `GIRL.py`:
 
 ![Flow chart](program-flow-chart_resized.png)
+
+### Scoring of Rules
+
+ * For each generation, rules should be allowed to fire plentifully
+ * Some facts lead to rewards
  
-## 4. Rete algorithm
+In *Clara Rules* (not used here), chains of inference can be inspected.
+
+### Score Update from the Reinforcement-Learning Perspective
+
+* For each inferred post-cond, the rule.fire += ε
+* Then for each time step, the "fire" values of every rule **amortize**.
+* At the time of **reward**, we reward all rules that has recently fired.
+* A question is: If a rule recently fired, but has no influence on the rewarded rule?
+* The point is: at least I can more easily detect the antecedents during backward chaining.
+* Another problem: what about instantiations? So the "fire" should be recorded as instantiated **post-conds** of a rule.
+* Recording all instantiations of post-conds may be costly but there seems no other alternatives.
+
+Another question is how to express the **Bellman Condition** or update formula.
+
+* The "state" would be the WM for each inference step.
+* The "action" would be the inference post-cond.
+* So the Bellman condition says: V(x) = Expect[ R +  γ V(x') ]
+* which means we have to establish a value function over the **states** x = WM contents.
+* But this is different from value functions over **rules**.
+* The rules are more like **actions** taking a state to a new state.
+* So how come I am evaluating actions instead of states?
+-- Perhaps it is a kind of Q-learning?  Q(a|x).
+-- Bellman update formula:  V(x) += η[ R + γ V(x') - V(x) ]
+-- for Q-learning:  Q(x,a) += η[ R + γ max Q(x',a') - Q(x,a) ]
+-- for SARSA: Q(x,a) += η[ R + γ Q(x',a') - Q(x,a) ]
+
+### Running the GIRL Code
+
+You can try the current version:
+
+    python GIRL.py
+
+The randomly generated logic rules are like this, for example:
+
+![](logic_rules_screenshot.png)
+
+where
+
+* grey = conjunction
+* green = negated conjunction
+* red = conclusion
+
+### Why It Fails to Converge?
+
+The current algorithm _fails_ to converge for Tic-Tac-Toe:
+
+![](run-results.png)
+
+Failure is probably because the current algorithm performs only 1 inference step per game move.  I predict that Tic-Tac-Toe can be solved once we have **multi-step** inference.
+
+## 3. Rete algorithm
 
 Rete is like a minimalist logic engine.  The version we use here is called NaiveRete, from Github:
 
@@ -79,29 +172,7 @@ There is also a paper, originally in French, which explains Rete in more abstrac
 
 The original NaiveRete code has a few bugs that I fixed with great pain, and with the help of Doorenbos' thesis.
 
-## 5. Genetic evolution of logic Rules
-
-You can try the current version:
-
-    python GIRL.py
-
-The randomly generated logic rules are like this, for example:
-
-![](logic_rules_screenshot.png)
-
-where
-
-* grey = conjunction
-* green = negated conjunction
-* red = conclusion
-
-The current algorithm _fails_ to converge for Tic-Tac-Toe:
-
-![](run-results.png)
-
-Failure is probably because the current algorithm performs only 1 inference step per game move.  I predict that Tic-Tac-Toe can be solved once we have **multi-step** inference.
-
-## 6. How to run the Rete tests
+### How to run the Rete tests
 
 Install PyTest via:
 
@@ -111,14 +182,13 @@ And then:
 
     python -m pytest test/*_test.py
 
-
-## 7. PyGame GUI dependency
+## 4. Graphical Interface for Tic Tac Toe
 
 The GUI is like this:
 
 ![](GUI-screenshot.png)
 
-It requires PyGame:
+It requires **PyGame**:
 
     sudo apt install python3-pygame
 

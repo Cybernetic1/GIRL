@@ -1,8 +1,6 @@
 # -*- coding: utf8 -*-
 
 # TO-DO:
-# * Fail to converge for mysterious reason...
-#	need a way to measure whether a set of rules is winning or losing on average
 # * May need multi-step reasoning, but how?
 # * rule is sometimes bodiless --- when does it arise?
 # * Do all bindings lead to same production?
@@ -28,12 +26,12 @@
 # How the score is calculated
 # ===========================	
 # * moves are saved during a game
-# * at game's end, moves are added or subtracted scores
-#
+# * at game's end, moves (ie. logic rules) are added or subtracted scores
+# * the "average fitness" is simply averaged over the entire population of rules
 
 # * Objective function:
-#		The KB would be run many times
-#		For each run, a positive/negative reward would be obtained
+#		The KB of rules would be run many times
+#		For each game, a positive/negative reward would be obtained
 #		That reward would be assigned to the entire inference chain (with time-discount)
 #		Over many runs, each candidate rule would accumulate some scores
 
@@ -49,38 +47,6 @@
 #		* How to genetically encode a Rete net?
 #		* Perhaps differentiable Rete is a better approach?
 #		* It may be efficient enough to compile to Rete on each GA iteration 
-
-# STANDARD EVOLUTIONARY ALGORITHM
-# ===============================
-# Initialize population
-# Repeat until success:
-#    Select parents
-#    Recombine, mutate
-#    Evaluate
-#    Select survivors
-
-# STRUCTURE OF THE GENOME
-# =======================
-# * The genome is a set of rules, which evolve co-operatively.
-# * Each candidate = just one rule.
-# * Each rule = [ head => tail ]
-# * Heads and tails are composed from "var" symbols and "const" symbols.
-# * Rules have variable length, OK?
-#   -- as long as their lengths can decrease during learning
-
-# SCORING OF RULES
-# ================
-# * For each generation, rules should be allowed to fire plentifully
-# * Some facts lead to rewards
-# * The chains of inference can be inspected in Clara Rules
-
-# STRUCTURE OF A RULE
-# ===================
-#   pre-condition => post-condition
-#	pre-condition = list of positive/negative atoms, followed by an NC part
-#	NC = NC[ list of atoms... ]
-#	post-condition = just one positive atom
-#	literal = atomic proposition optionally preceded by a negation sign
 
 from random import randint, uniform, choice
 import operator
