@@ -18,36 +18,6 @@
 # * Fixed bug: delete_token_and_descendents ---> delete_descendents_of_tokens
 # * fixed a couple more bugs in Rete
 
-# **** NOTE:  In this new version we use rules that are compatible with Rete,
-# that consists only of conjunctions, negations, and negated conjunctions (NC).
-# NCs can be nested to any level.  So the general form of a rule is: a conjunction,
-# followed by some negated atoms, followed by a possibly nested NC.
-
-# How the score is calculated
-# ===========================	
-# * moves are saved during a game
-# * at game's end, moves (ie. logic rules) are added or subtracted scores
-# * the "average fitness" is simply averaged over the entire population of rules
-
-# * Objective function:
-#		The KB of rules would be run many times
-#		For each game, a positive/negative reward would be obtained
-#		That reward would be assigned to the entire inference chain (with time-discount)
-#		Over many runs, each candidate rule would accumulate some scores
-
-# * Rule engine (minimalistic):
-#		It may be based on Genifer 3 (simple rule engine)
-#		This version is based on Genifer 6 (Rete)
-#		1. First, evolve a set of rules, import into Rete
-#		2. Run the rules for N iterations, record scores
-#		3. Repeat
-
-# **** Rete-related ideas:
-#		* If Rete is used, we may want to learn the Rete network directly
-#		* How to genetically encode a Rete net?
-#		* Perhaps differentiable Rete is a better approach?
-#		* It may be efficient enough to compile to Rete on each GA iteration 
-
 from random import randint, uniform, choice
 import operator
 import sys
@@ -613,7 +583,7 @@ def playGames(population):
 	for candidate in population:
 		p = add_rule_to_Rete(rete_net, candidate['rule'])
 		if p:
-			# print('●', print_rule(candidate['rule']), end='\n')
+			print('●', print_rule(candidate['rule']), end='\n')
 			# print(' (%d)' % length_of_rule(candidate['rule']))
 			candidate['p_node'] = p
 	# save_Rete_graph(rete_net, 'rete_0')
@@ -678,23 +648,12 @@ def playGames(population):
 				break			# next game
 	return win, draw, stall, lose
 
-# ALGORITHM:
-# 1) REPEAT: apply rules and collect all results
-#		update RETE Working Memory
-# 2) Select 1 playable result and play it
-# Each rule candidate could have multiple instances
-# should we add all P_i's to WM?
-# 1) every rule may infer a (non-action) proposition P_i
-# 2) every rule has its instantiations that should be assumed
-#	-- why are instantiations different? because of substitution into rules.
-#	-- but are these subsitutions mutually compatible or exclusive?
-#	-- seems compatible, eg: all men are mortal => Socrates and Plato are mortal.
-# 3) can we simply accept all such propositions in the same Working-Memory state?
-#	-- in other words, if head[0] == P then we always add postcond to WM.
-# 4) TO-DO:  we can iterate the "INFERENCE" step multiple times, before making
-#		an action.
-# NOTE: When a variable is unbound, we simply assign random values to it;
-#		This seems reasonable, as we regard unbound predicates as STOCHASTIC.
+# TO-DO:
+# * Each candidate may generate actions, how to handle them?
+#		- if bump, that rule shall die unconditionally
+#		- else if playable, what if there are >1 actions?
+# * If new proposition, simply add to WM
+#		- but there is still the problem of instantiations
 def play_1_move(population, CurrentPlayer):
 	global moves
 	# **** Part A: pure INFERENCE step(s) ****

@@ -14,14 +14,16 @@
 * Structure of a Rule
 * Flow Chart for Generating Random Logic Formulas
 * Scoring of Rules
-* Score Update from the Reinforcement-Learning Perspective
+* Score Updating from the Reinforcement-Learning Perspective
 * Running the Code
 * Why It Fails to Converge?
 
 [3. Rete algorithm](https://github.com/Cybernetic1/GIRL#3-rete-algorithm)
 
 * Understanding Rete
-* How to run the Rete tests
+* Implementation Details
+* For Each Game Move (play_1_move function)
+* Trying the Rete Demos
  
 [4. Graphical Interface for Tic Tac Toe](https://github.com/Cybernetic1/GIRL#5-graphical-interface-for-tic-tac-toe) 
 
@@ -86,6 +88,10 @@ This code is the **predecessor** of my code.
  * post-condition = just one positive atom
  * literal = atomic proposition optionally preceded by a negation sign
 
+In this version we use rules that are compatible with Rete, that consist only of conjunctions, negations, and negated conjunctions (NC).  NCs can be nested to any level. 
+
+So the general form of a rule is: a conjunction, followed by some negated atoms, followed by a possibly nested NC.
+
 ### Flow chart of logic formula generation
 
 This flow chart helps to understand the code in `GIRL.py`:
@@ -96,10 +102,23 @@ This flow chart helps to understand the code in `GIRL.py`:
 
  * For each generation, rules should be allowed to fire plentifully
  * Some facts lead to rewards
- 
-In *Clara Rules* (not used here), chains of inference can be inspected.
 
-### Score Update from the Reinforcement-Learning Perspective
+Once generated, a KB (knowledge base, = set of rules) would be run over many games:
+
+   * For each game, a positive/negative reward would be obtained
+   * That reward would be assigned to the entire inference chain (with time-discount)
+   * Over many runs, each candidate rule would accumulate some scores
+
+How the **fitness score** is calculated for each KB:
+
+   * moves are saved during a game
+   * at game's end, moves (ie. logic rules) are added or subtracted scores
+   * the **average fitness** is simply averaged over the entire population of rules
+
+
+Note:  In the inference engine *Clara Rules* (not used here), chains of inference can be inspected.
+
+### Score Updating from the Reinforcement-Learning Perspective
 
 * For each inferred post-cond, the rule.fire += ε
 * Then for each time step, the "fire" values of every rule **amortize**.
@@ -131,13 +150,14 @@ You can try the current version:
 
 The randomly generated logic rules are like this, for example:
 
-![](logic_rules_screenshot.png)
+![](logic_rules_screenshot.png?)
 
 where
 
 * grey = conjunction
 * green = negated conjunction
-* red = conclusion
+* bright green = conclusion
+* bright red = conclusion that is also action
 
 ### Why It Fails to Converge?
 
@@ -149,32 +169,71 @@ Failure is probably because the current algorithm performs only 1 inference step
 
 ## 3. Rete algorithm
 
-Rete is like a minimalist logic engine.  The version we use here is called NaiveRete, from Github:
+### Understanding Rete
 
-https://github.com/GNaive/naive-rete
+Rete is a notoriously complicated algorithm, although its basic idea is simple:  compile logic rules into a decision-tree-like network, so that rules-matching can be performed efficiently.
+
+The PhD thesis [[Doorenbos 1995].pdf](basic_Rete_algorithm_[Doorenbos1995].pdf) is also included in this repository.  It explains the basic Rete algorithm very clearly and provides pseudo-code.  NaiveRete is based on the pseudo-code in this paper, in particular Appendix A.
+
+There is also a paper, originally in French, which explains Rete in more abstract terms, which I partly translated into English: [[Fages and Lissajoux 1992].pdf](Fages_Lissajoux1992.pdf).
+
+This is an example of a Rete network (with only 1 logic rule):
+
+![example Rete network](rete_graph_ncc_test.png)
+
+## Implementation Details
+
+Rete is like a minimalist logic engine.  The version we use here is called **NaiveRete**, from Github: [https://github.com/GNaive/naive-rete](https://github.com/GNaive/naive-rete).
+
+The original NaiveRete code has a few bugs that I fixed with great pain, and with the help of Doorenbos' thesis.
+
+For our purpose, any inference engine will do.  Rete is not necessary;  It mere provides faster inference speed.  For example, Genifer 3 is another simple rule engine.  Genifer 6 is based on Rete.
+
+1. First, evolve a set of rules, import into Rete
+2. Run the rules for N iterations, record scores
+3. Repeat
+
+Rete-related ideas:
+
+* If Rete is used, we may want to learn the Rete network directly
+* How to genetically encode a Rete net?
+* Perhaps differentiable Rete is a better approach?
+* It may be efficient enough to compile to Rete on each GA iteration 
+
+### For Each Game Move (play_1_move function)
+
+1. REPEAT: apply rules and collect all results
+	Update Rete Working Memory (WM)
+
+2. Select 1 playable result and play it
+	Each rule candidate could have multiple instances
+
+Should we add all P~i~'s to WM?
+
+1. Every rule may infer a (non-action) proposition P~i~
+
+2. Every rule has its instantiations that should be assumed
+    - Why are instantiations different? because of substitution into rules.
+    - But are these subsitutions mutually compatible or exclusive?
+    - Seems compatible, eg: all men are mortal => Socrates and Plato are mortal.
+    
+3. Can we simply accept all such propositions in the same Working-Memory state?
+    - In other words, if head[0] == P then we always add postcond to WM.
+
+4. TO-DO:  we can iterate the "**inference**" step multiple times, before making an action.
+
+NOTE: When a variable is unbound, we simply assign random values to it; This seems reasonable, as we regard unbound predicates as **stochastic**.
+
+### Trying the Rete Demos
 
 Here are some demos:
 
     python genifer.py
     python genifer_lover.py
 
-You can also look into the `tests` directory for examples.
+You can also look into the `tests/` directory for examples.
 
-Rete is a notoriously complicated algorithm, although its basic idea is simple:  compile logic rules into a decision-tree-like network, so that rules-matching can be performed efficiently.
-
-This is an example of a Rete network (with only 1 logic rule):
-
-![example Rete network](rete_graph_ncc_test.png)
-
-The PhD thesis [[Doorenbos 1995].pdf](basic_Rete_algorithm_[Doorenbos1995].pdf) is also included in this repository.  It explains the basic Rete algorithm very clearly and provides pseudo-code.  NaiveRete is based on the pseudo-code in this paper, in particular Appendix A.
-
-There is also a paper, originally in French, which explains Rete in more abstract terms, which I partly translated into English: [[Fages and Lissajoux 1992].pdf](Fages_Lissajoux1992.pdf).
-
-The original NaiveRete code has a few bugs that I fixed with great pain, and with the help of Doorenbos' thesis.
-
-### How to run the Rete tests
-
-Install PyTest via:
+To run the Rete tests, first install PyTest via:
 
     pip3 install pytest
 
