@@ -5,8 +5,21 @@
 // DONE:
 
 var square = new Array(9);
-for (var i = 0; i < 9; ++i)
+
+for (var i = 0; i < 9; ++i) {
 	square[i] = document.getElementById('T' + i.toString());
+
+	square[i].addEventListener('click', (e) => {
+		const td = e.currentTarget;
+		if (td.innerText == '')
+			td.innerText = 'X';
+		else if (td.innerText == 'X')
+			td.innerText = 'O';
+		else
+			td.textContent = '';
+		td.className = td.innerText;
+		});
+	}
 
 // ***************** SSE handling ********************
 
@@ -21,16 +34,18 @@ function streamEventHandler(e) {
 
 var evtSource = null;
 
-evtSource = new EventSource("http://localhost:7000/SSE");
+// evtSource = new EventSource("http://localhost:7000/SSE");
 
-evtSource.onmessage = streamEventHandler;
+// evtSource.onmessage = streamEventHandler;
 
+/*
 evtSource.onerror = function(e) {
 	if (evtSource.readyState == 2) {
 		evtSource.close();
 		setTimeout(initEventSource, 5000);
 		}
 	};
+*/
 
 console.log("Event source established");
 
@@ -47,6 +62,10 @@ function initEventSource() {
 		};
 	console.log("Event source established");
 	}
+
+// ***************** Keyboard Buttons *****************
+
+
 
 // ******************* Menu Buttons *******************
 
