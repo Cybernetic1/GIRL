@@ -10,7 +10,7 @@ class BetaNode(object):
 		self.parent = parent if parent else []
 
 	def dump(self):
-		return "%s %s" % (self.__class__.__name__, id(self))
+		return "%s %s" % (self.__class__.__name__, hex(id(self)))
 
 
 class Has:
@@ -275,5 +275,7 @@ def is_var(v):
 	return v.startswith('$') if v else False
 
 def DEBUG(*args):
-	# print(*args)
+	print(end='\x1b[36m')
+	print(*args)
+	print(end='\x1b[0m')
 	return

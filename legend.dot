@@ -1,0 +1,43 @@
+digraph {
+	subgraph cluster_1 {
+	label = beta
+	"BetaNode 140181797936544" [label="βroot"];
+	"BetaNode 140181797936544" -> "BetaMemory 140181798071880";
+	"BetaMemory 140181798071880" [label="βM"];
+	"BetaMemory 140181798071880" -> "JoinNode 140181798072104";
+	"JoinNode 140181798072104" [shape=box,color=red,label="J"];
+	"JoinNode 140181798072104" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7f7e9e472ef0>"
+	"(X $y $x)" [style=filled,fillcolor=orange];
+	"JoinNode 140181798072104" -> "(X $y $x)"
+	"JoinNode 140181798072104" -> "BetaMemory 140181798072160";
+	"BetaMemory 140181798072160" [label="βM"];
+	"BetaMemory 140181798072160" -> "JoinNode 140181798072216";
+	"JoinNode 140181798072216" [shape=box,color=red,label="J"];
+	"JoinNode 140181798072216" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7f7e9e472ef0>"
+	"(X $z $x)" [style=filled,fillcolor=orange];
+	"JoinNode 140181798072216" -> "(X $z $x)"
+	"F3 =? 0:F3" [style=filled,fillcolor=yellow];
+	"JoinNode 140181798072216" -> "F3 =? 0:F3"
+	"JoinNode 140181798072216" -> "BetaMemory 140181798072272";
+	"BetaMemory 140181798072272" [label="βM"];
+	"BetaMemory 140181798072272" -> "JoinNode 140181798117728";
+	"JoinNode 140181798117728" [shape=box,color=red,label="J"];
+	"(□ $w $x)" [style=filled,fillcolor=orange];
+	"JoinNode 140181798117728" -> "(□ $w $x)"
+	"F3 =? 0:F3" [style=filled,fillcolor=yellow];
+	"JoinNode 140181798117728" -> "F3 =? 0:F3"
+	"F3 =? 1:F3" [style=filled,fillcolor=yellow];
+	"JoinNode 140181798117728" -> "F3 =? 1:F3"
+	"JoinNode 140181798117728" -> "PNode 140181798071824";
+	"PNode 140181798071824" [style=filled,fillcolor=pink,label="p"];
+	}
+	subgraph cluster_0 {
+	label = alpha
+	"no-test" -> "F1==X";
+	"F1==X" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7f7e9e472ef0>";
+	"no-test" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7f7e9e451a58>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7f7e9e451a58>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7f7e9e472ef0>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	}
+	"F1==X" -> "JoinNode 140181798072104" [color=gray];
+}

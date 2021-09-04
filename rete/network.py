@@ -7,11 +7,10 @@ from rete.filter_node import FilterNode
 from rete.ncc_node import NccNode, NccPartnerNode
 from rete.negative_node import NegativeNode
 from rete.alpha import AlphaMemory, ConstantTestNode
-from rete.join_node import JoinNode, TestAtJoinNode
+from rete.join_node import JoinNode, TestAtJoinNode, CustomTestAtJoinNode
 from rete.pnode import PNode
-from rete.common import Token, BetaNode, FIELDS, Has, Neg, Rule, Ncc, is_var, Filter, Bind
+from rete.common import DEBUG, Token, BetaNode, FIELDS, Has, Neg, Rule, Ncc, is_var, Filter, Bind
 from rete.beta_memory_node import BetaMemory
-
 
 class Network:
 
@@ -120,13 +119,20 @@ class Network:
 		if isinstance(node, JoinNode):
 			# dump details of node
 			self.buf.write('	"%s" [shape=box,color=red,label="J"];\n' % node.dump())
-			self.buf.write('	"%s" -> "⍺M:%s"\n' % (node.dump(), repr(node.amem)))
+			if node.amem is not None:
+				self.buf.write('	"%s" -> "⍺M:%s"\n' % (node.dump(), repr(node.amem)))
 			# self.buf.write('	"amem:%s" [label="amem"];\n' % repr(node.amem))
-			self.buf.write('	"%s" [style=filled,fillcolor=orange];\n' % repr(node.has))
-			self.buf.write('	"%s" -> "%s"\n' % (node.dump(), repr(node.has)))
-			for t in node.tests:
-				self.buf.write('	"%s" [style=filled,fillcolor=yellow];\n' % t.dump())
-				self.buf.write('	"%s" -> "%s"\n' % (node.dump(), t.dump()))
+			if node.has is not None:
+				self.buf.write('	"%s" [style=filled,fillcolor=orange];\n' % repr(node.has))
+				self.buf.write('	"%s" -> "%s"\n' % (node.dump(), repr(node.has)))
+			if node.tests:
+				for t in node.tests:
+					self.buf.write('	"%s" [style=filled,fillcolor=yellow];\n' % t.dump())
+					self.buf.write('	"%s" -> "%s"\n' % (node.dump(), t.dump()))
+			if hasattr(node, 'custom_tests'):
+				for t in node.custom_tests:
+					self.buf.write('	"%s" [style=filled,fillcolor=yellow];\n' % t.dump())
+					self.buf.write('	"%s" -> "%s"\n' % (node.dump(), t.dump()))
 		for child in node.children:
 			self.buf.write('	"%s" -> "%s"' % (node.dump(), child.dump()))
 			if isinstance(child, NccPartnerNode):
@@ -156,10 +162,14 @@ class Network:
 					# v2 = getattr(condition, f2)
 					# if f < f2 and v == v2:
 						# path.append((f, f2))
+		# 'ConstantTestNode' is defined in alpha.py.
+		# It is for testing a predicate against WMEs.
 		am = ConstantTestNode.build_or_share_alpha_memory(self.alpha_root, path)
-		for w in self.alpha_root.amem.items:
-			if condition.test(w):
-				am.activation(w)
+
+		# check for activation (perhaps it is active at build time...?)
+		for wme in self.alpha_root.amem.items:
+			if condition.test(wme):
+				am.activation(wme)
 		return am
 
 	@classmethod
@@ -171,7 +181,7 @@ class Network:
 		:rtype: list of TestAtJoinNode
 		"""
 		result = []
-		# DEBUG("condition = ", c)
+		DEBUG("condition = ", c)
 		for field_of_v, v in c.vars:
 			for idx, cond in enumerate(earlier_conds):
 				if isinstance(cond, Ncc) or isinstance(cond, Neg):
@@ -184,41 +194,63 @@ class Network:
 		return result
 
 	@classmethod
-	def get_join_tests_from_custom_condition(cls, c, earlier_conds):
+	def get_join_tests_from_custom_condition(cls, cond, earlier_conds):
 		"""
-		If earlier conds contain a var in current cond, create new cond
-		:type c: Has
+		The form of cond may be: 'var op var', 'var op const', etc.
+		We set the convention that the first argument is always a var.
+		If earlier conds contain a var in current cond, create CustomTest
+		:type cond: Has
 		:type earlier_conds: Rule
 		:rtype: list of TestAtJoinNode
 		"""
 		result = []
-		for field_of_v, v in c.vars:
-			for idx, cond in enumerate(earlier_conds):
-				if isinstance(cond, Ncc) or isinstance(cond, Neg):
-					continue
-				field_of_v2 = cond.contain(v)
-				if not field_of_v2:
-					continue
-				t = TestAtJoinNode(field_of_v, idx, field_of_v2, op)
+		DEBUG("custom condition = ", cond)
+		op = cond.F1
+		v = cond.F2		# We know that this must be a var
+
+		for index1, cond1 in enumerate(earlier_conds):
+			if isinstance(cond1, Ncc) or isinstance(cond1, Neg):
+				continue
+			field_of_v1 = cond1.contain(v)
+			if not field_of_v1:
+				continue
+
+			# At this point we have op( index1:field1 , __:__ )
+			v_c = cond.F3		# v_c can be var or const
+			if is_var(v_c):
+				for index2, cond2 in enumerate(earlier_conds):
+					if isinstance(cond2, Ncc) or isinstance(cond2, Neg):
+						continue
+					field_of_v2 = cond2.contain(v_c)
+					if not field_of_v2:
+						continue
+					t = CustomTestAtJoinNode(index1, field_of_v1, op, index2, field_of_v2)
+					result.append(t)
+			else:
+				t = CustomTestAtJoinNode(index1, field_of_v1, op, const=v_c)
 				result.append(t)
+
 		return result
 
 	@classmethod
-	def build_or_share_join_node(cls, parent, amem, tests, has):
+	def build_or_share_join_node(cls, parent, amem, tests, has, custom_tests=None):
 		"""
 		:type has: Has
 		:type parent: BetaNode
 		:type amem: AlphaMemory
 		:type tests: list of TestAtJoinNode
+		:type custom_tests: list of CustomTestAtJoinNode
 		:rtype: JoinNode
 		"""
 		for child in parent.children:
 			if isinstance(child, JoinNode) and child.amem == amem \
-					and child.tests == tests and child.has == has:
+					and child.tests == tests and child.has == has and \
+					child.custom_tests == custom_tests:
 				return child
-		node = JoinNode([], parent, amem, tests, has)
+		node = JoinNode([], parent, amem, tests, has, custom_tests)
 		parent.children.append(node)
-		amem.successors.append(node)
+		if amem:		# added by YKY
+			amem.successors.append(node)
 		return node
 
 	@classmethod
@@ -340,9 +372,25 @@ class Network:
 					# All earlier conds in which F2.var and F3.var occur must be tested
 					# 1. collect all earlier conds in which F2 or F3 occurs
 					# 2. set all links of the form "F2 op F3"
-					F2s = []
-					F3s = []
-					print("**** not implemented ****")
+					# F2s = []
+					# F3s = []
+
+					# **** New treatment:
+					# We should create a special join_node whose alpha_memory is automatically activated
+					# and whose cond is unnecessary.  Only its custom test node is essential.
+
+					#DEBUG("current node=", current_node)
+					# At this moment, 'current_node' is a join_node
+					current_node = self.build_or_share_beta_memory(current_node)
+					# After this, 'current_node' is a beta_memory
+					#DEBUG("current node'=", current_node)
+					tests = self.get_join_tests_from_custom_condition(cond, conds_higher_up)
+					#am = self.build_or_share_alpha_memory(cond)
+					# Finally, from 'current_node' which is a beta_memory, grows a new join_node:
+					#current_node = self.build_or_share_join_node(current_node, am, tests, cond)
+					current_node = self.build_or_share_join_node(current_node, None, None, None, custom_tests=tests)
+
+					print("**** testing new implementation ****")
 			elif isinstance(cond, Ncc):
 				current_node = self.build_or_share_ncc_nodes(current_node, cond, conds_higher_up)
 			elif isinstance(cond, Filter):
@@ -364,8 +412,9 @@ class Network:
 		elif isinstance(parent, JoinNode):
 			saved_list_of_children = parent.children
 			parent.children = [new_node]
-			for item in parent.amem.items:
-				parent.right_activation(item)
+			if parent.amem:	# added by YKY
+				for item in parent.amem.items:
+					parent.right_activation(item)
 			parent.children = saved_list_of_children
 		elif isinstance(parent, NegativeNode):
 			for token in parent.items:

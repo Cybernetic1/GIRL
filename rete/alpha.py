@@ -25,7 +25,7 @@ class ConstantTestNode:
 		"""
 		:type wme: rete.WME
 		"""
-		DEBUG("⍺ activate: wme=%s" % wme)
+		DEBUG("⍺ activation: wme=%s" % wme)
 		if self.field_to_test != 'no-test':
 			v = getattr(wme, self.field_to_test)
 			v2 = self.thing_the_field_must_equal

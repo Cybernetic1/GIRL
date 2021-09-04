@@ -16,7 +16,7 @@
 #		- predicates should only be invented in generate_postconditions
 # * Removed empty NCs
 # * Fixed bug: delete_token_and_descendents ---> delete_descendents_of_tokens
-# * fixed a couple more bugs in Rete
+# * Fixed a couple more bugs in Rete
 
 from random import randint, uniform, choice
 import operator
