@@ -11,16 +11,34 @@ print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`�
 
 net = Network()
 
+# Can win a vertical column:
+# X($y, $x) ^ X($z, $x) ^ □($w, $x) ^ ($y != $z) => playX($w, $x)
 c01 = Has('X', '$y', '$x')
 c02 = Has('X', '$z', '$x')
 c03 = Has('□', '$w', '$x')
 c04 = Has('!=', '$y', '$z')
 p0 = net.add_production(Rule(c01, c02, c03, c04))
 
-#c04 = Has('O', '$x', '$x')
-#c05 = Has('□', '$y', '$z')
-#c06 = Has('>', '$y', '$z')
-#p1 = net.add_production(Rule(c04, c05, c06))
+# Can win a horizontal row:
+# X($x, $y) ^ X($x, $z) ^ □($x, $w) ^ ($y != $z) => playX($x, $w)
+
+# Can win a diagonal:
+# X($x, $x) ^ X($y, $y) ^ □($z, $z) ^ ($x != $y) ^ ($y != $z) ^ ($z != $x) => playX($z, $z)
+
+# Can win a backward diagonal:
+# X($x, $x) ^ X($y, $y) ^ □($z, $z) ^ ($x != $y) ^ ($y != $z) ^ ($z != $x) => playX($z, $z)
+
+# If enemy can win, we need to block it:
+
+# Must block a vertical column:
+# O($y, $x) ^ O($z, $x) ^ □($w, $x) ^ ($y != $z) => playX($w, $x)
+
+# Must block a horizontal row:
+# Must block a diagonal:
+# Must block a backward diagonal:
+
+# Otherwise, prefer a tile that can lead to 'double fork'
+# Otherwise, just play randomly
 
 def show_board(board):
 	for i in [0, 3, 6]:

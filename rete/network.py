@@ -181,7 +181,7 @@ class Network:
 		:rtype: list of TestAtJoinNode
 		"""
 		result = []
-		DEBUG("condition = ", c)
+		#DEBUG("condition = ", c)
 		for field_of_v, v in c.vars:
 			for idx, cond in enumerate(earlier_conds):
 				if isinstance(cond, Ncc) or isinstance(cond, Neg):
@@ -204,9 +204,9 @@ class Network:
 		:rtype: list of TestAtJoinNode
 		"""
 		result = []
-		DEBUG("custom condition = ", cond)
+		# DEBUG("custom condition = ", cond)
 		op = cond.F1
-		v = cond.F2		# We know that this must be a var
+		v = cond.F2		# By convention this must be a var
 
 		for index1, cond1 in enumerate(earlier_conds):
 			if isinstance(cond1, Ncc) or isinstance(cond1, Neg):
@@ -389,8 +389,6 @@ class Network:
 					# Finally, from 'current_node' which is a beta_memory, grows a new join_node:
 					#current_node = self.build_or_share_join_node(current_node, am, tests, cond)
 					current_node = self.build_or_share_join_node(current_node, None, None, None, custom_tests=tests)
-
-					print("**** testing new implementation ****")
 			elif isinstance(cond, Ncc):
 				current_node = self.build_or_share_ncc_nodes(current_node, cond, conds_higher_up)
 			elif isinstance(cond, Filter):

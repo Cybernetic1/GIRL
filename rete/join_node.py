@@ -29,12 +29,12 @@ class JoinNode(BetaNode):
 		# The Join Nodes with CustomTests will never be right-activated
 		# Because they have no proper "conditions" (Has).
 		if hasattr(self, 'custom_tests'):
-			alert("custom_tests=", self.custom_tests)
+			DEBUG("This should be an error")
 
-		DEBUG(self, "right-activation:")
-		DEBUG("wme =", wme)
+		# DEBUG(self, "right-activation:")
+		# DEBUG("wme =", wme)
 		for token in self.parent.items:
-			DEBUG("token=", token)
+			# DEBUG("token=", token)
 			if self.perform_join_test(token, wme):
 				binding = self.make_binding(wme)
 				for child in self.children:
@@ -44,19 +44,19 @@ class JoinNode(BetaNode):
 		"""
 		:type token: rete.Token
 		"""
-		DEBUG(self, "left-activation:")
-		DEBUG("token=", token)
+		# DEBUG(self, "left-activation:")
+		# DEBUG("token=", token)
 		if hasattr(self, 'custom_tests'):
-			DEBUG("custom_tests=", self.custom_tests)
+			# DEBUG("custom_tests=", self.custom_tests)
 			if self.perform_custom_join_test(token):
 				# binding = self.make_binding(wme)
 				for child in self.children:
 					child.left_activation(token, None, None)
 
 		if self.amem:		# added by YKY
-			DEBUG("Amem gets left-activation")
+			# DEBUG("Amem gets left-activation")
 			for wme in self.amem.items:
-				DEBUG("wme =", wme)
+				# DEBUG("wme =", wme)
 				if self.perform_join_test(token, wme):
 					binding = self.make_binding(wme)
 					for child in self.children:
