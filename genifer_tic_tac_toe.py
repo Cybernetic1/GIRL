@@ -25,8 +25,8 @@ p0 = net.add_production(Rule(c01, c02, c03, c04))
 # Can win a diagonal:
 # X($x, $x) ^ X($y, $y) ^ □($z, $z) ^ ($x != $y) ^ ($y != $z) ^ ($z != $x) => playX($z, $z)
 
-# Can win a backward diagonal:
-# X($x, $x) ^ X($y, $y) ^ □($z, $z) ^ ($x != $y) ^ ($y != $z) ^ ($z != $x) => playX($z, $z)
+# Can win a backward diagonal: (0,2) (1,1) (2,0)
+# X($x, $z) ^ X($y, $y) ^ □($z, $x) ^ ($x != $y) ^ ($y != $z) ^ ($z != $x) => playX($z, $z)
 
 # If enemy can win, we need to block it:
 
