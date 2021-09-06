@@ -13,11 +13,30 @@ net = Network()
 
 # Can win a vertical column:
 # X($y, $x) ^ X($z, $x) ^ □($w, $x) ^ ($y != $z) => playX($w, $x)
-c01 = Has('X', '$y', '$x')
-c02 = Has('X', '$z', '$x')
-c03 = Has('□', '$w', '$x')
-c04 = Has('!=', '$y', '$z')
-p0 = net.add_production(Rule(c01, c02, c03, c04))
+p0 = net.add_production(Rule(
+	Has('X', '$y', '$x'),
+	Has('X', '$z', '$x'),
+	Has('□', '$w', '$x'),
+	Has('!=', '$y', '$z'),
+))
+p0.postcondition = Has("playX", '$w', '$x')
+
+p1 = net.add_production(Rule(
+	Has('X', '$x'),
+	Has('X', '$y'),
+	Has('□', '$z'),
+	Has("samerow", '$x', '$y'),
+	Has("samerow", '$y', '$z'),
+))
+
+p2 = net.add_production(Rule(
+	Has('π1', '$x', '$x1'),		# $x1 = row number
+	Has('π1', '$y', '$y1'),
+))
+p2.postcondition = Has("samerow", '$x', '$y')
+
+c10 = Has('diag', (1,1), (0,0))
+#p1 = net.add_production(Rule(c10, c11, c02, c03))
 
 # Can win a horizontal row:
 # X($x, $y) ^ X($x, $z) ^ □($x, $w) ^ ($y != $z) => playX($x, $w)
@@ -67,8 +86,6 @@ wmes = [
 	WME('O', '2', '2'),
 	WME('□', '0', '1'),
 	WME('□', '2', '0'),
-	#WME('!=', '1', '2'),
-	#WME('!=', '2', '1'),
 ]
 for wme in wmes:
 	net.add_wme(wme)
