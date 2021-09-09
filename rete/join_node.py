@@ -79,6 +79,7 @@ class JoinNode(BetaNode):
 	def perform_custom_join_test(self, token):
 		# This is for CustomTestAtJoinNode:
 		for this_test in self.custom_tests:
+			print("custom test:", this_test)
 			op = this_test.op
 			wme1 = token.wmes[this_test.condition_number_of_arg1]
 			arg1 = getattr(wme1, this_test.field_of_arg1)
@@ -87,7 +88,7 @@ class JoinNode(BetaNode):
 			else:
 				wme2 = token.wmes[this_test.condition_number_of_arg2]
 				arg2 = getattr(wme2, this_test.field_of_arg2)
-			if op == '=':
+			if op == '==':
 				if arg1 != arg2:
 					return False
 			if op == '!=':
@@ -98,6 +99,12 @@ class JoinNode(BetaNode):
 					return False
 			if op == '<':
 				if arg1 >= arg2:
+					return False
+			if op == 'π1':
+				if arg1[0] != arg2:
+					return False
+			if op == 'π2':
+				if arg1[1] != arg2:
 					return False
 		return True
 

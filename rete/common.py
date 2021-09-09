@@ -272,7 +272,10 @@ class Token:
 			cls.delete_token_and_descendents(tok)
 
 def is_var(v):
-	return v.startswith('$') if v else False
+	if v and type(v) == str:
+		return v.startswith('$')
+	else:
+		return False
 
 def DEBUG(*args):
 	print(end='\x1b[36m')

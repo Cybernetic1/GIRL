@@ -362,7 +362,7 @@ class Network:
 				# **** Added by YKY:  check if cond is a custom operator
 				op = getattr(cond, 'F1')
 				# DEBUG("op = ", op)
-				if op not in ['>', '<', '=', '!=']:
+				if op not in ['>', '<', '==', '!=', 'π1', 'π2']:
 					# op = None
 					current_node = self.build_or_share_beta_memory(current_node)
 					tests = self.get_join_tests_from_condition(cond, conds_higher_up)
@@ -388,7 +388,7 @@ class Network:
 					#am = self.build_or_share_alpha_memory(cond)
 					# Finally, from 'current_node' which is a beta_memory, grows a new join_node:
 					#current_node = self.build_or_share_join_node(current_node, am, tests, cond)
-					current_node = self.build_or_share_join_node(current_node, None, None, None, custom_tests=tests)
+					current_node = self.build_or_share_join_node(current_node, None, None, cond, custom_tests=tests)
 			elif isinstance(cond, Ncc):
 				current_node = self.build_or_share_ncc_nodes(current_node, cond, conds_higher_up)
 			elif isinstance(cond, Filter):

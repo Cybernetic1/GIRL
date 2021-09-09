@@ -13,29 +13,36 @@ net = Network()
 
 # Can win a vertical column:
 # X($y, $x) ^ X($z, $x) ^ □($w, $x) ^ ($y != $z) => playX($w, $x)
-p0 = net.add_production(Rule(
-	Has('X', '$y', '$x'),
-	Has('X', '$z', '$x'),
-	Has('□', '$w', '$x'),
-	Has('!=', '$y', '$z'),
-))
-p0.postcondition = Has("playX", '$w', '$x')
+# p0 = net.add_production(Rule(
+	# Has('X', '$y', '$x'),
+	# Has('X', '$z', '$x'),
+	# Has('□', '$w', '$x'),
+	# Has('!=', '$y', '$z'),
+# ))
+# p0.postcondition = Has("oldX", '$w', '$x')
 
-p1 = net.add_production(Rule(
-	Has('X', '$x'),
-	Has('X', '$y'),
-	Has('□', '$z'),
-	Has("samerow", '$x', '$y'),
-	Has("samerow", '$y', '$z'),
-))
+# p1 = net.add_production(Rule(
+	# Has("samerow", '$x', '$y'),
+	# Has("samerow", '$y', '$z'),
+	# Has('X', '$x'),
+	# Has('X', '$y'),
+	# Has('□', '$z'),
+# ))
+# p1.postcondition = Has("newX", '$z')
 
 p2 = net.add_production(Rule(
-	Has('π1', '$x', '$x1'),		# $x1 = row number
-	Has('π1', '$y', '$y1'),
+	Has('O', '$x'),
+	Has('O', '$y'),
+	Has('π1', '$x', 1),		# $x1 = row number
+	Has('π1', '$y', 1),
+	Has('!=', '$x', '$y')
 ))
 p2.postcondition = Has("samerow", '$x', '$y')
 
-c10 = Has('diag', (1,1), (0,0))
+# The problem here is that the π1(x,1) proposition needs to be checked
+# for x != y, but it has no "Has" representation.
+
+#c10 = Has('diag', (1,1), (0,0))
 #p1 = net.add_production(Rule(c10, c11, c02, c03))
 
 # Can win a horizontal row:
@@ -77,15 +84,15 @@ board = 9 * [0]
 # ⭕❌⭕
 #   ❌⭕
 wmes = [
-	WME('X', '0', '2'),
-	WME('X', '1', '1'),
-	WME('X', '2', '1'),
-	WME('O', '0', '0'),
-	WME('O', '1', '0'),
-	WME('O', '1', '2'),
-	WME('O', '2', '2'),
-	WME('□', '0', '1'),
-	WME('□', '2', '0'),
+	WME('X', (0, 2)),
+	WME('X', (1, 1)),
+	WME('X', (2, 1)),
+	WME('O', (0, 0)),
+	WME('O', (1, 0)),
+	WME('O', (1, 2)),
+	WME('O', (2, 2)),
+	WME('□', (0, 1)),
+	WME('□', (2, 0)),
 ]
 for wme in wmes:
 	net.add_wme(wme)
@@ -95,13 +102,13 @@ for wme in wmes:
 		x = 1
 	else:
 		x = 0
-	board[ int(wme.F2) * 3 + int(wme.F3) ] = x
+	board[ wme.F2[0] * 3 + wme.F2[1] ] = x
 print("\nFacts:")
 show_board(board)
 
-print("\n# of results = ", len(p0.items))
+print("\n# of p2 results = ", len(p2.items))
 print("Results:")
-for i in p0.items:
+for i in p2.items:
 	print(i)
 
 f = open("rete.dot", "w+")
