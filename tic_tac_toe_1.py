@@ -21,31 +21,6 @@ p0 = net.add_production(Rule(
 ))
 p0.postcondition = Has("oldX", '$w', '$x')
 
-# p1 = net.add_production(Rule(
-	# Has("samerow", '$x', '$y'),
-	# Has("samerow", '$y', '$z'),
-	# Has('X', '$x'),
-	# Has('X', '$y'),
-	# Has('□', '$z'),
-# ))
-# p1.postcondition = Has("newX", '$z')
-
-# p2 = net.add_production(Rule(
-	# Has('O', '$x'),
-	# Has('O', '$y'),
-	# Has('π1', '$x', 1),		# $x1 = row number
-	# Has('π1', '$y', 1),
-	# Has('!=', '$x', '$y')
-# ))
-# p2.postcondition = Has("samerow", '$x', '$y')
-# Solved: The problem here is that the π1(x,1) proposition needs to
-# be checked for x != y, but it has no "Has" representation.
-# Now the problem is a "None" token passed down to the Join Node.
-# Why is it None? 
-
-#c10 = Has('diag', (1,1), (0,0))
-#p1 = net.add_production(Rule(c10, c11, c02, c03))
-
 # Can win a horizontal row:
 # X($x, $y) ^ X($x, $z) ^ □($x, $w) ^ ($y != $z) => playX($x, $w)
 

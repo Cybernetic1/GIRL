@@ -11,16 +11,6 @@ print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`�
 
 net = Network()
 
-# Can win a vertical column:
-# X($y, $x) ^ X($z, $x) ^ □($w, $x) ^ ($y != $z) => playX($w, $x)
-# p0 = net.add_production(Rule(
-	# Has('X', '$y', '$x'),
-	# Has('X', '$z', '$x'),
-	# Has('□', '$w', '$x'),
-	# Has('!=', '$y', '$z'),
-# ))
-# p0.postcondition = Has("oldX", '$w', '$x')
-
 # p1 = net.add_production(Rule(
 	# Has("samerow", '$x', '$y'),
 	# Has("samerow", '$y', '$z'),
