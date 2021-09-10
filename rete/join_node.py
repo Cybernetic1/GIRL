@@ -15,6 +15,8 @@ class JoinNode(BetaNode):
 		:type custom_tests: list of CustomTestAtJoinNode
 		:type has: Has
 		"""
+		# 'super()' means to find parent-class of JoinNode and
+		# to instantiate this object as a member of the parent class
 		super(JoinNode, self).__init__(children=children, parent=parent)
 		self.amem = amem
 		self.tests = tests
@@ -86,11 +88,11 @@ class JoinNode(BetaNode):
 			if hasattr(this_test, 'const'):
 				arg2 = this_test.const
 			else:
+				DEBUG("token:", token)
 				wme2 = token.wmes[this_test.condition_number_of_arg2]
+				if wme2 is None:
+					return True
 				arg2 = getattr(wme2, this_test.field_of_arg2)
-			if op == '==':
-				if arg1 != arg2:
-					return False
 			if op == '!=':
 				if arg1 == arg2:
 					return False
@@ -100,10 +102,10 @@ class JoinNode(BetaNode):
 			if op == '<':
 				if arg1 >= arg2:
 					return False
-			if op == 'π1':
+			if op == 'π0':
 				if arg1[0] != arg2:
 					return False
-			if op == 'π2':
+			if op == 'π1':
 				if arg1[1] != arg2:
 					return False
 		return True

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #FIELDS = ['identifier', 'attribute', 'value']
-FIELDS = ['F1', 'F2', 'F3']
+FIELDS = ['F0', 'F1', 'F2']
 
 class BetaNode(object):
 
@@ -15,26 +15,26 @@ class BetaNode(object):
 
 class Has:
 
-	def __init__(self, F1=None, F2=None, F3=None):
+	def __init__(self, F0=None, F1=None, F2=None):
 		"""
 		(<x> ^self <y>)
 		repr as:
 		('$x', 'self', '$y')
 
-		:type F1, F2, F3: Var or str
+		:type F0, F1, F2: Var or str
 		"""
+		self.F0 = F0
 		self.F1 = F1
 		self.F2 = F2
-		self.F3 = F3
 
 	def __repr__(self):
-		return "(%s %s %s)" % (self.F1, self.F2, self.F3)
+		return "(%s %s %s)" % (self.F0, self.F1, self.F2)
 
 	def __eq__(self, other):
 		return self.__class__ == other.__class__ \
+			   and self.F0 == other.F0 \
 			   and self.F1 == other.F1 \
-			   and self.F2 == other.F2 \
-			   and self.F3 == other.F3
+			   and self.F2 == other.F2
 
 	@property
 	def vars(self):
@@ -76,7 +76,7 @@ class Has:
 class Neg(Has):
 
 	def __repr__(self):
-		return "~(%s %s %s)" % (self.F1, self.F2, self.F3)
+		return "~(%s %s %s)" % (self.F0, self.F1, self.F2)
 
 
 class Rule(list):
@@ -114,16 +114,16 @@ class Bind:
 
 class WME:
 
-	def __init__(self, F1=None, F2=None, F3=None):
+	def __init__(self, F0=None, F1=None, F2=None):
+		self.F0 = F0
 		self.F1 = F1
 		self.F2 = F2
-		self.F3 = F3
 		self.amems = []  # the ones containing this WME
 		self.tokens = []  # the ones containing this WME
 		self.negative_join_results = []
 
 	def __repr__(self):
-		return "(%s %s %s)" % (self.F1, self.F2, self.F3)
+		return "(%s %s %s)" % (self.F0, self.F1, self.F2)
 
 	def __eq__(self, other):
 		"""
@@ -131,13 +131,15 @@ class WME:
 		"""
 		if not isinstance(other, WME):
 			return False
-		return self.F1 == other.F1 and \
-			   self.F2 == other.F2 and \
-			   self.F3 == other.F3
+		return self.F0 == other.F0 and \
+			   self.F1 == other.F1 and \
+			   self.F2 == other.F2
 
 
 class Token:
 
+	# The input 'parent' Token is a list of WMEs up to item (i-1).
+	# The input WME is the i-th item in the new Token.
 	def __init__(self, parent, wme, node=None, binding=None):
 		"""
 		:type wme: WME

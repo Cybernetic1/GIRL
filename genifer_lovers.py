@@ -36,9 +36,9 @@ wmes = [
 print("\nFacts:")
 for wme in wmes:
 	net.add_wme(wme)
-	print(wme.F1 + '(' + wme.F2, end='')
-	if wme.F3:
-		print(', ' + wme.F3 + ')')
+	print(wme.F0 + '(' + wme.F1, end='')
+	if wme.F2:
+		print(', ' + wme.F2 + ')')
 	else:
 		print(')')
 

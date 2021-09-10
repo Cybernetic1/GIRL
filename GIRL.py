@@ -670,7 +670,7 @@ def play_1_move(population, CurrentPlayer):
 			for item in p0.items:
 				# **** Previously I assumed postcond = X = action
 				# **** But now postcond can be a predicate P_i
-				head = p0.postcondition.F1
+				head = p0.postcondition.F0
 				DEBUG("the head=", head)
 				if head[0] == 'P':
 
@@ -679,18 +679,18 @@ def play_1_move(population, CurrentPlayer):
 					DEBUG("postcond =", p0.postcondition)
 					# Question: are all instances the same?
 					# apply binding to rule's action (ie, post-condition)
+					if is_var(p0.postcondition.F1):
+						p0.postcondition.F1 = item.get_binding(p0.postcondition.F1)
+						if p0.postcondition.F1 is None:
+							p0.postcondition.F1 = str(randint(0,2))
 					if is_var(p0.postcondition.F2):
 						p0.postcondition.F2 = item.get_binding(p0.postcondition.F2)
 						if p0.postcondition.F2 is None:
 							p0.postcondition.F2 = str(randint(0,2))
-					if is_var(p0.postcondition.F3):
-						p0.postcondition.F3 = item.get_binding(p0.postcondition.F3)
-						if p0.postcondition.F3 is None:
-							p0.postcondition.F3 = str(randint(0,2))
 					DEBUG("postcond =", p0.postcondition, "<-- after binding")
 
 					# **** Add to Working Memory:
-					rete_net.add_wme(WME(head, p0.postcondition.F2, p0.postcondition.F3))
+					rete_net.add_wme(WME(head, p0.postcondition.F1, p0.postcondition.F2))
 					# input("added proposition to WM...")		# pause
 					continue			# continue to next instantiation...
 
@@ -705,7 +705,7 @@ def play_1_move(population, CurrentPlayer):
 			DEBUG(len(p0.items), "instances")
 		for item in p0.items:
 
-			head = p0.postcondition.F1
+			head = p0.postcondition.F0
 			if head[0] != 'P':
 				# **** Here, the post-cond must be an ACTION ****
 
@@ -715,19 +715,19 @@ def play_1_move(population, CurrentPlayer):
 				# item = choice(p0.items)		# choose an instantiation randomly
 				# Question: are all instances the same?
 				# apply binding to rule's action (ie, post-condition)
+				if is_var(p0.postcondition.F1):
+					p0.postcondition.F1 = item.get_binding(p0.postcondition.F1)
+					if p0.postcondition.F1 is None:
+						p0.postcondition.F1 = str(randint(0,2))
 				if is_var(p0.postcondition.F2):
 					p0.postcondition.F2 = item.get_binding(p0.postcondition.F2)
 					if p0.postcondition.F2 is None:
 						p0.postcondition.F2 = str(randint(0,2))
-				if is_var(p0.postcondition.F3):
-					p0.postcondition.F3 = item.get_binding(p0.postcondition.F3)
-					if p0.postcondition.F3 is None:
-						p0.postcondition.F3 = str(randint(0,2))
 				DEBUG("postcond =", p0.postcondition, "<-- after binding")
 
 				# Check if the square is empty
-				x = int(p0.postcondition.F2)
-				y = int(p0.postcondition.F3)
+				x = int(p0.postcondition.F1)
+				y = int(p0.postcondition.F2)
 				if board[x][y] == ' ':
 					playable.append(candidate)		# append to 'playable' list
 					candidate['fitness'] += 1.0
@@ -757,14 +757,14 @@ def play_1_move(population, CurrentPlayer):
 	candidate = choice(uniques)
 	p0 = candidate['p_node']
 
-	x = int(p0.postcondition.F2)
-	y = int(p0.postcondition.F3)
+	x = int(p0.postcondition.F1)
+	y = int(p0.postcondition.F2)
 	board[x][y] = CurrentPlayer
 	# print("    played move: X(%d,%d)" % (x,y))
 	# remove old WME
-	rete_net.remove_wme(WME(' ', p0.postcondition.F2, p0.postcondition.F3))
+	rete_net.remove_wme(WME(' ', p0.postcondition.F1, p0.postcondition.F2))
 	# add new WME
-	rete_net.add_wme(WME(CurrentPlayer, p0.postcondition.F2, p0.postcondition.F3))
+	rete_net.add_wme(WME(CurrentPlayer, p0.postcondition.F1, p0.postcondition.F2))
 	# **** record move: record the rule that is fired
 	moves.append(candidate)
 	return False

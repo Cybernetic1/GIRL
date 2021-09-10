@@ -13,13 +13,13 @@ net = Network()
 
 # Can win a vertical column:
 # X($y, $x) ^ X($z, $x) ^ □($w, $x) ^ ($y != $z) => playX($w, $x)
-# p0 = net.add_production(Rule(
-	# Has('X', '$y', '$x'),
-	# Has('X', '$z', '$x'),
-	# Has('□', '$w', '$x'),
-	# Has('!=', '$y', '$z'),
-# ))
-# p0.postcondition = Has("oldX", '$w', '$x')
+p0 = net.add_production(Rule(
+	Has('X', '$y', '$x'),
+	Has('X', '$z', '$x'),
+	Has('□', '$w', '$x'),
+	Has('!=', '$y', '$z'),
+))
+p0.postcondition = Has("oldX", '$w', '$x')
 
 # p1 = net.add_production(Rule(
 	# Has("samerow", '$x', '$y'),
@@ -30,14 +30,14 @@ net = Network()
 # ))
 # p1.postcondition = Has("newX", '$z')
 
-p2 = net.add_production(Rule(
-	Has('O', '$x'),
-	Has('O', '$y'),
-	Has('π0', '$x', 1),		# $x1 = row number
-	Has('π0', '$y', 1),
-	Has('!=', '$x', '$y')
-))
-p2.postcondition = Has("samerow", '$x', '$y')
+# p2 = net.add_production(Rule(
+	# Has('O', '$x'),
+	# Has('O', '$y'),
+	# Has('π1', '$x', 1),		# $x1 = row number
+	# Has('π1', '$y', 1),
+	# Has('!=', '$x', '$y')
+# ))
+# p2.postcondition = Has("samerow", '$x', '$y')
 # Solved: The problem here is that the π1(x,1) proposition needs to
 # be checked for x != y, but it has no "Has" representation.
 # Now the problem is a "None" token passed down to the Join Node.
@@ -85,15 +85,15 @@ board = 9 * [0]
 # ⭕❌⭕
 #   ❌⭕
 wmes = [
-	WME('X', (0, 2)),
-	WME('X', (1, 1)),
-	WME('X', (2, 1)),
-	WME('O', (0, 0)),
-	WME('O', (1, 0)),
-	WME('O', (1, 2)),
-	WME('O', (2, 2)),
-	WME('□', (0, 1)),
-	WME('□', (2, 0)),
+	WME('X', 0, 2),
+	WME('X', 1, 1),
+	WME('X', 2, 1),
+	WME('O', 0, 0),
+	WME('O', 1, 0),
+	WME('O', 1, 2),
+	WME('O', 2, 2),
+	WME('□', 0, 1),
+	WME('□', 2, 0),
 ]
 for wme in wmes:
 	net.add_wme(wme)
@@ -103,17 +103,17 @@ for wme in wmes:
 		x = 1
 	else:
 		x = 0
-	board[ wme.F1[0] * 3 + wme.F1[1] ] = x
+	board[ wme.F1 * 3 + wme.F2 ] = x
 print("\nFacts:")
 show_board(board)
 
-print("\n# of p2 results = ", len(p2.items))
+print("\n# of p0 results = ", len(p0.items))
 print("Results:")
-for i in p2.items:
+for i in p0.items:
 	print(i)
 
-f = open("rete.dot", "w+")
+f = open("rete1.dot", "w+")
 f.write(net.dump())
 f.close()
-os.system("dot -Tpng rete.dot -orete.png")
-print("\nRete graph saved as rete.png\n")
+os.system("dot -Tpng rete1.dot -orete1.png")
+print("\nRete graph saved as rete1.png\n")

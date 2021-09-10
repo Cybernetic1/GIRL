@@ -205,8 +205,8 @@ class Network:
 		"""
 		result = []
 		# DEBUG("custom condition = ", cond)
-		op = cond.F1
-		v = cond.F2		# By convention this must be a var
+		op = cond.F0
+		v = cond.F1		# By convention this must be a var
 
 		for index1, cond1 in enumerate(earlier_conds):
 			if isinstance(cond1, Ncc) or isinstance(cond1, Neg):
@@ -216,7 +216,7 @@ class Network:
 				continue
 
 			# At this point we have op( index1:field1 , __:__ )
-			v_c = cond.F3		# v_c can be var or const
+			v_c = cond.F2		# v_c can be var or const
 			if is_var(v_c):
 				for index2, cond2 in enumerate(earlier_conds):
 					if isinstance(cond2, Ncc) or isinstance(cond2, Neg):
@@ -360,20 +360,20 @@ class Network:
 				current_node = self.build_or_share_negative_node(current_node, am, tests)
 			elif isinstance(cond, Has):
 				# **** Added by YKY:  check if cond is a custom operator
-				op = getattr(cond, 'F1')
+				op = getattr(cond, 'F0')
 				# DEBUG("op = ", op)
-				if op not in ['>', '<', '==', '!=', 'π1', 'π2']:
+				if op not in ['>', '<', '!=', 'π0', 'π1']:
 					# op = None
 					current_node = self.build_or_share_beta_memory(current_node)
 					tests = self.get_join_tests_from_condition(cond, conds_higher_up)
 					am = self.build_or_share_alpha_memory(cond)
 					current_node = self.build_or_share_join_node(current_node, am, tests, cond)
 				else:
-					# All earlier conds in which F2.var and F3.var occur must be tested
-					# 1. collect all earlier conds in which F2 or F3 occurs
-					# 2. set all links of the form "F2 op F3"
+					# All earlier conds in which F1.var and F2.var occur must be tested
+					# 1. collect all earlier conds in which F1 or F2 occurs
+					# 2. set all links of the form "F1 op F2"
+					# F1s = []
 					# F2s = []
-					# F3s = []
 
 					# **** New treatment:
 					# We should create a special join_node whose alpha_memory is automatically activated

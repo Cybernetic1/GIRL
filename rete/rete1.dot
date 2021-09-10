@@ -1,0 +1,57 @@
+digraph {
+	subgraph cluster_1 {
+	label = beta
+	"BetaNode 0x7f097ff88b38" [label="βroot"];
+	"BetaNode 0x7f097ff88b38" -> "BetaMemory 0x7f097ff2a0f0";
+	"BetaMemory 0x7f097ff2a0f0" [label="βM"];
+	"BetaMemory 0x7f097ff2a0f0" -> "JoinNode 0x7f097ff2a1d0";
+	"JoinNode 0x7f097ff2a1d0" [shape=box,color=red,label="J"];
+	"JoinNode 0x7f097ff2a1d0" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7f097ff2a198>"
+	"(X $y $x)" [style=filled,fillcolor=orange];
+	"JoinNode 0x7f097ff2a1d0" -> "(X $y $x)"
+	"JoinNode 0x7f097ff2a1d0" -> "BetaMemory 0x7f097ff2a208";
+	"BetaMemory 0x7f097ff2a208" [label="βM"];
+	"BetaMemory 0x7f097ff2a208" -> "JoinNode 0x7f097ff2a240";
+	"JoinNode 0x7f097ff2a240" [shape=box,color=red,label="J"];
+	"JoinNode 0x7f097ff2a240" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7f097ff2a198>"
+	"(X $z $x)" [style=filled,fillcolor=orange];
+	"JoinNode 0x7f097ff2a240" -> "(X $z $x)"
+	"F3 == 0:F3?" [style=filled,fillcolor=yellow];
+	"JoinNode 0x7f097ff2a240" -> "F3 == 0:F3?"
+	"JoinNode 0x7f097ff2a240" -> "BetaMemory 0x7f097ff2a278";
+	"BetaMemory 0x7f097ff2a278" [label="βM"];
+	"BetaMemory 0x7f097ff2a278" -> "JoinNode 0x7f097ff2a3c8";
+	"JoinNode 0x7f097ff2a3c8" [shape=box,color=red,label="J"];
+	"JoinNode 0x7f097ff2a3c8" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7f097ff2a320>"
+	"(□ $w $x)" [style=filled,fillcolor=orange];
+	"JoinNode 0x7f097ff2a3c8" -> "(□ $w $x)"
+	"F3 == 0:F3?" [style=filled,fillcolor=yellow];
+	"JoinNode 0x7f097ff2a3c8" -> "F3 == 0:F3?"
+	"F3 == 1:F3?" [style=filled,fillcolor=yellow];
+	"JoinNode 0x7f097ff2a3c8" -> "F3 == 1:F3?"
+	"JoinNode 0x7f097ff2a3c8" -> "BetaMemory 0x7f097ff2a400";
+	"BetaMemory 0x7f097ff2a400" [label="βM"];
+	"BetaMemory 0x7f097ff2a400" -> "JoinNode 0x7f097ff2a438";
+	"JoinNode 0x7f097ff2a438" [shape=box,color=red,label="J"];
+	"(!= $y $z)" [style=filled,fillcolor=orange];
+	"JoinNode 0x7f097ff2a438" -> "(!= $y $z)"
+	"0:F2 != 1:F2?" [style=filled,fillcolor=yellow];
+	"JoinNode 0x7f097ff2a438" -> "0:F2 != 1:F2?"
+	"JoinNode 0x7f097ff2a438" -> "PNode 0x7f097ff2a0b8";
+	"PNode 0x7f097ff2a0b8" [style=filled,fillcolor=pink,label="p"];
+	}
+	subgraph cluster_0 {
+	label = alpha
+	"no-test" -> "F0==X";
+	"F0==X" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7f097ff2a198>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7f097ff2a198>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"no-test" -> "F0==□";
+	"F0==□" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7f097ff2a320>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7f097ff2a320>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	"no-test" -> "⍺M:<rete.alpha.AlphaMemory object at 0x7f097ff887f0>";
+	"⍺M:<rete.alpha.AlphaMemory object at 0x7f097ff887f0>" [shape=box, style="rounded,filled", label="⍺M", fillcolor=gray];
+	}
+	"F0==X" -> "JoinNode 0x7f097ff2a1d0" [color=gray];
+	"F0==X" -> "JoinNode 0x7f097ff2a240" [color=gray];
+	"F0==□" -> "JoinNode 0x7f097ff2a3c8" [color=gray];
+}
