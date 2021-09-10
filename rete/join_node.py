@@ -149,7 +149,7 @@ class CustomTestAtJoinNode:
 		self.condition_number_of_arg1 = condition_number_of_arg1
 		self.field_of_arg1 = field_of_arg1
 		self.op = op
-		if const:
+		if const is not None:
 			self.const = const
 		else:
 			self.condition_number_of_arg2 = condition_number_of_arg2

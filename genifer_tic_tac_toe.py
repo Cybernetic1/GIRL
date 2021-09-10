@@ -20,14 +20,23 @@ net = Network()
 # ))
 # p1.postcondition = Has("newX", '$z')
 
+p1 = net.add_production(Rule(
+	Has('$z', '$x'),
+	Has('$z', '$y'),
+	Has('π1', '$x', 0),		# $x_1 = column number
+	Has('π1', '$y', 0),
+	Has('!=', '$x', '$y')
+))
+p1.postcondition = Has("same_col", '$x', '$y')
+
 p2 = net.add_production(Rule(
-	Has('O', '$x'),
-	Has('O', '$y'),
-	Has('π0', '$x', 1),		# $x1 = row number
+	Has('$z', '$x'),
+	Has('$z', '$y'),
+	Has('π0', '$x', 1),		# $x_0 = row number
 	Has('π0', '$y', 1),
 	Has('!=', '$x', '$y')
 ))
-p2.postcondition = Has("samerow", '$x', '$y')
+p2.postcondition = Has("same_row", '$x', '$y')
 # Solved: The problem here is that the π1(x,1) proposition needs to
 # be checked for x != y, but it has no "Has" representation.
 # Now the problem is a "None" token passed down to the Join Node.
@@ -97,10 +106,11 @@ for wme in wmes:
 print("\nFacts:")
 show_board(board)
 
-print("\n# of p2 results = ", len(p2.items))
-print("Results:")
-for i in p2.items:
-	print(i)
+for p in [p1, p2]:
+	print("\n# of results = ", len(p.items))
+	print("Results:")
+	for i in p.items:
+		print(i)
 
 f = open("rete.dot", "w+")
 f.write(net.dump())

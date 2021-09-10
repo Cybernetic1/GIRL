@@ -274,7 +274,7 @@ class Token:
 			cls.delete_token_and_descendents(tok)
 
 def is_var(v):
-	if v and type(v) == str:
+	if type(v) == str:
 		return v.startswith('$')
 	else:
 		return False

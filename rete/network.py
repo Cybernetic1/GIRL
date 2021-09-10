@@ -224,7 +224,7 @@ class Network:
 					field_of_v2 = cond2.contain(v_c)
 					if not field_of_v2:
 						continue
-					t = CustomTestAtJoinNode(index1, field_of_v1, op, index2, field_of_v2)
+					t = CustomTestAtJoinNode(index1, field_of_v1, op, condition_number_of_arg2=index2, field_of_arg2=field_of_v2)
 					result.append(t)
 			else:
 				t = CustomTestAtJoinNode(index1, field_of_v1, op, const=v_c)
@@ -244,9 +244,14 @@ class Network:
 		"""
 		for child in parent.children:
 			if isinstance(child, JoinNode) and child.amem == amem \
-					and child.tests == tests and child.has == has and \
-					child.custom_tests == custom_tests:
-				return child
+					and child.tests == tests and child.has == has:
+				if custom_tests and hasattr(child, custom_tests):
+					if child.custom_tests == custom_tests:
+						return child
+					else:
+						continue
+				else:
+					return child
 		node = JoinNode([], parent, amem, tests, has, custom_tests)
 		parent.children.append(node)
 		if amem:		# added by YKY
