@@ -23,8 +23,8 @@ net = Network()
 p1 = net.add_production(Rule(
 	Has('$z', '$x'),
 	Has('$z', '$y'),
-	Has('π1', '$x', 0),		# $x_1 = column number
-	Has('π1', '$y', 0),
+	Has('π1', '$x', 1),		# $x_1 = column number
+	Has('π1', '$y', 1),
 	Has('!=', '$x', '$y')
 ))
 p1.postcondition = Has("same_col", '$x', '$y')
