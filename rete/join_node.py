@@ -69,19 +69,22 @@ class JoinNode(BetaNode):
 		:type token: rete.Token
 		:type wme: rete.WME
 		"""
+		DEBUG("join test, token=", token)
 		for this_test in self.tests:
+			DEBUG("test:", this_test)
 			# This is for ordinary TestAtJoinNode:
 			arg1 = getattr(wme, this_test.field_of_arg1)
 			wme2 = token.wmes[this_test.condition_number_of_arg2]
-			arg2 = getattr(wme2, this_test.field_of_arg2)
-			if arg1 != arg2:
-				return False
+			if wme2 is not None:
+				arg2 = getattr(wme2, this_test.field_of_arg2)
+				if arg1 != arg2:
+					return False
 		return True
 
 	def perform_custom_join_test(self, token):
 		# This is for CustomTestAtJoinNode:
 		for this_test in self.custom_tests:
-			print("custom test:", this_test)
+			DEBUG("custom test:", this_test)
 			op = this_test.op
 			wme1 = token.wmes[this_test.condition_number_of_arg1]
 			arg1 = getattr(wme1, this_test.field_of_arg1)

@@ -245,6 +245,14 @@ f.close()
 os.system("dot -Tpng rete.dot -orete.png")
 DEBUG("\nRete graph saved as rete.png\n")
 
+# **** Background knowledge ****
+net.add_wme(WME('diag', (0, 0)))
+net.add_wme(WME('diag', (1, 1)))
+net.add_wme(WME('diag', (2, 2)))
+net.add_wme(WME('back_diag', (0, 2)))
+net.add_wme(WME('back_diag', (1, 1)))
+net.add_wme(WME('back_diag', (2, 0)))
+
 def show_board(board):
 	for i in [0, 3, 6]:
 		for j in range(3):
@@ -258,6 +266,7 @@ def show_board(board):
 			print(c, end='')
 		print(end='\n')
 
+print("Setting up board...")
 board = 9 * [0]
 # ⭕  ❌
 # ⭕❌⭕
