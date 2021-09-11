@@ -33,7 +33,7 @@ p.append(net.add_production(Rule(
 	Has('π0', '$y', 0),
 	Has('π0', '$z', 0),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("row_0_win", '$x')
 
 # row 1 win:
 p.append(net.add_production(Rule(
@@ -45,7 +45,7 @@ p.append(net.add_production(Rule(
 	Has('π0', '$y', 1),
 	Has('π0', '$z', 1),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("row_1_win", '$x')
 
 # row 2 win:
 p.append(net.add_production(Rule(
@@ -57,7 +57,7 @@ p.append(net.add_production(Rule(
 	Has('π0', '$y', 2),
 	Has('π0', '$z', 2),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("row_2_win", '$x')
 
 # column 0 win:
 p.append(net.add_production(Rule(
@@ -69,7 +69,7 @@ p.append(net.add_production(Rule(
 	Has('π1', '$y', 0),
 	Has('π1', '$z', 0),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("column_0_win", '$x')
 
 # column 1 win:
 p.append(net.add_production(Rule(
@@ -93,7 +93,7 @@ p.append(net.add_production(Rule(
 	Has('π1', '$y', 2),
 	Has('π1', '$z', 2),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("column_2_win", '$x')
 
 # diagonal win:
 p.append(net.add_production(Rule(
@@ -105,7 +105,7 @@ p.append(net.add_production(Rule(
 	Has('diag', '$y'),
 	Has('diag', '$z'),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("diag_win", '$x')
 
 # backward diagonal win:
 p.append(net.add_production(Rule(
@@ -117,9 +117,9 @@ p.append(net.add_production(Rule(
 	Has('back_diag', '$y'),
 	Has('back_diag', '$z'),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("backdiag_win", '$x')
 
-# prevent row 0 losing
+# prevent row 0 lose:
 p.append(net.add_production(Rule(
 	Has('□', '$x'),
 	Has('O', '$y'),
@@ -129,9 +129,9 @@ p.append(net.add_production(Rule(
 	Has('π0', '$y', 0),
 	Has('π0', '$z', 0),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("prevent_row_0_lose", '$x')
 
-# prevent row 1 losing:
+# prevent row 1 lose:
 p.append(net.add_production(Rule(
 	Has('□', '$x'),
 	Has('O', '$y'),
@@ -141,9 +141,9 @@ p.append(net.add_production(Rule(
 	Has('π0', '$y', 1),
 	Has('π0', '$z', 1),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("prevent_row_1_lose", '$x')
 
-# prevent row 2 losing:
+# prevent row 2 lose:
 p.append(net.add_production(Rule(
 	Has('□', '$x'),
 	Has('O', '$y'),
@@ -153,9 +153,9 @@ p.append(net.add_production(Rule(
 	Has('π0', '$y', 2),
 	Has('π0', '$z', 2),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("prevent_row_2_lose", '$x')
 
-# prevent column 0 losing:
+# prevent column 0 lose:
 p.append(net.add_production(Rule(
 	Has('□', '$x'),
 	Has('O', '$y'),
@@ -165,9 +165,9 @@ p.append(net.add_production(Rule(
 	Has('π1', '$y', 0),
 	Has('π1', '$z', 0),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("prevent_column_0_lose", '$x')
 
-# prevent column 1 losing:
+# prevent column 1 lose:
 p.append(net.add_production(Rule(
 	Has('□', '$x'),
 	Has('O', '$y'),
@@ -177,9 +177,9 @@ p.append(net.add_production(Rule(
 	Has('π1', '$y', 1),
 	Has('π1', '$z', 1),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("prevent_column_1_lose", '$x')
 
-# prevent column 2 losing:
+# prevent column 2 lose:
 p.append(net.add_production(Rule(
 	Has('□', '$x'),
 	Has('O', '$y'),
@@ -189,9 +189,9 @@ p.append(net.add_production(Rule(
 	Has('π1', '$y', 2),
 	Has('π1', '$z', 2),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("prevent_column_2_lose", '$x')
 
-# prevent diagonal losing:
+# prevent diagonal lose:
 p.append(net.add_production(Rule(
 	Has('□', '$x'),
 	Has('O', '$y'),
@@ -201,9 +201,9 @@ p.append(net.add_production(Rule(
 	Has('diag', '$y'),
 	Has('diag', '$z'),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("prevent_diag_lose", '$x')
 
-# prevent backward diagonal losing:
+# prevent backward diagonal lose:
 p.append(net.add_production(Rule(
 	Has('□', '$x'),
 	Has('O', '$y'),
@@ -213,13 +213,13 @@ p.append(net.add_production(Rule(
 	Has('back_diag', '$y'),
 	Has('back_diag', '$z'),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("prevent_backdiag_lose", '$x')
 
 # if center not occupied, play it:
 p.append(net.add_production(Rule(
 	Has('□', (1,1))
 )))
-p[-1].postcondition = Has("play", (1,1))
+p[-1].postcondition = Has("center_empty", (1,1))
 
 # If potential double-fork, play it.
 # How to determine double-fork?
@@ -232,7 +232,7 @@ p[-1].postcondition = Has("play", (1,1))
 p.append(net.add_production(Rule(
 	Has('□', '$x')
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("random_play", '$x')
 
 # Solved: The problem here is that the π1(x,1) proposition needs to
 # be checked for x != y, but it has no "Has" representation.
