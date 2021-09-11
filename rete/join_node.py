@@ -172,7 +172,7 @@ class CustomTestAtJoinNode:
 				self.condition_number_of_arg1, self.field_of_arg1, self.op, self.condition_number_of_arg2, self.field_of_arg2 )
 
 	def __eq__(self, other):
-		if self.const:
+		if hasattr(self, 'const'):
 			return isinstance(other, CustomTestAtJoinNode) and \
 				self.field_of_arg1 == other.field_of_arg1 and \
 				self.condition_number_of_arg1 == other.condition_number_of_arg1 and \

@@ -245,7 +245,7 @@ class Network:
 		for child in parent.children:
 			if isinstance(child, JoinNode) and child.amem == amem \
 					and child.tests == tests and child.has == has:
-				if custom_tests and hasattr(child, custom_tests):
+				if custom_tests and hasattr(child, 'custom_tests'):
 					if child.custom_tests == custom_tests:
 						return child
 					else:

@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+# TO-DO:
+# * need ability to make logic assumptions (how?)
+# * need fuzzy or probabilistic truth values
+
 import sys
 import os
 
@@ -24,7 +28,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('π0', '$x', 0),
 	Has('π0', '$y', 0),
 	Has('π0', '$z', 0),
@@ -36,7 +40,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('π0', '$x', 1),
 	Has('π0', '$y', 1),
 	Has('π0', '$z', 1),
@@ -48,7 +52,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('π0', '$x', 2),
 	Has('π0', '$y', 2),
 	Has('π0', '$z', 2),
@@ -60,7 +64,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('π1', '$x', 0),
 	Has('π1', '$y', 0),
 	Has('π1', '$z', 0),
@@ -72,19 +76,19 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
-	Has('!=', '$y', '$z')
 	Has('π1', '$x', 1),
 	Has('π1', '$y', 1),
 	Has('π1', '$z', 1),
+	Has('!=', '$y', '$z'),
 )))
-p[-1].postcondition = Has("play", '$x')
+p[-1].postcondition = Has("column_1_win", '$x')
 
 # column 2 win:
 p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('π1', '$x', 2),
 	Has('π1', '$y', 2),
 	Has('π1', '$z', 2),
@@ -96,7 +100,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('diag', '$x'),
 	Has('diag', '$y'),
 	Has('diag', '$z'),
@@ -108,7 +112,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('back_diag', '$x'),
 	Has('back_diag', '$y'),
 	Has('back_diag', '$z'),
@@ -120,7 +124,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('π0', '$x', 0),
 	Has('π0', '$y', 0),
 	Has('π0', '$z', 0),
@@ -132,7 +136,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('π0', '$x', 1),
 	Has('π0', '$y', 1),
 	Has('π0', '$z', 1),
@@ -144,7 +148,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('π0', '$x', 2),
 	Has('π0', '$y', 2),
 	Has('π0', '$z', 2),
@@ -156,7 +160,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('π1', '$x', 0),
 	Has('π1', '$y', 0),
 	Has('π1', '$z', 0),
@@ -168,7 +172,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('π1', '$x', 1),
 	Has('π1', '$y', 1),
 	Has('π1', '$z', 1),
@@ -180,7 +184,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('π1', '$x', 2),
 	Has('π1', '$y', 2),
 	Has('π1', '$z', 2),
@@ -192,7 +196,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('diag', '$x'),
 	Has('diag', '$y'),
 	Has('diag', '$z'),
@@ -204,7 +208,7 @@ p.append(net.add_production(Rule(
 	Has(' ', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
-	Has('!=', '$y', '$z')
+	Has('!=', '$y', '$z'),
 	Has('back_diag', '$x'),
 	Has('back_diag', '$y'),
 	Has('back_diag', '$z'),
@@ -219,10 +223,10 @@ p[-1].postcondition = Has("play", (1,1))
 
 # If potential double-fork, play it.
 # How to determine double-fork?
-#   if play $x => can-win $y,
-#   if play $x => can-win $z,
-#   $y != $z.
-# => potential double-fork exists
+#   assume play $x => can-win $y,
+#   assume play $x => can-win $z,
+#   and $y != $z.
+# => potential double-fork exists at position $x
 
 # play randomly:
 p.append(net.add_production(Rule(
