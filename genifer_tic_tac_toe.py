@@ -146,7 +146,7 @@ q = net.add_production(Rule(
 	Has('π0', '$z', 0),
 ))
 q.postcondition = Has("prevent_row_0_lose", '$x')
-q.truth=1.0
+q.truth=0.8
 p.append(q)
 
 # prevent row 1 lose:
@@ -160,7 +160,7 @@ q = net.add_production(Rule(
 	Has('π0', '$z', 1),
 ))
 q.postcondition = Has("prevent_row_1_lose", '$x')
-q.truth=1.0
+q.truth=0.8
 p.append(q)
 
 # prevent row 2 lose:
@@ -174,7 +174,7 @@ q = net.add_production(Rule(
 	Has('π0', '$z', 2),
 ))
 q.postcondition = Has("prevent_row_2_lose", '$x')
-q.truth=1.0
+q.truth=0.8
 p.append(q)
 
 # prevent column 0 lose:
@@ -188,7 +188,7 @@ q = net.add_production(Rule(
 	Has('π1', '$z', 0),
 ))
 q.postcondition = Has("prevent_column_0_lose", '$x')
-q.truth=1.0
+q.truth=0.8
 p.append(q)
 
 # prevent column 1 lose:
@@ -202,7 +202,7 @@ q = net.add_production(Rule(
 	Has('π1', '$z', 1),
 ))
 q.postcondition = Has("prevent_column_1_lose", '$x')
-q.truth=1.0
+q.truth=0.8
 p.append(q)
 
 # prevent column 2 lose:
@@ -216,7 +216,7 @@ q = net.add_production(Rule(
 	Has('π1', '$z', 2),
 ))
 q.postcondition = Has("prevent_column_2_lose", '$x')
-q.truth=1.0
+q.truth=0.8
 p.append(q)
 
 # prevent diagonal lose:
@@ -230,7 +230,7 @@ q = net.add_production(Rule(
 	Has('diag', '$z'),
 ))
 q.postcondition = Has("prevent_diag_lose", '$x')
-q.truth=1.0
+q.truth=0.8
 p.append(q)
 
 # prevent backward diagonal lose:
@@ -244,7 +244,7 @@ q = net.add_production(Rule(
 	Has('back_diag', '$z'),
 ))
 q.postcondition = Has("prevent_backdiag_lose", '$x')
-q.truth=1.0
+q.truth=0.8
 p.append(q)
 
 # if center not occupied, play it:
@@ -252,7 +252,7 @@ q = net.add_production(Rule(
 	Has('□', (1,1))
 ))
 q.postcondition = Has("center_empty", (1,1))
-q.truth=1.0
+q.truth=0.6
 p.append(q)
 
 # If potential double-fork, play it.
@@ -267,7 +267,7 @@ q = net.add_production(Rule(
 	Has('□', '$x')
 ))
 q.postcondition = Has("random_play", '$x')
-q.truth=1.0
+q.truth=0.4
 p.append(q)
 
 # Solved: The problem here is that the π1(x,1) proposition needs to
