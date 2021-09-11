@@ -12,68 +12,228 @@ print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`�
 net = Network()
 p = []				# list of p-Nodes
 
-p.append(net.add_production(Rule(
-	Has('$z', '$x'),
-	Has('$z', '$y'),
-	Has('π1', '$x', 0),		# $x_1 = column number
-	Has('π1', '$y', 0),
-	Has('!=', '$x', '$y')
-)))
-p[-1].postcondition = Has("same_col", '$x', '$y')
-
-p.append(net.add_production(Rule(
-	Has('$z', '$x'),
-	Has('$z', '$y'),
-	Has('π0', '$x', 1),		# $x_0 = row number
-	Has('π0', '$y', 1),
-	Has('!=', '$x', '$y')
-)))
-p[-1].postcondition = Has("same_row", '$x', '$y')
-
-# General strategy:
+# **** General strategy ****
 # - if can win, play it
 # - about to lose, play it
 # - if center not occupied, play it
 # - if able to 'double-fork', play it
 # - play randomly
 
-# p1 = net.add_production(Rule(
-	# Has("samerow", '$x', '$y'),
-	# Has("samerow", '$y', '$z'),
-	# Has('X', '$x'),
-	# Has('X', '$y'),
-	# Has('□', '$z'),
-# ))
-# p1.postcondition = Has("newX", '$z')
+# row 0 win:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('X', '$y'),
+	Has('X', '$z'),
+	Has('!=', '$y', '$z')
+	Has('π0', '$x', 0),
+	Has('π0', '$y', 0),
+	Has('π0', '$z', 0),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# row 1 win:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('X', '$y'),
+	Has('X', '$z'),
+	Has('!=', '$y', '$z')
+	Has('π0', '$x', 1),
+	Has('π0', '$y', 1),
+	Has('π0', '$z', 1),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# row 2 win:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('X', '$y'),
+	Has('X', '$z'),
+	Has('!=', '$y', '$z')
+	Has('π0', '$x', 2),
+	Has('π0', '$y', 2),
+	Has('π0', '$z', 2),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# column 0 win:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('X', '$y'),
+	Has('X', '$z'),
+	Has('!=', '$y', '$z')
+	Has('π1', '$x', 0),
+	Has('π1', '$y', 0),
+	Has('π1', '$z', 0),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# column 1 win:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('X', '$y'),
+	Has('X', '$z'),
+	Has('!=', '$y', '$z')
+	Has('π1', '$x', 1),
+	Has('π1', '$y', 1),
+	Has('π1', '$z', 1),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# column 2 win:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('X', '$y'),
+	Has('X', '$z'),
+	Has('!=', '$y', '$z')
+	Has('π1', '$x', 2),
+	Has('π1', '$y', 2),
+	Has('π1', '$z', 2),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# diagonal win:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('X', '$y'),
+	Has('X', '$z'),
+	Has('!=', '$y', '$z')
+	Has('diag', '$x'),
+	Has('diag', '$y'),
+	Has('diag', '$z'),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# backward diagonal win:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('X', '$y'),
+	Has('X', '$z'),
+	Has('!=', '$y', '$z')
+	Has('back_diag', '$x'),
+	Has('back_diag', '$y'),
+	Has('back_diag', '$z'),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# prevent row 0 losing
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('O', '$y'),
+	Has('O', '$z'),
+	Has('!=', '$y', '$z')
+	Has('π0', '$x', 0),
+	Has('π0', '$y', 0),
+	Has('π0', '$z', 0),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# prevent row 1 losing:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('O', '$y'),
+	Has('O', '$z'),
+	Has('!=', '$y', '$z')
+	Has('π0', '$x', 1),
+	Has('π0', '$y', 1),
+	Has('π0', '$z', 1),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# prevent row 2 losing:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('O', '$y'),
+	Has('O', '$z'),
+	Has('!=', '$y', '$z')
+	Has('π0', '$x', 2),
+	Has('π0', '$y', 2),
+	Has('π0', '$z', 2),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# prevent column 0 losing:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('O', '$y'),
+	Has('O', '$z'),
+	Has('!=', '$y', '$z')
+	Has('π1', '$x', 0),
+	Has('π1', '$y', 0),
+	Has('π1', '$z', 0),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# prevent column 1 losing:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('O', '$y'),
+	Has('O', '$z'),
+	Has('!=', '$y', '$z')
+	Has('π1', '$x', 1),
+	Has('π1', '$y', 1),
+	Has('π1', '$z', 1),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# prevent column 2 losing:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('O', '$y'),
+	Has('O', '$z'),
+	Has('!=', '$y', '$z')
+	Has('π1', '$x', 2),
+	Has('π1', '$y', 2),
+	Has('π1', '$z', 2),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# prevent diagonal losing:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('O', '$y'),
+	Has('O', '$z'),
+	Has('!=', '$y', '$z')
+	Has('diag', '$x'),
+	Has('diag', '$y'),
+	Has('diag', '$z'),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# prevent backward diagonal losing:
+p.append(net.add_production(Rule(
+	Has(' ', '$x'),
+	Has('O', '$y'),
+	Has('O', '$z'),
+	Has('!=', '$y', '$z')
+	Has('back_diag', '$x'),
+	Has('back_diag', '$y'),
+	Has('back_diag', '$z'),
+)))
+p[-1].postcondition = Has("play", '$x')
+
+# if center not occupied, play it:
+p.append(net.add_production(Rule(
+	Has(' ', (1,1))
+)))
+p[-1].postcondition = Has("play", (1,1))
+
+# If potential double-fork, play it.
+# How to determine double-fork?
+#   if play $x => can-win $y,
+#   if play $x => can-win $z,
+#   $y != $z.
+# => potential double-fork exists
+
+# play randomly:
+p.append(net.add_production(Rule(
+	Has(' ', '$x')
+)))
+p[-1].postcondition = Has("play", '$x')
 
 # Solved: The problem here is that the π1(x,1) proposition needs to
 # be checked for x != y, but it has no "Has" representation.
 # Now the problem is a "None" token passed down to the Join Node.
 # Why is it None? 
-
-#c10 = Has('diag', (1,1), (0,0))
-#p1 = net.add_production(Rule(c10, c11, c02, c03))
-
-# Can win a horizontal row:
-# X($x, $y) ^ X($x, $z) ^ □($x, $w) ^ ($y != $z) => playX($x, $w)
-
-# Can win a diagonal:
-# X($x, $x) ^ X($y, $y) ^ □($z, $z) ^ ($x != $y) ^ ($y != $z) ^ ($z != $x) => playX($z, $z)
-
-# Can win a backward diagonal: (0,2) (1,1) (2,0)
-# X($x, $z) ^ X($y, $y) ^ □($z, $x) ^ ($x != $y) ^ ($y != $z) ^ ($z != $x) => playX($z, $z)
-
-# If enemy can win, we need to block it:
-
-# Must block a vertical column:
-# O($y, $x) ^ O($z, $x) ^ □($w, $x) ^ ($y != $z) => playX($w, $x)
-
-# Must block a horizontal row:
-# Must block a diagonal:
-# Must block a backward diagonal:
-
-# Otherwise, prefer a tile that can lead to 'double fork'
-# Otherwise, just play randomly
 
 def show_board(board):
 	for i in [0, 3, 6]:
