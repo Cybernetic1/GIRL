@@ -4,12 +4,38 @@
 import sys
 import os
 
-from rete.common import Has, Rule, WME, Neg, Ncc, Token
+from rete.common import DEBUG, Has, Rule, WME, Neg, Ncc, Token
 from rete.network import Network
 
 print("\n\x1b[32m——`—,—{\x1b[31;1m@\x1b[0m\n")   # Genifer logo ——`—,—{@
 
 net = Network()
+p = []				# list of p-Nodes
+
+p.append(net.add_production(Rule(
+	Has('$z', '$x'),
+	Has('$z', '$y'),
+	Has('π1', '$x', 0),		# $x_1 = column number
+	Has('π1', '$y', 0),
+	Has('!=', '$x', '$y')
+)))
+p[-1].postcondition = Has("same_col", '$x', '$y')
+
+p.append(net.add_production(Rule(
+	Has('$z', '$x'),
+	Has('$z', '$y'),
+	Has('π0', '$x', 1),		# $x_0 = row number
+	Has('π0', '$y', 1),
+	Has('!=', '$x', '$y')
+)))
+p[-1].postcondition = Has("same_row", '$x', '$y')
+
+# General strategy:
+# - if can win, play it
+# - about to lose, play it
+# - if center not occupied, play it
+# - if able to 'double-fork', play it
+# - play randomly
 
 # p1 = net.add_production(Rule(
 	# Has("samerow", '$x', '$y'),
@@ -19,24 +45,6 @@ net = Network()
 	# Has('□', '$z'),
 # ))
 # p1.postcondition = Has("newX", '$z')
-
-p1 = net.add_production(Rule(
-	Has('$z', '$x'),
-	Has('$z', '$y'),
-	Has('π1', '$x', 0),		# $x_1 = column number
-	Has('π1', '$y', 0),
-	Has('!=', '$x', '$y')
-))
-p1.postcondition = Has("same_col", '$x', '$y')
-
-p2 = net.add_production(Rule(
-	Has('$z', '$x'),
-	Has('$z', '$y'),
-	Has('π0', '$x', 1),		# $x_0 = row number
-	Has('π0', '$y', 1),
-	Has('!=', '$x', '$y')
-))
-p2.postcondition = Has("same_row", '$x', '$y')
 
 # Solved: The problem here is that the π1(x,1) proposition needs to
 # be checked for x != y, but it has no "Has" representation.
@@ -107,14 +115,13 @@ for wme in wmes:
 print("\nFacts:")
 show_board(board)
 
-for p in [p1, p2]:
-	print("\n# of results = ", len(p.items))
-	print("Results:")
-	for i in p.items:
+for q in p:
+	print(f"\n{q.postcondition} ({len(q.items)} results):")
+	for i in q.items:
 		print(i)
 
 f = open("rete.dot", "w+")
 f.write(net.dump())
 f.close()
 os.system("dot -Tpng rete.dot -orete.png")
-print("\nRete graph saved as rete.png\n")
+DEBUG("\nRete graph saved as rete.png\n")
