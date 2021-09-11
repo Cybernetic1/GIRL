@@ -25,7 +25,7 @@ p = []				# list of p-Nodes
 
 # row 0 win:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
 	Has('!=', '$y', '$z'),
@@ -37,7 +37,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # row 1 win:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
 	Has('!=', '$y', '$z'),
@@ -49,7 +49,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # row 2 win:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
 	Has('!=', '$y', '$z'),
@@ -61,7 +61,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # column 0 win:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
 	Has('!=', '$y', '$z'),
@@ -73,7 +73,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # column 1 win:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
 	Has('π1', '$x', 1),
@@ -85,7 +85,7 @@ p[-1].postcondition = Has("column_1_win", '$x')
 
 # column 2 win:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
 	Has('!=', '$y', '$z'),
@@ -97,7 +97,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # diagonal win:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
 	Has('!=', '$y', '$z'),
@@ -109,7 +109,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # backward diagonal win:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('X', '$y'),
 	Has('X', '$z'),
 	Has('!=', '$y', '$z'),
@@ -121,7 +121,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # prevent row 0 losing
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
 	Has('!=', '$y', '$z'),
@@ -133,7 +133,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # prevent row 1 losing:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
 	Has('!=', '$y', '$z'),
@@ -145,7 +145,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # prevent row 2 losing:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
 	Has('!=', '$y', '$z'),
@@ -157,7 +157,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # prevent column 0 losing:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
 	Has('!=', '$y', '$z'),
@@ -169,7 +169,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # prevent column 1 losing:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
 	Has('!=', '$y', '$z'),
@@ -181,7 +181,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # prevent column 2 losing:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
 	Has('!=', '$y', '$z'),
@@ -193,7 +193,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # prevent diagonal losing:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
 	Has('!=', '$y', '$z'),
@@ -205,7 +205,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # prevent backward diagonal losing:
 p.append(net.add_production(Rule(
-	Has(' ', '$x'),
+	Has('□', '$x'),
 	Has('O', '$y'),
 	Has('O', '$z'),
 	Has('!=', '$y', '$z'),
@@ -217,7 +217,7 @@ p[-1].postcondition = Has("play", '$x')
 
 # if center not occupied, play it:
 p.append(net.add_production(Rule(
-	Has(' ', (1,1))
+	Has('□', (1,1))
 )))
 p[-1].postcondition = Has("play", (1,1))
 
@@ -230,7 +230,7 @@ p[-1].postcondition = Has("play", (1,1))
 
 # play randomly:
 p.append(net.add_production(Rule(
-	Has(' ', '$x')
+	Has('□', '$x')
 )))
 p[-1].postcondition = Has("play", '$x')
 
@@ -238,6 +238,12 @@ p[-1].postcondition = Has("play", '$x')
 # be checked for x != y, but it has no "Has" representation.
 # Now the problem is a "None" token passed down to the Join Node.
 # Why is it None? 
+
+f = open("rete.dot", "w+")
+f.write(net.dump())
+f.close()
+os.system("dot -Tpng rete.dot -orete.png")
+DEBUG("\nRete graph saved as rete.png\n")
 
 def show_board(board):
 	for i in [0, 3, 6]:
@@ -283,9 +289,3 @@ for q in p:
 	print(f"\n{q.postcondition} ({len(q.items)} results):")
 	for i in q.items:
 		print(i)
-
-f = open("rete.dot", "w+")
-f.write(net.dump())
-f.close()
-os.system("dot -Tpng rete.dot -orete.png")
-DEBUG("\nRete graph saved as rete.png\n")
