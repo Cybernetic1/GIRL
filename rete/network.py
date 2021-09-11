@@ -211,6 +211,9 @@ class Network:
 		for index1, cond1 in enumerate(earlier_conds):
 			if isinstance(cond1, Ncc) or isinstance(cond1, Neg):
 				continue
+			# Not necessary to check on previous custom tests:
+			if cond1.F0 in ['>', '<', '!=', 'π0', 'π1']:
+				continue
 			field_of_v1 = cond1.contain(v)
 			if not field_of_v1:
 				continue
@@ -381,8 +384,9 @@ class Network:
 					# F2s = []
 
 					# **** New treatment:
-					# We should create a special join_node whose alpha_memory is automatically activated
-					# and whose cond is unnecessary.  Only its custom test node is essential.
+					# We should create a special join_node with custom_tests,
+					# whose alpha_memory is omitted and automatically activated.
+					# Its cond is needed to remember its arguments.
 
 					#DEBUG("current node=", current_node)
 					# At this moment, 'current_node' is a join_node
