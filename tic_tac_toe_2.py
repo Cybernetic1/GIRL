@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-# **** This is a third (improved) representation of the logic of Tic Tac Toe.
+# **** This is a second (improved) representation of the logic of Tic Tac Toe.
 # We seek to find a representation that is most "natural" and close to human thinking.
 
 # TO-DO:
@@ -282,15 +282,6 @@ p.append(q)
 # but the first state is not a proper logic formula (in our system)
 # because it contains 2 ⇒'s.  Perhaps we can convert it to:
 # 1'.  (! X plays $a ∨ has_fork) ⇒ play $a
-# but still, the satisfaction of a conditional statement is not derivable
-# in our current system.  Unless we have the ability to put a hypothetical
-# fact into our WMEs and then derive the conclusion.
-
-# (!A ∨ B) ⇒ C
-# !(!A ∨ B) ∨ C
-# (A ∧ !B) ∨ C
-# (A ∨ C), (!B ∨ C)
-# !A ⇒ C, B ⇒ C
 
 # play randomly:
 q = net.add_production(Rule(
@@ -300,10 +291,11 @@ q.postcondition = Has("random_play", '$x')
 q.truth=0.4
 p.append(q)
 
+# [note to myself:
 # Solved: The problem here is that the π1(x,1) proposition needs to
 # be checked for x != y, but it has no "Has" representation.
 # Now the problem is a "None" token passed down to the Join Node.
-# Why is it None? 
+# Why is it None?]
 
 f = open("rete.dot", "w+")
 f.write(net.dump())
@@ -334,19 +326,19 @@ def show_board(board):
 
 print("Setting up board...")
 board = 9 * [0]
-# ⭕  
+# ⭕  ❌
+# ⭕❌⭕
 #   ❌⭕
-#     ❌
 wmes = [
+	WME('X', (0, 2)),
 	WME('X', (1, 1)),
-	WME('X', (2, 2)),
+	WME('X', (2, 1)),
 	WME('O', (0, 0)),
+	WME('O', (1, 0)),
 	WME('O', (1, 2)),
+	WME('O', (2, 2)),
 	WME('□', (0, 1)),
-	WME('□', (0, 2)),
-	WME('□', (1, 0)),
 	WME('□', (2, 0)),
-	WME('□', (2, 1)),
 ]
 for wme in wmes:
 	net.add_wme(wme)
