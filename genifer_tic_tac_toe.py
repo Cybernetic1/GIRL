@@ -257,10 +257,12 @@ p.append(q)
 
 # If potential double-fork, play it.
 # How to determine double-fork?
-#   assume play $x => can-win $y,
-#   assume play $x => can-win $z,
-#   and $y != $z.
-# => potential double-fork exists at position $x
+#    assume X plays move $a:
+#        assume O plays an arbitrary (non-winning) move,
+#            assume X plays move $b then X wins,
+#            or, assume X plays move $c then X wins,
+#        and $b != $c
+#    then $x is a potential fork.
 
 # play randomly:
 q = net.add_production(Rule(
