@@ -286,6 +286,29 @@ p.append(q)
 # in our current system.  Unless we have the ability to put a hypothetical
 # fact into our WMEs and then derive the conclusion.
 
+# Actually, more simply:
+# 1. X plays $a => ∃$b can_win $b
+# 2. X plays $a => ∃$c can_win $c
+# 3. $b != $c
+# ==> exists fork $a
+# but still this is not expressible in our current system because 1 & 2
+# are conditionals within the "outer" conditional statement.
+
+# Let's turn it into disjunctions:
+# 1. !X plays $a ∨ (∃$b can_win $b)
+# 2. !X plays $a ∨ (∃$c can_win $c)
+# 3. $b != $c
+# ==> exists fork $a
+
+# The above suggests the use of NCC's (negated conjunctions) supported by our Rete:
+# 1. ! (X plays $a ∧ ! (∃$b can_win $b))
+# 2. ! (X plays $a ∧ ! (∃$b can_win $c))
+# 3. $b != $c
+# ==> exists fork $a
+# but this is still problematic, because $b and $c's bindings seem to be lost or
+# mysterious.
+
+# (A => B) => C
 # (!A ∨ B) => C
 # !(!A ∨ B) ∨ C
 # (A ∧ !B) ∨ C
