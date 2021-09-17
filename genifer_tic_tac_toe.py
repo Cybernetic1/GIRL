@@ -268,29 +268,29 @@ p.append(q)
 #    then $a is a potential fork.
 
 # In other words, perhaps can be expressed as conditional statements?
-#    (X plays move $a ⇒
-#        (O plays anything ⇒
-#            (X plays $b ⇒ X wins
-#            ∨ X plays $c ⇒ X wins)
+#    (X plays move $a =>
+#        (O plays anything =>
+#            (X plays $b => X wins
+#            ∨ X plays $c => X wins)
 #         ∧ $b != $c))
-#     ⇒ $a is a potential fork.
+#     => $a is a potential fork.
 
 # This can be simplied with new predicates:
-# 1. (X plays $a ⇒ has_fork) ⇒ play $a
+# 1. (X plays $a => has_fork) => play $a
 # 2. O-move can be ignored.
-# 3. can_win $b ∧ can_win $c ∧ $b != $c ⇒ has_fork
+# 3. can_win $b ∧ can_win $c ∧ $b != $c => has_fork
 # but the first state is not a proper logic formula (in our system)
-# because it contains 2 ⇒'s.  Perhaps we can convert it to:
-# 1'.  (! X plays $a ∨ has_fork) ⇒ play $a
+# because it contains 2 =>'s.  Perhaps we can convert it to:
+# 1'.  (! X plays $a ∨ has_fork) => play $a
 # but still, the satisfaction of a conditional statement is not derivable
 # in our current system.  Unless we have the ability to put a hypothetical
 # fact into our WMEs and then derive the conclusion.
 
-# (!A ∨ B) ⇒ C
+# (!A ∨ B) => C
 # !(!A ∨ B) ∨ C
 # (A ∧ !B) ∨ C
 # (A ∨ C), (!B ∨ C)
-# !A ⇒ C, B ⇒ C
+# !A => C, B => C
 
 # play randomly:
 q = net.add_production(Rule(
