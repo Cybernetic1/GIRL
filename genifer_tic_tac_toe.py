@@ -308,12 +308,8 @@ p.append(q)
 # but this is still problematic, because $b and $c's bindings seem to be lost or
 # mysterious.
 
-# (A => B) => C
-# (!A ∨ B) => C
-# !(!A ∨ B) ∨ C
-# (A ∧ !B) ∨ C
-# (A ∨ C), (!B ∨ C)
-# !A => C, B => C
+# Looks like we're back to the classical time when an ATMS
+# (Assumption-based Truth Maintenance System) is needed...
 
 # play randomly:
 q = net.add_production(Rule(
