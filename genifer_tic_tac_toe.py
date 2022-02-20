@@ -311,6 +311,13 @@ p.append(q)
 # Looks like we're back to the classical time when an ATMS
 # (Assumption-based Truth Maintenance System) is needed...
 
+# Let's see how an assumption is like a λ-term under Curry-Howard isomorphism:
+# For example:
+#     X plays $a => ∃$b can_win $b
+# $a is a proof of "X plays $a"
+# It maps to a proof of "∃$b can_win $b", the proof witness is $b
+# So the assumption works like a map.
+
 # play randomly:
 q = net.add_production(Rule(
 	Has('□', '$x')
