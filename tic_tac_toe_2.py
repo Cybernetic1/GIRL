@@ -6,7 +6,7 @@
 
 # TO-DO:
 # * need ability to make logic assumptions (how?)
-# * need fuzzy or probabilistic truth values
+# * need fuzzy or probabilistic truth values (to generate stochastic actions)
 
 import sys
 import os
