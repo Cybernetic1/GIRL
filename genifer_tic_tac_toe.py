@@ -287,7 +287,8 @@ p.append(q)
 # but the first formula is not a proper logic formula (in our system)
 # because it contains 2 =>'s.  Perhaps we can convert it to:
 # 1'. (! X plays $a ∨ has_fork) => play $a
-# Strangely, [1'] seems to be incorrect.  Perhaps [1] is not a material implication?
+# Strangely, [1'] seems to be incorrect.
+# In fact, the LHS of [1] is not a material implication.
 
 # Actually, more simply:
 # 1. X plays $a => ∃$b can_win $b
@@ -311,15 +312,20 @@ p.append(q)
 # but this is still problematic, because $b and $c's bindings seem to be lost or
 # mysterious.
 
+# The predicate "has_fork" is definable in our system.
+
+# To consider an even simpler case of assumption:
+# The predicate "can win" is based on an assumption:
+#     (play $a => won $a) => can_win $a
+# Here, clearly can_win is definable in our system without the need to
+# make assumptions.  But this does not re-use the predicate "won".
+# 
+
 # Looks like we're back to the classical time when an ATMS
 # (Assumption-based Truth Maintenance System) is needed...
 
-# Let's see how an assumption is like a λ-term under Curry-Howard isomorphism:
-# For example:
-#     X plays $a => ∃$b can_win $b
-# $a is a proof of "X plays $a"
-# It maps to a proof of "∃$b can_win $b", the proof witness is $b
-# So the assumption works like a map.
+# Under Curry-Howard isomorphism, an assumption is like a λ-variable.
+# The discharge of an assumption results in an implication which is a λ-term.
 
 # play randomly:
 q = net.add_production(Rule(
