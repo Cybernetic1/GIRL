@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+# Test of rete engine to solve Tic Tac Toe, simple version
+
 import sys
 import os
 

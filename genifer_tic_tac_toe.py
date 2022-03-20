@@ -40,6 +40,11 @@ q.postcondition = Has("row_0_win", '$x')
 q.truth=1.0
 p.append(q)
 
+# Solved: The problem here is that the π1(x,1) proposition needs to
+# be checked for x != y, but it has no "Has" representation.
+# Now the problem is a "None" token passed down to the Join Node.
+# Why is it None? 
+
 # row 1 win:
 q = net.add_production(Rule(
 	Has('□', '$x'),
@@ -279,12 +284,10 @@ p.append(q)
 # 1. (X plays $a => has_fork) => play $a
 # 2. O-move can be ignored.
 # 3. can_win $b ∧ can_win $c ∧ $b != $c => has_fork
-# but the first state is not a proper logic formula (in our system)
+# but the first formula is not a proper logic formula (in our system)
 # because it contains 2 =>'s.  Perhaps we can convert it to:
-# 1'.  (! X plays $a ∨ has_fork) => play $a
-# but still, the satisfaction of a conditional statement is not derivable
-# in our current system.  Unless we have the ability to put a hypothetical
-# fact into our WMEs and then derive the conclusion.
+# 1'. (! X plays $a ∨ has_fork) => play $a
+# Strangely, [1'] seems to be incorrect.  Perhaps [1] is not a material implication?
 
 # Actually, more simply:
 # 1. X plays $a => ∃$b can_win $b
@@ -325,11 +328,6 @@ q = net.add_production(Rule(
 q.postcondition = Has("random_play", '$x')
 q.truth=0.4
 p.append(q)
-
-# Solved: The problem here is that the π1(x,1) proposition needs to
-# be checked for x != y, but it has no "Has" representation.
-# Now the problem is a "None" token passed down to the Join Node.
-# Why is it None? 
 
 f = open("rete.dot", "w+")
 f.write(net.dump())
