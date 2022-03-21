@@ -312,6 +312,12 @@ p.append(q)
 # but this is still problematic, because $b and $c's bindings seem to be lost or
 # mysterious.
 
+# Looks like we're back to the classical time when an ATMS
+# (Assumption-based Truth Maintenance System) is needed...
+
+# Under Curry-Howard isomorphism, an assumption is like a λ-variable.
+# The discharge of an assumption results in an implication which is a λ-term.
+
 # The predicate "has_fork" is definable in our system.
 
 # To consider an even simpler case of assumption:
@@ -319,13 +325,17 @@ p.append(q)
 #     (play $a => won $a) => can_win $a
 # Here, clearly can_win is definable in our system without the need to
 # make assumptions.  But this does not re-use the predicate "won".
-# 
 
-# Looks like we're back to the classical time when an ATMS
-# (Assumption-based Truth Maintenance System) is needed...
-
-# Under Curry-Howard isomorphism, an assumption is like a λ-variable.
-# The discharge of an assumption results in an implication which is a λ-term.
+# If the rule for "won" is defined, how can it remain unchanged while
+# still be applicable to the "hypothetical" case?  Suppose the rule is:
+#     $a ∧ $b ∧ $c => won
+# and $a is currently missing.  We may put into memory $a and the reminder:
+#     assumed $a
+# then we get the conclusion "won".  This conclusion should be marked
+# differently, but how?  Obviously it can be marked as "$a => won".
+# When enough conclusions have been obtained, the assumption can be discharged
+# (removed).  And this mechanism looks like it can be added to Rete,
+# with some modifications.
 
 # play randomly:
 q = net.add_production(Rule(
